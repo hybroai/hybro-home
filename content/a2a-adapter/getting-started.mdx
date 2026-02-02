@@ -1,0 +1,81 @@
+# Quick Start
+
+Get your first A2A-compatible agent running in about 5 minutes.
+
+## 1. Install
+
+```bash
+pip install a2a-adapter
+```
+
+## 2. Your First Agent (3 Lines!)
+
+```python
+import asyncio
+from a2a_adapter import load_a2a_agent, serve_agent
+from a2a.types import AgentCard
+
+async def main():
+    adapter = await load_a2a_agent({
+        "adapter": "n8n",
+        "webhook_url": "https://your-n8n.com/webhook/workflow"
+    })
+    serve_agent(
+        agent_card=AgentCard(name="My Agent", description="..."),
+        adapter=adapter
+    )
+
+asyncio.run(main())
+```
+
+That's it — your agent is now A2A-compatible and can communicate with other A2A agents.
+
+## 3. Other Frameworks
+
+### CrewAI Crew → A2A Agent
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "crewai",
+    "crew": your_crew_instance
+})
+```
+
+### LangChain Chain → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langchain",
+    "runnable": your_chain,
+    "input_key": "input"
+})
+```
+
+### LangGraph Workflow → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langgraph",
+    "graph": your_compiled_graph,
+    "input_key": "messages",
+    "output_key": "output"
+})
+```
+
+### Custom Function → A2A Agent
+
+```python
+async def my_agent(inputs: dict) -> str:
+    return f"Processed: {inputs['message']}"
+
+adapter = await load_a2a_agent({
+    "adapter": "callable",
+    "callable": my_agent
+})
+```
+
+## Next Steps
+
+- [Usage & Examples](/a2a-adapter/usage) — More examples and patterns
+- [Configuration](/a2a-adapter/configuration) — All adapter options
+- [API Reference](/a2a-adapter/api) — `load_a2a_agent`, `serve_agent`, `BaseAgentAdapter`

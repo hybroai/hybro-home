@@ -1,0 +1,144 @@
+# Usage & Examples
+
+## n8n Workflow → A2A Agent
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "n8n",
+    "webhook_url": "https://n8n.example.com/webhook/math"
+})
+```
+
+## CrewAI Crew → A2A Agent
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "crewai",
+    "crew": your_crew_instance
+})
+```
+
+## LangChain Chain → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langchain",
+    "runnable": your_chain,
+    "input_key": "input"
+})
+```
+
+## LangGraph Workflow → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langgraph",
+    "graph": your_compiled_graph,
+    "input_key": "messages",
+    "output_key": "output"
+})
+```
+
+## Custom Function → A2A Agent
+
+```python
+async def my_agent(inputs: dict) -> str:
+    return f"Processed: {inputs['message']}"
+
+adapter = await load_a2a_agent({
+    "adapter": "callable",
+    "callable": my_agent
+})
+```
+
+## Custom Adapter Class
+
+For full control, subclass `BaseAgentAdapter`:
+
+```python
+from a2a_adapter import BaseAgentAdapter
+from a2a.types import Message, MessageSendParams, TextPart
+
+class SentimentAnalyzer(BaseAgentAdapter):
+    async def to_framework(self, params: MessageSendParams):
+        text = params.messages[-1].content[0].text
+        return {"text": text}
+
+    async def call_framework(self, framework_input, params):
+        sentiment = analyze_sentiment(framework_input["text"])
+        return {"sentiment": sentiment}
+
+    async def from_framework(self, framework_output, params):
+        return Message(
+            role="assistant",
+            content=[TextPart(
+                type="text",
+                text=f"Sentiment: {framework_output['sentiment']}"
+            )]
+        )
+
+adapter = SentimentAnalyzer()
+serve_agent(agent_card=card, adapter=adapter, port=8004)
+```
+
+## Streaming Custom Adapter
+
+Implement `handle_stream()` for streaming responses:
+
+```python
+class StreamingAdapter(BaseAgentAdapter):
+    async def handle_stream(self, params: MessageSendParams):
+        for chunk in generate_response_chunks():
+            yield {
+                "event": "message",
+                "data": json.dumps({"type": "content", "content": chunk})
+            }
+        yield {"event": "done", "data": json.dumps({"status": "completed"})}
+
+    def supports_streaming(self):
+        return True
+```
+
+## LangGraph as A2A Server
+
+Expose a LangGraph workflow as an A2A server:
+
+```python
+from langgraph.graph import StateGraph, END
+
+builder = StateGraph(YourState)
+builder.add_node("process", process_node)
+builder.set_entry_point("process")
+builder.add_edge("process", END)
+graph = builder.compile()
+
+adapter = await load_a2a_agent({
+    "adapter": "langgraph",
+    "graph": graph,
+    "input_key": "messages",
+    "output_key": "output"
+})
+serve_agent(agent_card=card, adapter=adapter, port=9002)
+```
+
+## Calling A2A Agents from LangGraph
+
+Use A2A agents inside a LangGraph workflow:
+
+```python
+from langgraph.graph import StateGraph
+from a2a.client import A2AClient
+
+math_agent = A2AClient(base_url="http://localhost:9000")
+
+async def call_math_agent(state):
+    response = await math_agent.send_message(
+        MessageSendParams(messages=[...])
+    )
+    return {"result": response}
+
+graph = StateGraph(...)
+graph.add_node("math", call_math_agent)
+```
+
+See the [configuration](/a2a-adapter/configuration) page for all adapter options.

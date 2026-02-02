@@ -1,0 +1,53 @@
+# A2A Adapter
+
+**Open Source A2A Protocol Adapter SDK** — Make any agent framework A2A-compatible in 3 lines.
+
+A Python SDK that enables seamless integration of various agent frameworks (n8n, LangGraph, CrewAI, LangChain, etc.) with the **A2A (Agent-to-Agent) Protocol**. Build interoperable AI agent systems that can communicate across different platforms and frameworks.
+
+## Key Benefits
+
+- **3-line setup** — Expose any agent as A2A-compliant
+- **Framework agnostic** — Works with n8n, LangGraph, CrewAI, LangChain, and more
+- **Streaming support** — Built-in streaming for real-time responses
+- **Production ready** — Type-safe, well-tested, and actively maintained
+
+## Architecture
+
+```
+┌─────────────────┐
+│   A2A Caller    │  (Other A2A Agents)
+└────────┬────────┘
+         │ A2A Protocol (HTTP + JSON-RPC 2.0)
+         ▼
+┌─────────────────┐
+│  A2A Adapter    │  (This SDK)
+│   - N8n         │
+│   - LangGraph   │
+│   - CrewAI      │
+│   - LangChain   │
+│   - Callable    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Your Agent     │  (n8n workflow / CrewAI crew / Chain)
+└─────────────────┘
+```
+
+**Single-Agent Design**: Each server hosts exactly one agent. Multi-agent orchestration is handled externally via A2A protocol or orchestration frameworks like LangGraph.
+
+## Framework Support
+
+| Framework   | Adapter               | Non-Streaming | Streaming | Async Tasks | Status   |
+| ----------- | --------------------- | ------------- | --------- | ----------- | -------- |
+| **n8n**     | N8nAgentAdapter       | ✅            | ❌        | ✅          | ✅ Stable |
+| **LangGraph** | LangGraphAgentAdapter | ✅            | ✅        | ✅          | ✅ Stable |
+| **CrewAI**  | CrewAIAgentAdapter    | ✅            | ❌        | ✅          | ✅ Stable |
+| **LangChain** | LangChainAgentAdapter | ✅            | ✅        | ❌          | ✅ Stable |
+| **Callable** | CallableAgentAdapter  | ✅            | ✅        | ❌          | ✅ Stable |
+
+## Next Steps
+
+- [Install a2a-adapter](/a2a-adapter/installation)
+- [Quick Start in 5 minutes](/a2a-adapter/getting-started)
+- [Usage examples](/a2a-adapter/usage)

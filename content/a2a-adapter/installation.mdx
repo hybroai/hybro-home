@@ -1,0 +1,47 @@
+# Installation
+
+## Basic Installation
+
+```bash
+pip install a2a-adapter
+```
+
+## With Framework Support
+
+Install optional dependencies for the framework you use:
+
+```bash
+# For n8n (HTTP webhooks) — no extra deps
+pip install a2a-adapter
+
+# For CrewAI
+pip install a2a-adapter[crewai]
+
+# For LangChain
+pip install a2a-adapter[langchain]
+
+# For LangGraph
+pip install a2a-adapter[langgraph]
+
+# Install all frameworks
+pip install a2a-adapter[all]
+
+# For development (tests, etc.)
+pip install a2a-adapter[dev]
+```
+
+## Requirements
+
+- **Python 3.11+**
+- The official [A2A SDK](https://pypi.org/project/a2a/) is installed automatically as a dependency.
+
+## Verify Installation
+
+```python
+from a2a_adapter import load_a2a_agent
+
+# If this runs without ImportError, you're good
+print("a2a-adapter installed successfully")
+```
+
+Next: [Quick Start](/a2a-adapter/getting-started) to run your first A2A agent in 5 minutes.
