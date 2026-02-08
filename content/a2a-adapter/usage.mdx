@@ -1,0 +1,64 @@
+# Examples
+
+Code in this section follows the patterns used in the [a2a-adapter examples](https://github.com/hybroai/a2a-adapter/tree/main/examples) on GitHub.
+
+## Run the examples
+
+The [a2a-adapter repository](https://github.com/hybroai/a2a-adapter) includes runnable examples in the `examples/` directory. Use them to try different adapters and the A2A client.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/hybroai/a2a-adapter.git
+cd a2a-adapter
+```
+
+### 2. Install dependencies
+
+```bash
+pip install a2a-adapter
+```
+
+### 3. Start an agent server
+
+In a terminal, run one of the agent examples (the server will listen on port 9000 by default unless the script says otherwise):
+
+```bash
+# N8n workflow agent (no n8n instance required for a minimal run)
+python examples/01_single_n8n_agent.py
+
+# Or: CrewAI crew
+python examples/02_single_crewai_agent.py
+
+# Or: LangChain / LangGraph / OpenClaw / custom...
+python examples/03_single_langchain_agent.py
+python examples/07_langgraph_server.py
+python examples/08_openclaw_agent.py
+python examples/05_custom_adapter.py
+```
+
+Leave this terminal running.
+
+### 4. Call the agent from another terminal
+
+Open a **second terminal**, from the same repo root:
+
+```bash
+cd a2a-adapter
+python examples/04_single_agent_client.py
+```
+
+The client sends a test message to `http://localhost:9000` and prints the agent’s response. You can point the client at a different base URL if your agent runs on another port or host.
+
+### Example files overview
+
+| File                                                                                                                   | Description                       |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| [01_single_n8n_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/01_single_n8n_agent.py)             | N8n workflow agent                |
+| [02_single_crewai_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/02_single_crewai_agent.py)       | CrewAI multi-agent crew           |
+| [03_single_langchain_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/03_single_langchain_agent.py) | LangChain streaming agent         |
+| [04_single_agent_client.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/04_single_agent_client.py)       | A2A client for testing            |
+| [05_custom_adapter.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/05_custom_adapter.py)                 | Custom adapter implementations    |
+| [06_langgraph_single_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/06_langgraph_single_agent.py) | Calling A2A agents from LangGraph |
+| [07_langgraph_server.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/07_langgraph_server.py)             | LangGraph workflow as A2A server  |
+| [08_openclaw_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/08_openclaw_agent.py)                 | OpenClaw personal AI agent        |

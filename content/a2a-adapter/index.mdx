@@ -1,0 +1,47 @@
+# A2A Adapter
+
+**Open Source A2A Protocol Adapter SDK** — Make any agent framework A2A-compatible in 3 lines.
+
+A Python SDK that enables seamless integration of various agent frameworks (n8n, LangGraph, CrewAI, LangChain, etc.) and personal AI agents (OpenClaw) with the **A2A (Agent-to-Agent) Protocol**. Build interoperable AI agent systems that can communicate across different platforms and frameworks.
+
+## Key Benefits
+
+- **3-line setup** — Expose any agent as A2A-compliant
+- **Framework agnostic** — Works with n8n, LangGraph, CrewAI, LangChain, OpenClaw, and more
+- **Streaming support** — Built-in streaming for real-time responses
+- **Production ready** — Type-safe, well-tested, and actively maintained
+
+## Architecture
+
+```
+┌─────────────────┐
+│   A2A Caller    │  (Other A2A Agents)
+└────────┬────────┘
+         │ A2A Protocol (HTTP + JSON-RPC 2.0)
+         ▼
+┌─────────────────┐
+│  A2A Adapter    │  (This SDK)
+│   - N8n         │
+│   - LangGraph   │
+│   - CrewAI      │
+│   - LangChain   │
+│   - OpenClaw    │
+│   - Callable    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Your Agent     │  (n8n / CrewAI / Chain / OpenClaw)
+└─────────────────┘
+```
+
+## Framework Support
+
+| Framework     | Adapter               | Non-Streaming | Streaming | Async Tasks | Status    |
+| ------------- | --------------------- | ------------- | --------- | ----------- | --------- |
+| **n8n**       | N8nAgentAdapter       | ✅            | ❌        | ✅          | ✅ Stable |
+| **LangGraph** | LangGraphAgentAdapter | ✅            | ✅        | ✅          | ✅ Stable |
+| **CrewAI**    | CrewAIAgentAdapter    | ✅            | ❌        | ✅          | ✅ Stable |
+| **LangChain** | LangChainAgentAdapter | ✅            | ✅        | ❌          | ✅ Stable |
+| **OpenClaw**  | OpenClawAgentAdapter  | ✅            | ❌        | ✅          | ✅ Stable |
+| **Callable**  | CallableAgentAdapter  | ✅            | ✅        | ❌          | ✅ Stable |
