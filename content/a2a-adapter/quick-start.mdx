@@ -1,0 +1,111 @@
+# Quick Start
+
+Get your first A2A-compatible agent running in about 5 minutes.
+
+## Step 1 — Install
+
+```bash
+pip install a2a-adapter
+```
+
+## Step 2 — Your First Agent (3 lines of config!)
+
+Save the following as `my_agent.py` (or use the [repository example](https://github.com/hybroai/a2a-adapter/blob/main/examples/01_single_n8n_agent.py)):
+
+```python
+import asyncio
+from a2a_adapter import load_a2a_agent, serve_agent
+from a2a.types import AgentCard
+
+async def main():
+    adapter = await load_a2a_agent({
+        "adapter": "n8n",
+        "webhook_url": "https://your-n8n.com/webhook/workflow"
+    })
+    serve_agent(
+        agent_card=AgentCard(name="My Agent", description="..."),
+        adapter=adapter
+    )
+
+asyncio.run(main())
+```
+
+Replace `https://your-n8n.com/webhook/workflow` with your real n8n webhook URL
+
+## Step 3 — Start the agent server
+
+```bash
+python my_agent.py
+```
+
+Leave this terminal running. The server will listen on **port 9000** by default. You should see log output indicating the server is ready.
+
+## Step 4 — Call the agent (second terminal)
+
+Open a **second terminal**. Run the A2A client so it talks to the agent on port 9000:
+
+- **If you cloned the repo in Step 3:**
+  ```bash
+  cd a2a-adapter
+  python examples/04_single_agent_client.py
+  ```
+- **If you only ran `my_agent.py`:** clone the repo (or [download the client script](https://github.com/hybroai/a2a-adapter/blob/main/examples/04_single_agent_client.py)), then from the repo root run:
+  ```bash
+  python examples/04_single_agent_client.py
+  ```
+
+The client sends a test message to the agent at `http://localhost:9000` and prints the response. If the agent is running, you’ll see the reply in this terminal.
+
+## Other frameworks (snippets)
+
+### CrewAI Crew → A2A Agent
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "crewai",
+    "crew": your_crew_instance
+})
+```
+
+### LangChain Chain → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langchain",
+    "runnable": your_chain,
+    "input_key": "input"
+})
+```
+
+### LangGraph Workflow → A2A Agent (with Streaming)
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "langgraph",
+    "graph": your_compiled_graph,
+    "input_key": "messages",
+    "output_key": "output"
+})
+```
+
+### Custom Function → A2A Agent
+
+```python
+async def my_agent(inputs: dict) -> str:
+    return f"Processed: {inputs['message']}"
+
+adapter = await load_a2a_agent({
+    "adapter": "callable",
+    "callable": my_agent
+})
+```
+
+### OpenClaw Agent → A2A Agent
+
+```python
+adapter = await load_a2a_agent({
+    "adapter": "openclaw",
+    "thinking": "low",
+    "async_mode": True
+})
+```

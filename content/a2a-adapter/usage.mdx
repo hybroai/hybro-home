@@ -1,144 +1,64 @@
-# Usage & Examples
+# Examples
 
-## n8n Workflow → A2A Agent
+Code in this section follows the patterns used in the [a2a-adapter examples](https://github.com/hybroai/a2a-adapter/tree/main/examples) on GitHub.
 
-```python
-adapter = await load_a2a_agent({
-    "adapter": "n8n",
-    "webhook_url": "https://n8n.example.com/webhook/math"
-})
+## Run the examples
+
+The [a2a-adapter repository](https://github.com/hybroai/a2a-adapter) includes runnable examples in the `examples/` directory. Use them to try different adapters and the A2A client.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/hybroai/a2a-adapter.git
+cd a2a-adapter
 ```
 
-## CrewAI Crew → A2A Agent
+### 2. Install dependencies
 
-```python
-adapter = await load_a2a_agent({
-    "adapter": "crewai",
-    "crew": your_crew_instance
-})
+```bash
+pip install a2a-adapter
 ```
 
-## LangChain Chain → A2A Agent (with Streaming)
+### 3. Start an agent server
 
-```python
-adapter = await load_a2a_agent({
-    "adapter": "langchain",
-    "runnable": your_chain,
-    "input_key": "input"
-})
+In a terminal, run one of the agent examples (the server will listen on port 9000 by default unless the script says otherwise):
+
+```bash
+# N8n workflow agent (no n8n instance required for a minimal run)
+python examples/01_single_n8n_agent.py
+
+# Or: CrewAI crew
+python examples/02_single_crewai_agent.py
+
+# Or: LangChain / LangGraph / OpenClaw / custom...
+python examples/03_single_langchain_agent.py
+python examples/07_langgraph_server.py
+python examples/08_openclaw_agent.py
+python examples/05_custom_adapter.py
 ```
 
-## LangGraph Workflow → A2A Agent (with Streaming)
+Leave this terminal running.
 
-```python
-adapter = await load_a2a_agent({
-    "adapter": "langgraph",
-    "graph": your_compiled_graph,
-    "input_key": "messages",
-    "output_key": "output"
-})
+### 4. Call the agent from another terminal
+
+Open a **second terminal**, from the same repo root:
+
+```bash
+cd a2a-adapter
+python examples/04_single_agent_client.py
 ```
 
-## Custom Function → A2A Agent
+The client sends a test message to `http://localhost:9000` and prints the agent’s response. You can point the client at a different base URL if your agent runs on another port or host.
 
-```python
-async def my_agent(inputs: dict) -> str:
-    return f"Processed: {inputs['message']}"
+### Example files overview
 
-adapter = await load_a2a_agent({
-    "adapter": "callable",
-    "callable": my_agent
-})
-```
-
-## Custom Adapter Class
-
-For full control, subclass `BaseAgentAdapter`:
-
-```python
-from a2a_adapter import BaseAgentAdapter
-from a2a.types import Message, MessageSendParams, TextPart
-
-class SentimentAnalyzer(BaseAgentAdapter):
-    async def to_framework(self, params: MessageSendParams):
-        text = params.messages[-1].content[0].text
-        return {"text": text}
-
-    async def call_framework(self, framework_input, params):
-        sentiment = analyze_sentiment(framework_input["text"])
-        return {"sentiment": sentiment}
-
-    async def from_framework(self, framework_output, params):
-        return Message(
-            role="assistant",
-            content=[TextPart(
-                type="text",
-                text=f"Sentiment: {framework_output['sentiment']}"
-            )]
-        )
-
-adapter = SentimentAnalyzer()
-serve_agent(agent_card=card, adapter=adapter, port=8004)
-```
-
-## Streaming Custom Adapter
-
-Implement `handle_stream()` for streaming responses:
-
-```python
-class StreamingAdapter(BaseAgentAdapter):
-    async def handle_stream(self, params: MessageSendParams):
-        for chunk in generate_response_chunks():
-            yield {
-                "event": "message",
-                "data": json.dumps({"type": "content", "content": chunk})
-            }
-        yield {"event": "done", "data": json.dumps({"status": "completed"})}
-
-    def supports_streaming(self):
-        return True
-```
-
-## LangGraph as A2A Server
-
-Expose a LangGraph workflow as an A2A server:
-
-```python
-from langgraph.graph import StateGraph, END
-
-builder = StateGraph(YourState)
-builder.add_node("process", process_node)
-builder.set_entry_point("process")
-builder.add_edge("process", END)
-graph = builder.compile()
-
-adapter = await load_a2a_agent({
-    "adapter": "langgraph",
-    "graph": graph,
-    "input_key": "messages",
-    "output_key": "output"
-})
-serve_agent(agent_card=card, adapter=adapter, port=9002)
-```
-
-## Calling A2A Agents from LangGraph
-
-Use A2A agents inside a LangGraph workflow:
-
-```python
-from langgraph.graph import StateGraph
-from a2a.client import A2AClient
-
-math_agent = A2AClient(base_url="http://localhost:9000")
-
-async def call_math_agent(state):
-    response = await math_agent.send_message(
-        MessageSendParams(messages=[...])
-    )
-    return {"result": response}
-
-graph = StateGraph(...)
-graph.add_node("math", call_math_agent)
-```
-
-See the [configuration](/a2a-adapter/configuration) page for all adapter options.
+| File                                                                                                                   | Description                       |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| [01_single_n8n_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/01_single_n8n_agent.py)             | N8n workflow agent                |
+| [02_single_crewai_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/02_single_crewai_agent.py)       | CrewAI multi-agent crew           |
+| [03_single_langchain_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/03_single_langchain_agent.py) | LangChain streaming agent         |
+| [04_single_agent_client.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/04_single_agent_client.py)       | A2A client for testing            |
+| [05_custom_adapter.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/05_custom_adapter.py)                 | Custom adapter implementations    |
+| [06_langgraph_single_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/06_langgraph_single_agent.py) | Calling A2A agents from LangGraph |
+| [07_langgraph_server.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/07_langgraph_server.py)             | LangGraph workflow as A2A server  |
+| [08_openclaw_agent.py](https://github.com/hybroai/a2a-adapter/blob/main/examples/08_openclaw_agent.py)                 | OpenClaw personal AI agent        |

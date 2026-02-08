@@ -1,4 +1,4 @@
 export default {
-  index: 'Introduction',
+  index: 'Overview',
   'a2a-adapter': 'A2A Adapter'
 }
