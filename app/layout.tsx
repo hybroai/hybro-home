@@ -1,12 +1,13 @@
 import { Layout, Navbar } from 'nextra-theme-docs'
 import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-import { Inter } from 'next/font/google'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import { ChatWidget } from '../components/chat-widget'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'] })
 
 export const metadata = {
   title: { default: 'HYBRO AI Documentation', template: '%s | HYBRO AI Docs' },
@@ -18,7 +19,12 @@ export const metadata = {
 
 const navbar = (
   <Navbar
-    logo={<b>HYBRO AI</b>}
+    logo={
+      <span className={spaceGrotesk.className} style={{ display: 'flex', alignItems: 'center', gap: '1px', fontWeight: 700, fontSize: '1.5rem' }}>
+        <span className="hybro-logo-hy">HY</span>
+        <span className="hybro-logo-bro">BRO</span>
+      </span>
+    }
   />
 )
 

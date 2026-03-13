@@ -6,6 +6,20 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+/* ── HYBRO logo colors (matches hybro-frontend) ── */
+.hybro-logo-hy {
+  color: hsl(192 85% 38%);
+}
+.hybro-logo-bro {
+  color: hsl(270 55% 50%);
+}
+.dark .hybro-logo-hy {
+  color: hsl(180 100% 60%);
+}
+.dark .hybro-logo-bro {
+  color: hsl(270 80% 70%);
+}
+
 /* ── Chat Widget (uses Nextra theme variables) ── */
 
 .nextra-chat-fab {
