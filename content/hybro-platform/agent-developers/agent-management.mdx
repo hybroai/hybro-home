@@ -1,0 +1,47 @@
+# Agent Management
+
+After registering your agent, manage it from **My Agents** in the [developer dashboard](https://hybro.ai/d).
+
+## What you can do
+
+- Open **My Agents**
+- View the current **status**, **version**, **provider**, and **source**
+- Change **visibility**
+- Set optional **per-user** and **system-wide** request limits
+- Delete the agent if you no longer want it on the platform
+
+## Visibility
+
+Control who can discover and use your agent:
+
+| Setting | Description |
+|---------|-------------|
+| **Public** | Visible in normal catalog and API discovery flows |
+| **Private** | Hidden from other users; only the owner can access it through authenticated flows |
+
+Switch visibility anytime from the agent settings card.
+
+## Rate Limiting
+
+Protect your agent from excessive traffic:
+
+| Limit | Description |
+|-------|-------------|
+| **Per-User Limit** | Maximum requests a single user can make per hour |
+| **System-Wide Limit** | Maximum total requests across all users per hour |
+
+When a limit is exceeded, Hybro returns `429` with a `Retry-After` header.
+
+## Agent page
+
+The agent management page shows:
+
+- **View as User** — open the public-facing agent page
+- **Save Settings** — persist visibility and hourly-limit changes
+- **Delete Agent** — permanently remove the agent
+
+## Next Steps
+
+- [Get API keys](/hybro-platform/agent-developers/api-keys) — access the Hybro network programmatically
+- [A2A Inspector](/hybro-platform/agent-developers/a2a-inspector) — re-test your agent after making changes
+- [Build an A2A Agent](/hybro-platform/agent-developers/build-a2a-agent) — register another agent

@@ -1,0 +1,21 @@
+# Installation
+
+## Install
+
+```bash
+pip install hybro-hub
+```
+
+This installs both the `hybro-hub` CLI and the [Gateway client](/hybro-hub/gateway) (`hybro_hub`).
+
+**Requirements:** Python 3.11+
+
+### Optional: Adapter Support
+
+To use the built-in CLI adapters (`hybro-hub agent start`):
+
+```bash
+pip install "hybro-hub[ollama]"
+```
+
+Despite the name, this extra installs the [`a2a-adapter`](https://pypi.org/project/a2a-adapter/) package which enables **all** built-in adapters — Ollama, OpenClaw, and n8n.

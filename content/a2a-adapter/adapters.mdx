@@ -1,0 +1,231 @@
+# Adapters
+
+Detailed guide for each built-in adapter.
+
+For a full signature reference, use [API Reference](/a2a-adapter/api-reference). The tables below focus on the most commonly used constructor arguments.
+
+## N8nAdapter
+
+Connects n8n workflows to the A2A Protocol via webhook.
+
+```python
+from a2a_adapter import N8nAdapter, serve_agent
+
+adapter = N8nAdapter(
+    webhook_url="http://localhost:5678/webhook/my-workflow",
+    name="N8n Math Agent",
+    description="Math operations powered by n8n",
+    timeout=30,
+    message_field="message",  # Field name in the webhook payload
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `webhook_url` | `str` | required | Your n8n webhook URL |
+| `name` | `str` | `"N8nAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `timeout` | `int` | `30` | HTTP request timeout (seconds) |
+| `message_field` | `str` | `"message"` | Webhook payload field name |
+
+**Streaming:** No (n8n webhooks are request/response)
+
+---
+
+## LangChainAdapter
+
+Wraps any LangChain `Runnable` (chains, models, prompts) as an A2A agent.
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from a2a_adapter import LangChainAdapter, serve_agent
+
+chain = ChatPromptTemplate.from_template("Answer: {input}") | ChatOpenAI(model="gpt-4o-mini")
+
+adapter = LangChainAdapter(
+    runnable=chain,
+    input_key="input",
+    name="Chat Agent",
+    description="General-purpose chat powered by GPT-4o-mini",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `runnable` | `Runnable` | required | Any LangChain Runnable |
+| `input_key` | `str` | `"input"` | Key for the runnable's input dict |
+| `name` | `str` | `"LangChainAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `input_mapper` | `callable \| None` | `None` | Custom input transform function |
+
+**Streaming:** Auto-detected. If the Runnable supports `.astream()`, streaming is enabled automatically.
+
+---
+
+## LangGraphAdapter
+
+Wraps a compiled LangGraph graph as an A2A agent.
+
+```python
+from a2a_adapter import LangGraphAdapter, serve_agent
+
+adapter = LangGraphAdapter(
+    graph=compiled_graph,
+    input_key="messages",
+    output_key="output",
+    name="Research Workflow",
+    description="Multi-step research workflow",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `graph` | `CompiledGraph` | required | A compiled LangGraph graph |
+| `input_key` | `str` | `"messages"` | Input state key |
+| `output_key` | `str` | `"output"` | Output state key to extract response |
+| `name` | `str` | `"LangGraphAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `input_mapper` | `callable \| None` | `None` | Custom input transform function |
+
+**Streaming:** Auto-detected. Streams state deltas during graph execution.
+
+---
+
+## CrewAIAdapter
+
+Wraps a CrewAI Crew as an A2A agent.
+
+```python
+from a2a_adapter import CrewAIAdapter, serve_agent
+
+adapter = CrewAIAdapter(
+    crew=your_crew_instance,
+    name="Research Crew",
+    description="Multi-agent research team",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `crew` | `Crew` | required | A CrewAI Crew instance |
+| `name` | `str` | `"CrewAIAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `input_mapper` | `callable \| None` | `None` | Custom input transform function |
+
+**Streaming:** No. Uses `crew.kickoff_async()` with sync fallback.
+
+---
+
+## OllamaAdapter
+
+Connects to a local Ollama instance for running LLMs as A2A agents.
+
+```python
+from a2a_adapter import OllamaAdapter, serve_agent
+
+adapter = OllamaAdapter(
+    model="llama3.2:8b",
+    name="Local LLM",
+    description="Llama 3.2 via Ollama",
+    system_prompt="You are a helpful assistant",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `model` | `str` | required | Ollama model name |
+| `name` | `str` | `"OllamaAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `system_prompt` | `str \| None` | `None` | System prompt for the model |
+| `base_url` | `str` | `"http://localhost:11434"` | Ollama API base URL |
+
+**Streaming:** Yes. Uses NDJSON streaming from the Ollama `/api/chat` endpoint.
+
+---
+
+## OpenClawAdapter
+
+Wraps an [OpenClaw](https://openclaw.ai) AI coding agent as an A2A agent. OpenClaw is a local AI coding assistant that runs on your machine.
+
+```python
+from a2a_adapter import OpenClawAdapter, serve_agent
+
+adapter = OpenClawAdapter(
+    thinking="low",
+    name="OpenClaw Agent",
+    description="Personal AI powered by OpenClaw",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `thinking` | `str` | `"low"` | Thinking level |
+| `name` | `str` | `"OpenClawAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+
+**Streaming:** No. Uses subprocess execution with JSON parsing. Supports POSIX signal cancellation.
+
+---
+
+## CallableAdapter
+
+Wraps any async function as an A2A agent.
+
+```python
+from a2a_adapter import CallableAdapter, serve_agent
+
+async def my_agent(inputs: dict) -> str:
+    return f"You said: {inputs['message']}"
+
+adapter = CallableAdapter(
+    func=my_agent,
+    name="Echo Agent",
+    description="Echoes back user input",
+)
+serve_agent(adapter, port=9000)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `func` | `Callable` | required | Async function to wrap |
+| `name` | `str` | `"CallableAdapter"` | Agent name |
+| `description` | `str` | `""` | Agent description |
+| `streaming` | `bool` | `False` | Whether the function should be treated as a streaming callable |
+
+**Streaming:** Optional. Use `CallableAdapter(func=my_streaming_agent, streaming=True)` for async-generator callables.
+
+---
+
+## Custom Adapter
+
+For full control, subclass `BaseA2AAdapter` directly:
+
+```python
+from a2a_adapter import BaseA2AAdapter, AdapterMetadata, serve_agent
+
+class MyAdapter(BaseA2AAdapter):
+    async def invoke(self, user_input: str, context_id=None, **kwargs) -> str:
+        # Your logic here
+        return f"Response to: {user_input}"
+
+    async def stream(self, user_input: str, context_id=None, **kwargs):
+        # Optional: streaming support
+        for word in user_input.split():
+            yield word + " "
+
+    def get_metadata(self) -> AdapterMetadata:
+        return AdapterMetadata(
+            name="My Custom Agent",
+            description="Does amazing things",
+            skills=[{"id": "skill-1", "name": "Process", "description": "Processes input"}],
+        )
+
+serve_agent(MyAdapter(), port=9000)
+```

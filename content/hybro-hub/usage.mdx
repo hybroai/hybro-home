@@ -1,0 +1,286 @@
+# Usage
+
+## Configuration
+
+Hybro Hub reads its configuration from `~/.hybro/config.yaml`. Create the config directory and file:
+
+```bash
+mkdir -p ~/.hybro
+```
+
+Create `~/.hybro/config.yaml`:
+
+```yaml
+# Cloud connection
+cloud:
+  api_key: "hybro_..."                    # Your Hybro API key
+  gateway_url: "https://api.hybro.ai"   # Cloud gateway URL
+
+# Agent discovery
+agents:
+  auto_discover: true                   # Scan localhost for A2A agents
+  auto_discover_exclude_ports:          # Skip non-agent ports
+    - 22    # SSH
+    - 3306  # MySQL
+    - 5432  # PostgreSQL
+
+  # Manually-configured agents (always registered)
+  local:
+    - name: "My Custom Agent"
+      url: "http://localhost:9001"
+    - name: "Team Agent"
+      url: "http://192.168.1.50:8080"  # LAN agents work too
+
+# Privacy settings (logging only, does not block dispatch)
+privacy:
+  default_routing: "local_first"
+  sensitive_keywords:
+    - "medical"
+    - "financial"
+    - "confidential"
+  sensitive_patterns:
+    - "PROJ-\\d{4}"
+
+# Heartbeat interval (seconds)
+heartbeat_interval: 30
+```
+
+### Environment Variables
+
+You can also configure the hub via environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `HYBRO_API_KEY` | Your Hybro API key (overrides config file) |
+| `HYBRO_GATEWAY_URL` | Gateway URL (overrides config file) |
+
+## Running the Hub
+
+Start the hub daemon:
+
+```bash
+hybro-hub start --api-key hybro_...
+```
+
+The API key is saved to `~/.hybro/config.yaml` after first use — subsequent starts don't need it.
+
+The hub will:
+1. Register with the Hybro relay service
+2. Discover local A2A agents
+3. Sync agent list to the cloud
+4. Begin listening for incoming messages
+
+Leave the terminal running. The hub maintains a persistent SSE connection to the cloud.
+
+With debug logging:
+
+```bash
+hybro-hub -v start
+```
+
+## CLI Commands
+
+### `hybro-hub status`
+
+Check if the hub is connected and how many agents are synced:
+
+```bash
+hybro-hub status
+```
+
+### `hybro-hub agents`
+
+List all discovered local agents and their health status:
+
+```bash
+hybro-hub agents
+```
+
+### `hybro-hub agent start`
+
+Launch a local A2A agent from a bundled adapter. Requires `a2a-adapter` package (`pip install "hybro-hub[ollama]"`).
+
+**Ollama** — local LLM (requires [Ollama](https://ollama.com)):
+
+```bash
+hybro-hub agent start ollama
+hybro-hub agent start ollama --model mistral:7b --port 10020 --system-prompt "You are a helpful assistant"
+```
+
+**OpenClaw** — AI coding agent (requires [OpenClaw](https://openclaw.ai)):
+
+```bash
+hybro-hub agent start openclaw
+hybro-hub agent start openclaw --thinking medium --agent-id main
+```
+
+**n8n** — workflow automation (requires a running [n8n](https://n8n.io) instance):
+
+```bash
+hybro-hub agent start n8n --webhook-url http://localhost:5678/webhook/my-agent
+```
+
+**Common options:**
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--port` | `10010` | Port for the A2A agent server |
+| `--name` | auto | Agent display name |
+| `--timeout` | varies | Request timeout in seconds |
+
+**Adapter-specific options:**
+
+| Option | Adapter | Description |
+|--------|---------|-------------|
+| `--model` | ollama | Ollama model (default: `llama3.2:8b`) |
+| `--system-prompt` | ollama | Custom system prompt |
+| `--thinking` | openclaw | Thinking level: off/minimal/low/medium/high/xhigh |
+| `--agent-id` | openclaw | OpenClaw agent ID |
+| `--openclaw-path` | openclaw | Path to the openclaw binary |
+| `--webhook-url` | n8n | Webhook URL (required) |
+
+## Agent Discovery
+
+### Auto-Discovery
+
+When `auto_discover: true` (the default), the hub:
+
+1. Enumerates all listening TCP ports on localhost using OS-native strategies
+2. Skips well-known service ports (22, 53, 80, 443, 3306, 5432, 6379, 27017) and any ports in `auto_discover_exclude_ports`
+3. Probes each port for `/.well-known/agent.json` (also checks `/.well-known/agent-card.json`)
+4. Registers any valid A2A agents found
+
+Auto-discovery runs at startup and re-scans periodically (every 120 seconds).
+
+### Manual Configuration
+
+You can also specify agents explicitly in `config.yaml`:
+
+```yaml
+agents:
+  local:
+    - name: "My Research Agent"
+      url: "http://localhost:9001"
+    - name: "Team Agent"
+      url: "http://192.168.1.50:8080"  # LAN agents work too
+```
+
+Manually configured agents are **always registered**, even if `auto_discover` is disabled.
+
+### Excluding Ports
+
+To skip additional ports during auto-discovery:
+
+```yaml
+agents:
+  auto_discover_exclude_ports:
+    - 8080  # your web server
+    - 3000  # your frontend dev server
+```
+
+## Health Monitoring
+
+The hub performs health checks every 60 seconds:
+
+- Fetches each agent's agent card (`/.well-known/agent.json` or `/.well-known/agent-card.json`)
+- Agents that fail **3 consecutive** health checks are removed
+- Recovered agents are automatically re-registered
+
+Check current agent health:
+
+```bash
+hybro-hub agents
+```
+
+## Privacy Classification
+
+The hub can detect sensitive data in outbound messages. **Currently it logs warnings — it does not block or anonymize.** Active blocking is on the roadmap.
+
+Every message in hybro.ai shows where it was processed:
+
+- **Local** — processed on your machine, data did not leave
+- **Cloud** — processed by a cloud agent via hybro.ai
+
+### What it detects
+
+**Built-in PII patterns:** email addresses, phone numbers, SSNs, credit card numbers, API keys.
+
+**Custom keywords and patterns** (configured in `config.yaml`):
+
+```yaml
+privacy:
+  sensitive_keywords:
+    - "medical"
+    - "financial"
+  sensitive_patterns:
+    - "PROJ-\\d{4}"
+    - "INTERNAL-\\w+"
+```
+
+When sensitive content is detected, the hub logs a warning with the classification. The message is still dispatched normally.
+
+## Built-in Adapters
+
+### Ollama
+
+Run a local Ollama LLM as an A2A agent:
+
+```bash
+# Make sure Ollama is running (ollama serve)
+hybro-hub agent start ollama --model llama3.2:8b
+```
+
+This starts an A2A server on port 10010 (configurable with `--port`). The hub will auto-discover it and make it available on the Hybro platform.
+
+```bash
+hybro-hub agent start ollama \
+  --model llama3.2:8b \
+  --system-prompt "You are a helpful coding assistant"
+```
+
+### OpenClaw
+
+Run an AI coding agent:
+
+```bash
+hybro-hub agent start openclaw
+hybro-hub agent start openclaw --thinking medium --agent-id main
+```
+
+### n8n
+
+Connect an n8n workflow as an A2A agent:
+
+```bash
+hybro-hub agent start n8n --webhook-url http://localhost:5678/webhook/my-agent
+```
+
+> All three adapters come from the same `a2a-adapter` package: `pip install "hybro-hub[ollama]"`
+
+## Bring Your Own Agent
+
+Any agent that speaks the [A2A protocol](https://github.com/a2aproject/A2A) works with Hybro Hub. Use the [a2a-python SDK](https://github.com/a2aproject/a2a-python) (`pip install a2a-sdk`) or [Google ADK](https://github.com/google/adk-python) (`pip install google-adk`) to build a compatible agent:
+
+```python
+from a2a.server.apps import A2AStarletteApplication
+from a2a.server.request_handlers import DefaultRequestHandler
+
+app = A2AStarletteApplication(
+    agent_card=my_card,
+    http_handler=DefaultRequestHandler(agent_executor=my_executor),
+)
+```
+
+Start it on any port — the hub discovers it automatically and syncs it to hybro.ai.
+
+## Lifecycle
+
+The hub daemon runs the following background tasks concurrently:
+
+| Task | Interval | Description |
+|------|----------|-------------|
+| **Health checks** | 60s | Verify local agents are responsive |
+| **Re-sync** | 120s | Re-discover agents and sync to cloud |
+| **Heartbeat** | 30s | Keep relay connection alive |
+
+The daemon handles `SIGINT` and `SIGTERM` for graceful shutdown.

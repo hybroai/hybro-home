@@ -1,5 +1,7 @@
 export default {
   index: 'Overview',
   'quick-start': 'Quick Start',
-  usage: 'Examples'
+  'api-reference': 'API Reference',
+  adapters: 'Adapters',
+  examples: 'Examples'
 }

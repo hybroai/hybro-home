@@ -1,0 +1,298 @@
+# API Reference
+
+Complete reference for the current A2A Adapter v0.2.x surface.
+
+## Server Functions
+
+### serve_agent()
+
+```python
+def serve_agent(
+    adapter: BaseA2AAdapter,
+    agent_card: AgentCard | None = None,
+    host: str = "0.0.0.0",
+    port: int = 9000,
+    log_level: str = "info",
+    **kwargs,
+) -> None
+```
+
+One-line A2A server startup. Combines `to_a2a()` + `uvicorn.run()`.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `adapter` | `BaseA2AAdapter` | required | Your adapter implementation |
+| `agent_card` | `AgentCard \| None` | `None` | Pre-built card (auto-generated if None) |
+| `host` | `str` | `"0.0.0.0"` | Bind address |
+| `port` | `int` | `9000` | Listen port |
+| `log_level` | `str` | `"info"` | Logging level |
+| `**kwargs` | | | Passed to `uvicorn.run()` (workers, ssl_keyfile, reload, etc.) |
+
+```python
+from a2a_adapter import N8nAdapter, serve_agent
+
+adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/agent")
+serve_agent(adapter, port=9000)
+```
+
+---
+
+### to_a2a()
+
+```python
+def to_a2a(
+    adapter: BaseA2AAdapter,
+    agent_card: AgentCard | None = None,
+    task_store: TaskStore | None = None,
+    **card_overrides,
+) -> Any  # Starlette ASGI application
+```
+
+Convert any adapter into an A2A Protocol ASGI application. Use this for production deployments with custom ASGI servers.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `adapter` | `BaseA2AAdapter` | required | Your adapter implementation |
+| `agent_card` | `AgentCard \| None` | `None` | Pre-built card (auto-generated if None) |
+| `task_store` | `TaskStore \| None` | `None` | Task persistence (defaults to in-memory) |
+| `**card_overrides` | | | Override card fields: name, description, url, version, streaming |
+
+```python
+from a2a_adapter import LangChainAdapter, to_a2a
+
+adapter = LangChainAdapter(runnable=chain, input_key="input")
+app = to_a2a(adapter, name="My Agent", url="https://my-agent.example.com")
+```
+
+---
+
+### build_agent_card()
+
+```python
+def build_agent_card(
+    adapter: BaseA2AAdapter,
+    **overrides,
+) -> AgentCard
+```
+
+Auto-generate an AgentCard from adapter metadata. Called automatically by `serve_agent()` and `to_a2a()`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `adapter` | `BaseA2AAdapter` | Adapter to generate card for |
+| `**overrides` | | Override fields: name, description, url, version, streaming, provider, documentation_url, icon_url |
+
+```python
+from a2a_adapter import N8nAdapter, build_agent_card
+
+adapter = N8nAdapter(webhook_url="...")
+card = build_agent_card(adapter, name="Math Agent", url="http://myserver:9000")
+```
+
+---
+
+## BaseA2AAdapter
+
+The abstract base class for all adapters. Only `invoke()` is required.
+
+### invoke() (required)
+
+```python
+@abstractmethod
+async def invoke(
+    self,
+    user_input: str,
+    context_id: str | None = None,
+    **kwargs,
+) -> str | list[Part]
+```
+
+Execute the agent and return a response.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `user_input` | `str` | The user's message as plain text |
+| `context_id` | `str \| None` | Conversation context ID for multi-turn |
+| `**kwargs` | | Includes `context` (A2A SDK `RequestContext`) |
+
+**Returns:** `str` for text-only, or `list[Part]` for multimodal responses.
+
+```python
+# Text response
+async def invoke(self, user_input, context_id=None, **kwargs):
+    return "Hello, world!"
+
+# Multimodal response
+from a2a.types import Part, TextPart, FilePart, FileWithUri
+
+async def invoke(self, user_input, context_id=None, **kwargs):
+    return [
+        Part(root=TextPart(text="Generated report")),
+        Part(root=FilePart(file=FileWithUri(
+            uri="http://example.com/report.pdf",
+            name="report.pdf",
+            mimeType="application/pdf"
+        )))
+    ]
+```
+
+---
+
+### stream() (optional)
+
+```python
+async def stream(
+    self,
+    user_input: str,
+    context_id: str | None = None,
+    **kwargs,
+) -> AsyncIterator[str | Part]
+```
+
+Stream the agent response, yielding chunks. If not implemented, the bridge falls back to `invoke()`.
+
+**Yields:** `str` for text chunks, or `Part` for multimodal content.
+
+```python
+async def stream(self, user_input, context_id=None, **kwargs):
+    for token in ["Hello", ", ", "world", "!"]:
+        yield token
+```
+
+---
+
+### cancel() (optional)
+
+```python
+async def cancel(self, context_id: str | None = None, **kwargs) -> None
+```
+
+Cancel the current execution. Override for frameworks that support interruption.
+
+---
+
+### close() (optional)
+
+```python
+async def close(self) -> None
+```
+
+Release resources (HTTP clients, subprocesses). Called on shutdown.
+
+---
+
+### get_metadata() (optional)
+
+```python
+def get_metadata(self) -> AdapterMetadata
+```
+
+Return metadata for automatic AgentCard generation.
+
+---
+
+### supports_streaming()
+
+```python
+def supports_streaming(self) -> bool
+```
+
+Auto-detects whether `stream()` is overridden. Override for explicit control.
+
+---
+
+## AdapterMetadata
+
+Dataclass for describing adapter capabilities:
+
+```python
+@dataclass
+class AdapterMetadata:
+    name: str = ""                          # Human-readable name
+    description: str = ""                   # What this agent does
+    version: str = "1.0.0"                  # Semantic version
+    skills: list[dict] = []                 # Skill dicts with id, name, description
+    input_modes: list[str] = ["text"]       # Supported input MIME types
+    output_modes: list[str] = ["text"]      # Supported output MIME types
+    streaming: bool = False                 # Supports streaming
+    provider: dict | None = None            # Organization and URL
+    documentation_url: str | None = None    # Docs URL
+    icon_url: str | None = None             # Icon URL
+```
+
+---
+
+## Loader Functions
+
+### load_adapter()
+
+```python
+def load_adapter(config: dict) -> BaseA2AAdapter
+```
+
+Factory function for config-driven adapter creation:
+
+```python
+from a2a_adapter import load_adapter
+
+adapter = load_adapter({
+    "adapter": "n8n",
+    "webhook_url": "http://localhost:5678/webhook/agent"
+})
+```
+
+### register_adapter()
+
+```python
+@register_adapter(name: str)
+```
+
+Decorator for registering custom third-party adapters:
+
+```python
+from a2a_adapter import register_adapter, BaseA2AAdapter
+
+@register_adapter("my_framework")
+class MyAdapter(BaseA2AAdapter):
+    async def invoke(self, user_input, context_id=None, **kwargs):
+        return "response"
+
+# Now usable via load_adapter:
+adapter = load_adapter({"adapter": "my_framework"})
+```
+
+---
+
+## Input Handling Pipeline
+
+All built-in adapters use a 3-priority cascade for input processing:
+
+| Priority | Mechanism | Description |
+|----------|-----------|-------------|
+| 1 (highest) | `input_mapper` | Custom function `(raw_input, context_id) -> dict` |
+| 2 | `parse_json_input` | Auto-parse JSON strings to dict |
+| 3 (fallback) | `input_key` | Map text to `{input_key: text}` |
+
+```python
+# Using input_key (simplest)
+adapter = LangChainAdapter(runnable=chain, input_key="input")
+
+# Using input_mapper (full control)
+def mapper(raw_input, context_id):
+    return {"messages": [{"role": "user", "content": raw_input}]}
+
+adapter = LangGraphAdapter(graph=graph, input_mapper=mapper)
+```
+
+## CallableAdapter
+
+`CallableAdapter` accepts `func=...`, not `callable=...`:
+
+```python
+from a2a_adapter import CallableAdapter
+
+async def fn(inputs: dict) -> str:
+    return f"Echo: {inputs['message']}"
+
+adapter = CallableAdapter(func=fn, streaming=False)
+```

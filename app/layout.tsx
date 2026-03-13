@@ -1,7 +1,9 @@
 import { Layout, Navbar } from 'nextra-theme-docs'
 import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
+import { ChatWidget } from '../components/chat-widget'
 import 'nextra-theme-docs/style.css'
+import './globals.css'
 
 export const metadata = {
   title: { default: 'HYBRO AI Documentation', template: '%s | HYBRO AI Docs' },
@@ -30,7 +32,7 @@ export default async function RootLayout({
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/hybroai/a2a-adapter"
+          docsRepositoryBase="https://github.com/hybroai"
           editLink={null}
           feedback={{
             content: 'Question? Give us feedback',
@@ -39,6 +41,7 @@ export default async function RootLayout({
         >
           {children}
         </Layout>
+        <ChatWidget />
       </body>
     </html>
   )

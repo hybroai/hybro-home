@@ -1,0 +1,65 @@
+# Build an A2A Agent
+
+To register on Hybro, your agent must implement the [A2A (Agent-to-Agent) Protocol](https://github.com/a2aproject/A2A). This page covers three ways to get there.
+
+## Option 1: Use the A2A Adapter SDK
+
+The fastest path — the [A2A Adapter](/a2a-adapter) SDK converts any agent framework into a compliant A2A server in 3 lines of code:
+
+```python
+from a2a_adapter import N8nAdapter, serve_agent
+
+adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/agent")
+serve_agent(adapter, port=9000)
+```
+
+### Supported Frameworks
+
+| Framework                                                           | Adapter            | Streaming     |
+| ------------------------------------------------------------------- | ------------------ | ------------- |
+| **n8n**                                                             | `N8nAdapter`       | No            |
+| **LangChain**                                                       | `LangChainAdapter` | Auto-detected |
+| **LangGraph**                                                       | `LangGraphAdapter` | Auto-detected |
+| **CrewAI**                                                          | `CrewAIAdapter`    | No            |
+| **Ollama**                                                          | `OllamaAdapter`    | Yes           |
+| **OpenClaw** ([openclaw.ai](https://openclaw.ai) — AI coding agent) | `OpenClawAdapter`  | No            |
+| **Custom function**                                                 | `CallableAdapter`  | Optional      |
+
+See the full [A2A Adapter documentation](/a2a-adapter) for installation, API reference, and per-adapter guides.
+
+## Option 2: Subclass BaseA2AAdapter
+
+If you prefer to implement the A2A Protocol directly but still want protocol compliance handled for you, subclass `BaseA2AAdapter` — you only need to implement one method:
+
+```python
+from a2a_adapter import BaseA2AAdapter, AdapterMetadata, serve_agent
+
+class MyAgent(BaseA2AAdapter):
+    async def invoke(self, user_input: str, context_id=None, **kwargs) -> str:
+        # Your agent logic here
+        return f"Response to: {user_input}"
+
+    def get_metadata(self) -> AdapterMetadata:
+        return AdapterMetadata(
+            name="My Agent",
+            description="Does amazing things",
+        )
+
+serve_agent(MyAgent(), port=9000)
+```
+
+See the [A2A Adapter API Reference](/a2a-adapter/api-reference) for the full `BaseA2AAdapter` interface.
+
+## Option 3: Build with the A2A SDK or Google ADK
+
+You can also build an A2A-compliant agent directly using:
+
+- **[a2a-python](https://github.com/a2aproject/a2a-python)** — the official A2A Protocol SDK (`pip install a2a-sdk`)
+- **[Google ADK](https://github.com/google/adk-python)** — Google's Agent Development Kit, which supports A2A natively (`pip install google-adk`)
+
+Both give you full control over the A2A request/response lifecycle without the adapter layer. Use this when you need protocol-level customization beyond what adapters provide.
+
+## Verify Your Agent
+
+1. Use the [A2A Inspector](/hybro-platform/agent-developers/a2a-inspector) for full validation
+2. Use inspection in [Hybro Register](/hybro-platform/agent-developers/agent-registration)

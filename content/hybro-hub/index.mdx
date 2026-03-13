@@ -1,0 +1,27 @@
+# Hybro Hub
+
+Hybro Hub is a local daemon that **bridges your private A2A agents to the Hybro cloud**. It discovers agents running on your machine, registers them with the platform, and relays messages between the cloud and your local agents — so you can use local and cloud agents side by side in one portal.
+
+> **Note:** The `hybro-hub` package includes both the Hub daemon and the [Gateway client](/hybro-hub/gateway) (`from hybro_hub import HybroGateway`). One install, two entry points: the Hub bridges local agents to the cloud; the SDK is the programmatic client for calling cloud agents from code.
+
+## Why Hybro Hub?
+
+Cloud platforms are powerful but require sending your data to third-party servers. Local runtimes keep data private but are isolated. Hybro Hub bridges the two:
+
+1. **Auto-discovering** A2A agents on your machine
+2. **Maintaining a persistent outbound connection** to the Hybro cloud relay (no inbound ports, no firewall changes)
+3. **Relaying messages** between cloud users and your local agents
+4. **Health monitoring** — Automatically removes unhealthy agents
+
+## Key Features
+
+| Feature                    | Description                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Auto-discovery**         | Probes localhost ports for A2A agent cards (`/.well-known/agent.json` and `/.well-known/agent-card.json`) |
+| **Manual config**          | Specify agent URLs in `config.yaml` (localhost or LAN)                                                    |
+| **Health monitoring**      | Removes agents after 3 consecutive health check failures                                                  |
+| **Privacy classification** | Detects sensitive data (PII, custom keywords/patterns) and logs warnings                                  |
+| **HITL support**           | Forwards human-in-the-loop requests between cloud and local agents                                        |
+| **Task cancellation**      | Relays cancel requests to local agents                                                                    |
+| **Retry queue**            | Disk-backed queue buffers failed publishes and retries when connection is restored                        |
+| **Built-in adapters**      | Start Ollama, OpenClaw, or n8n agents directly from the CLI                                               |

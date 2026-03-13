@@ -1,0 +1,160 @@
+# Examples
+
+Run the examples from the [a2a-adapter repository](https://github.com/hybroai/a2a-adapter).
+
+## Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/hybroai/a2a-adapter.git
+cd a2a-adapter
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install a2a-adapter
+```
+
+### 3. Start an Agent Server
+
+In a terminal, run one of the agent examples (the server will listen on port 9000 by default):
+
+```bash
+# N8n workflow agent
+python examples/n8n_agent.py
+
+# LangChain streaming agent
+python examples/langchain_agent.py
+
+# LangGraph workflow
+python examples/langgraph_server.py
+
+# CrewAI crew
+python examples/crewai_agent.py
+
+# OpenClaw agent
+python examples/openclaw_agent.py
+
+# Ollama local LLM
+python examples/ollama_agent.py
+
+# Custom adapter
+python examples/custom_adapter.py
+```
+
+Leave this terminal running.
+
+### 4. Test the Agent
+
+Open a **second terminal** and run the A2A client:
+
+```bash
+cd a2a-adapter
+python examples/single_agent_client.py
+```
+
+The client sends a test message to `http://localhost:9000` and prints the response.
+
+## Example: Custom Sentiment Analyzer
+
+A minimal custom adapter that classifies text sentiment:
+
+```python
+from a2a_adapter import BaseA2AAdapter, AdapterMetadata, serve_agent
+
+class SentimentAdapter(BaseA2AAdapter):
+    async def invoke(self, user_input: str, context_id=None, **kwargs) -> str:
+        positive_words = {"good", "great", "excellent", "happy", "love"}
+        words = set(user_input.lower().split())
+        if words & positive_words:
+            return "Sentiment: Positive"
+        return "Sentiment: Neutral/Negative"
+
+    def get_metadata(self) -> AdapterMetadata:
+        return AdapterMetadata(
+            name="Sentiment Analyzer",
+            description="Classifies text as positive or negative",
+            skills=[{
+                "id": "sentiment",
+                "name": "Sentiment Analysis",
+                "description": "Analyze the sentiment of input text",
+            }],
+        )
+
+serve_agent(SentimentAdapter(), port=8003)
+```
+
+## Example: Config-Driven Deployment
+
+Use `load_adapter()` for config-driven agent setup:
+
+```python
+from a2a_adapter import load_adapter, serve_agent
+
+# Load from a config dict (could come from YAML, env vars, etc.)
+adapter = load_adapter({
+    "adapter": "n8n",
+    "webhook_url": "http://localhost:5678/webhook/agent",
+    "name": "Config-Driven Agent",
+})
+
+serve_agent(adapter, port=9000)
+```
+
+## Example: Production ASGI Deployment
+
+Use `to_a2a()` for production deployments with any ASGI server:
+
+```python
+# app.py
+from a2a_adapter import LangChainAdapter, to_a2a
+from langchain_openai import ChatOpenAI
+
+chain = ChatOpenAI(model="gpt-4o-mini")
+adapter = LangChainAdapter(runnable=chain, input_key="input")
+app = to_a2a(adapter, name="Production Agent", url="https://my-agent.example.com")
+```
+
+Deploy with Gunicorn + Uvicorn workers:
+
+```bash
+gunicorn app:app -k uvicorn.workers.UvicornWorker -w 4
+```
+
+## Example: Multimodal Response
+
+Return files, images, and text in a single response:
+
+```python
+from a2a.types import Part, TextPart, FilePart, FileWithUri
+from a2a_adapter import BaseA2AAdapter, serve_agent
+
+class ReportAgent(BaseA2AAdapter):
+    async def invoke(self, user_input: str, context_id=None, **kwargs):
+        return [
+            Part(root=TextPart(text="Here's your generated report:")),
+            Part(root=FilePart(file=FileWithUri(
+                uri="http://example.com/report.pdf",
+                name="report.pdf",
+                mimeType="application/pdf"
+            )))
+        ]
+
+serve_agent(ReportAgent(), port=9000)
+```
+
+## Example Files Reference
+
+| File                     | Description                      |
+| ------------------------ | -------------------------------- |
+| `n8n_agent.py`           | N8n webhook agent                |
+| `langchain_agent.py`     | LangChain streaming agent        |
+| `langgraph_server.py`    | LangGraph workflow as A2A server |
+| `crewai_agent.py`        | CrewAI multi-agent crew          |
+| `openclaw_agent.py`      | OpenClaw personal AI agent       |
+| `ollama_agent.py`        | Local Ollama LLM agent           |
+| `custom_adapter.py`      | Custom adapter implementation    |
+| `single_agent_client.py` | A2A client for testing           |
+| `v02_quickstart.py`      | Quick start showcase             |

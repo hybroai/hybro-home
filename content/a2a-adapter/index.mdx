@@ -1,47 +1,80 @@
 # A2A Adapter
 
-**Open Source A2A Protocol Adapter SDK** — Make any agent framework A2A-compatible in 3 lines.
+**Open Source A2A Protocol Adapter SDK** — Convert any AI agent framework into a fully compliant A2A Protocol server in 3 lines of code.
 
-A Python SDK that enables seamless integration of various agent frameworks (n8n, LangGraph, CrewAI, LangChain, etc.) and personal AI agents (OpenClaw) with the **A2A (Agent-to-Agent) Protocol**. Build interoperable AI agent systems that can communicate across different platforms and frameworks.
+- [PyPI Package](https://pypi.org/project/a2a-adapter/)
+- [GitHub Repository](https://github.com/hybroai/a2a-adapter)
+
+## Installation
+
+```bash
+pip install a2a-adapter
+```
+
+## Quick Example
+
+```python
+from a2a_adapter import N8nAdapter, serve_agent
+
+adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/agent")
+serve_agent(adapter, port=9000)
+```
+
+That's it. Your n8n workflow is now an A2A-compliant server with:
+
+- Auto-generated Agent Card at `/.well-known/agent.json`
+- Task management and lifecycle
+- Push notifications
+- A2A JSON-RPC endpoint
+
+See the [Quick Start](/a2a-adapter/quick-start) to get your first agent running.
+
+## Framework Support
+
+| Framework                                                           | Adapter            | Streaming     | Status |
+| ------------------------------------------------------------------- | ------------------ | ------------- | ------ |
+| **n8n**                                                             | `N8nAdapter`       | No            | Stable |
+| **LangChain**                                                       | `LangChainAdapter` | Auto-detected | Stable |
+| **LangGraph**                                                       | `LangGraphAdapter` | Auto-detected | Stable |
+| **CrewAI**                                                          | `CrewAIAdapter`    | No            | Stable |
+| **OpenClaw** ([openclaw.ai](https://openclaw.ai) — AI coding agent) | `OpenClawAdapter`  | No            | Stable |
+| **Ollama**                                                          | `OllamaAdapter`    | Yes           | Stable |
+| **Custom Function**                                                 | `CallableAdapter`  | Optional      | Stable |
+| **Custom Class**                                                    | `BaseA2AAdapter`   | Optional      | Stable |
 
 ## Key Benefits
 
-- **3-line setup** — Expose any agent as A2A-compliant
-- **Framework agnostic** — Works with n8n, LangGraph, CrewAI, LangChain, OpenClaw, and more
-- **Streaming support** — Built-in streaming for real-time responses
-- **Production ready** — Type-safe, well-tested, and actively maintained
+- **3-line setup** — Expose any agent as A2A-compliant with minimal code
+- **Built-in adapters** — n8n, LangChain, LangGraph, CrewAI, OpenClaw, Ollama, and callable functions
+- **Streaming support** — auto-detected for LangChain and LangGraph, always on for Ollama, optional for callables
+- **ASGI deployment** — use `to_a2a()` when you want to run under your own server
+- **Extensible** — create custom adapters or register third-party ones
+
+## Three Levels of Control
+
+| Level       | Method                             | Use Case                                 |
+| ----------- | ---------------------------------- | ---------------------------------------- |
+| **Level 1** | `invoke(input) -> str`             | 90% of use cases — just return text      |
+| **Level 2** | `stream(input) -> AsyncIterator`   | Streaming frameworks (LangChain, Ollama) |
+| **Level 3** | Implement `AgentExecutor` directly | Full SDK access for advanced scenarios   |
 
 ## Architecture
 
 ```
-┌─────────────────┐
-│   A2A Caller    │  (Other A2A Agents)
-└────────┬────────┘
-         │ A2A Protocol (HTTP + JSON-RPC 2.0)
-         ▼
-┌─────────────────┐
-│  A2A Adapter    │  (This SDK)
-│   - N8n         │
-│   - LangGraph   │
-│   - CrewAI      │
-│   - LangChain   │
-│   - OpenClaw    │
-│   - Callable    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Your Agent     │  (n8n / CrewAI / Chain / OpenClaw)
-└─────────────────┘
+Layer 1: Public API
+    serve_agent() / to_a2a() / build_agent_card()
+         |
+Layer 2: A2A SDK
+    DefaultRequestHandler, TaskStore
+         |
+Layer 3: Bridge
+    AdapterAgentExecutor (thin ~80-line bridge)
+         |
+Layer 4: Adapter Interface
+    BaseA2AAdapter (invoke / stream / cancel)
+         |
+Layer 5: Framework Drivers
+    N8nAdapter, LangChainAdapter, CrewAIAdapter, ...
 ```
 
-## Framework Support
-
-| Framework     | Adapter               | Non-Streaming | Streaming | Async Tasks | Status    |
-| ------------- | --------------------- | ------------- | --------- | ----------- | --------- |
-| **n8n**       | N8nAgentAdapter       | ✅            | ❌        | ✅          | ✅ Stable |
-| **LangGraph** | LangGraphAgentAdapter | ✅            | ✅        | ✅          | ✅ Stable |
-| **CrewAI**    | CrewAIAgentAdapter    | ✅            | ❌        | ✅          | ✅ Stable |
-| **LangChain** | LangChainAgentAdapter | ✅            | ✅        | ❌          | ✅ Stable |
-| **OpenClaw**  | OpenClawAgentAdapter  | ✅            | ❌        | ✅          | ✅ Stable |
-| **Callable**  | CallableAgentAdapter  | ✅            | ✅        | ❌          | ✅ Stable |
+The key design insight is the **bridge layer** (`AdapterAgentExecutor`) that translates between the simple adapter interface (just implement `invoke()`) and the full A2A SDK event-driven model. This means adapters stay simple while getting full protocol compliance for free.
