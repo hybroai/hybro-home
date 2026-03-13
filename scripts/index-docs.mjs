@@ -8,7 +8,7 @@
  *   OPENAI_API_KEY=sk-... node scripts/index-docs.mjs
  */
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 import OpenAI from "openai";
 
@@ -166,6 +166,7 @@ async function main() {
     embedding: embeddings[i],
   }));
 
+  await mkdir(join(OUTPUT_PATH, ".."), { recursive: true });
   await writeFile(OUTPUT_PATH, JSON.stringify(index));
   console.log(`Index saved to ${OUTPUT_PATH} (${index.length} entries)`);
 }
