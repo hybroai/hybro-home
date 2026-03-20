@@ -125,7 +125,7 @@ export function ChatWidget() {
     <div className="nextra-chat-panel">
       {/* Header */}
       <div className="nextra-chat-header">
-        <span style={{ fontWeight: 600, fontSize: "14px" }}>
+        <span style={{ fontWeight: 600, fontSize: "0.875rem" }}>
           Hybro AI Assistant
         </span>
         <button
@@ -153,7 +153,7 @@ export function ChatWidget() {
       <div className="nextra-chat-messages">
         {messages.length === 0 && (
           <div className="nextra-chat-empty">
-            <p style={{ fontWeight: 600, marginBottom: "8px" }}>
+            <p style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
               Hi! I&apos;m the Hybro docs assistant.
             </p>
             <p>

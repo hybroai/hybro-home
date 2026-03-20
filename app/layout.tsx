@@ -3,11 +3,12 @@ import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import { ChatWidget } from '../components/chat-widget'
+import { Logo } from '../components/logo'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'] })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'], variable: '--font-space-grotesk' })
 
 export const metadata = {
   title: { default: 'HYBRO AI Documentation', template: '%s | HYBRO AI Docs' },
@@ -19,12 +20,8 @@ export const metadata = {
 
 const navbar = (
   <Navbar
-    logo={
-      <span className={spaceGrotesk.className} style={{ display: 'flex', alignItems: 'center', gap: '1px', fontWeight: 700, fontSize: '1.5rem' }}>
-        <span className="hybro-logo-hy">HY</span>
-        <span className="hybro-logo-bro">BRO</span>
-      </span>
-    }
+    logoLink="https://hybro.ai"
+    logo={<Logo />}
   />
 )
 
@@ -43,11 +40,11 @@ export default async function RootLayout({
           lightness: { light: 35, dark: 60 },
         }}
         backgroundColor={{
-          light: 'rgb(243,244,247)',
-          dark: 'rgb(15,17,25)',
+          light: 'rgb(243,244,246)',
+          dark: 'rgb(15,17,26)',
         }}
       />
-      <body className={inter.className}>
+      <body className={`${inter.className} ${spaceGrotesk.variable}`}>
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
