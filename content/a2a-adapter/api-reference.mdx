@@ -50,6 +50,8 @@ def to_a2a(
 
 Convert any adapter into an A2A Protocol ASGI application. Use this for production deployments with custom ASGI servers.
 
+A Starlette lifespan handler is automatically attached that calls `adapter.close()` and releases internal HTTP clients on shutdown — no manual cleanup needed.
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `adapter` | `BaseA2AAdapter` | required | Your adapter implementation |

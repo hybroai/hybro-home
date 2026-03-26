@@ -170,7 +170,7 @@ serve_agent(adapter, port=9000)
 | `name` | `str` | `"OpenClawAdapter"` | Agent name |
 | `description` | `str` | `""` | Agent description |
 
-**Streaming:** No. Uses subprocess execution with JSON parsing. Supports POSIX signal cancellation.
+**Streaming:** No. Uses subprocess execution with JSON parsing (checks both stdout and stderr). Supports POSIX signal cancellation.
 
 ---
 

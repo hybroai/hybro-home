@@ -8,51 +8,93 @@ Hybro Hub reads its configuration from `~/.hybro/config.yaml`. Create the config
 mkdir -p ~/.hybro
 ```
 
-Create `~/.hybro/config.yaml`:
+A minimal `~/.hybro/config.yaml` only needs your API key:
+
+```yaml
+cloud:
+  api_key: ${HYBRO_API_KEY}   # or paste directly: "hybro_your_key_here"
+```
+
+A fully-annotated example with all sections:
 
 ```yaml
 # Cloud connection
 cloud:
-  api_key: "hybro_..."                    # Your Hybro API key
-  gateway_url: "https://api.hybro.ai"   # Cloud gateway URL
+  api_key: ${HYBRO_API_KEY}          # or ${HYBRO_API_KEY:-} to allow unset
+  gateway_url: "https://api.hybro.ai"
 
 # Agent discovery
 agents:
-  auto_discover: true                   # Scan localhost for A2A agents
-  auto_discover_exclude_ports:          # Skip non-agent ports
+  auto_discover: true                  # probe localhost ports for A2A agents
+  auto_discover_exclude_ports:         # skip non-agent ports (built-in defaults shown)
     - 22    # SSH
+    - 53    # DNS
+    - 80    # HTTP
+    - 443   # HTTPS
     - 3306  # MySQL
     - 5432  # PostgreSQL
+    - 6379  # Redis
+    - 27017 # MongoDB
+  # auto_discover_scan_range: [10000, 11000]  # restrict scan to a port range
 
-  # Manually-configured agents (always registered)
+  # Manually-configured agents (always registered, even if auto_discover is off)
   local:
     - name: "My Custom Agent"
       url: "http://localhost:9001"
-    - name: "Team Agent"
+    - name: "Remote Agent"
       url: "http://192.168.1.50:8080"  # LAN agents work too
 
-# Privacy settings (logging only, does not block dispatch)
+# Privacy (classification is logging-only; messages are not blocked or rerouted)
 privacy:
-  default_routing: "local_first"
-  sensitive_keywords:
-    - "medical"
-    - "financial"
-    - "confidential"
-  sensitive_patterns:
-    - "PROJ-\\d{4}"
+  sensitive_keywords: ["medical", "financial", "confidential"]
+  sensitive_patterns: ["PROJ-\\d{4}"]
+
+# Offline resilience — events that fail delivery are queued to disk and retried
+publish_queue:
+  enabled: true
+  max_size_mb: 50
+  ttl_hours: 24
+  drain_interval: 30        # seconds between retry cycles
+  drain_batch_size: 20
+  max_retries_critical: 20  # agent_response, agent_error, processing_status
+  max_retries_normal: 5     # task_submitted, artifact_update, task_status
 
 # Heartbeat interval (seconds)
 heartbeat_interval: 30
 ```
 
-### Environment Variables
+### Environment Variable Syntax
 
-You can also configure the hub via environment variables:
+The config file supports environment variable references expanded before YAML parsing (matching the OTel Collector convention):
+
+| Syntax | Meaning |
+|--------|---------|
+| `${VAR}` | Value of `VAR`, or `""` if unset |
+| `${VAR:-default}` | Value of `VAR`, or `"default"` if unset |
+| `$${VAR}` | Literal `${VAR}` (escape) |
+
+Set the API key in your shell profile:
+
+```bash
+export HYBRO_API_KEY="hybro_..."
+```
+
+Or pass it once on the CLI (saved to the config file):
+
+```bash
+hybro-hub start --api-key hybro_...
+```
+
+> If the config file already contains an env var reference (e.g. `api_key: ${HYBRO_API_KEY}`), the CLI will **not** overwrite it — your env var wiring is preserved.
+
+### Environment Variable Overrides
+
+The following shell variables are also checked at startup and override whatever is in the config file:
 
 | Variable | Description |
 |----------|-------------|
-| `HYBRO_API_KEY` | Your Hybro API key (overrides config file) |
-| `HYBRO_GATEWAY_URL` | Gateway URL (overrides config file) |
+| `HYBRO_API_KEY` | Your Hybro API key |
+| `HYBRO_GATEWAY_URL` | Gateway URL |
 
 ## Running the Hub
 
@@ -132,7 +174,7 @@ hybro-hub agent start n8n --webhook-url http://localhost:5678/webhook/my-agent
 
 | Option | Adapter | Description |
 |--------|---------|-------------|
-| `--model` | ollama | Ollama model (default: `llama3.2:8b`) |
+| `--model` | ollama | Ollama model (default: `llama3.2`) |
 | `--system-prompt` | ollama | Custom system prompt |
 | `--thinking` | openclaw | Thinking level: off/minimal/low/medium/high/xhigh |
 | `--agent-id` | openclaw | OpenClaw agent ID |
@@ -151,6 +193,13 @@ When `auto_discover: true` (the default), the hub:
 4. Registers any valid A2A agents found
 
 Auto-discovery runs at startup and re-scans periodically (every 120 seconds).
+
+To restrict scanning to a specific port range (useful on machines with many open ports):
+
+```yaml
+agents:
+  auto_discover_scan_range: [10000, 11000]
+```
 
 ### Manual Configuration
 
@@ -194,7 +243,7 @@ hybro-hub agents
 
 ## Privacy Classification
 
-The hub can detect sensitive data in outbound messages. **Currently it logs warnings — it does not block or anonymize.** Active blocking is on the roadmap.
+The hub can detect sensitive data in outbound messages. **Classification is logging-only — messages are not blocked or rerouted.** Active blocking and anonymization are planned for a future release.
 
 Every message in hybro.ai shows where it was processed:
 
@@ -227,14 +276,14 @@ Run a local Ollama LLM as an A2A agent:
 
 ```bash
 # Make sure Ollama is running (ollama serve)
-hybro-hub agent start ollama --model llama3.2:8b
+hybro-hub agent start ollama --model llama3.2
 ```
 
 This starts an A2A server on port 10010 (configurable with `--port`). The hub will auto-discover it and make it available on the Hybro platform.
 
 ```bash
 hybro-hub agent start ollama \
-  --model llama3.2:8b \
+  --model llama3.2 \
   --system-prompt "You are a helpful coding assistant"
 ```
 

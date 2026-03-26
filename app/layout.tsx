@@ -48,7 +48,7 @@ export default async function RootLayout({
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/hybroai"
+          docsRepositoryBase="https://github.com/hybroai/hybro-documents"
           editLink={null}
           feedback={{
             content: 'Question? Give us feedback',
