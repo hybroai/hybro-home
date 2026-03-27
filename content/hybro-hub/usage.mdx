@@ -112,7 +112,11 @@ The hub will:
 3. Sync agent list to the cloud
 4. Begin listening for incoming messages
 
-Leave the terminal running. The hub maintains a persistent SSE connection to the cloud.
+The hub starts in the background by default. Logs are written to `~/.hybro/hub.log`. To keep it attached to the terminal instead, use `--foreground`:
+
+```bash
+hybro-hub start --foreground
+```
 
 With debug logging:
 
@@ -122,9 +126,27 @@ hybro-hub -v start
 
 ## CLI Commands
 
+### `hybro-hub start`
+
+Start the hub daemon in the background:
+
+```bash
+hybro-hub start
+hybro-hub start --api-key hybro_...   # provide key on first run
+hybro-hub start --foreground          # stay attached to the terminal
+```
+
+### `hybro-hub stop`
+
+Stop the running hub daemon:
+
+```bash
+hybro-hub stop
+```
+
 ### `hybro-hub status`
 
-Check if the hub is connected and how many agents are synced:
+Check if the hub is running and how many agents are synced to the cloud:
 
 ```bash
 hybro-hub status
@@ -169,6 +191,7 @@ hybro-hub agent start n8n --webhook-url http://localhost:5678/webhook/my-agent
 | `--port` | `10010` | Port for the A2A agent server |
 | `--name` | auto | Agent display name |
 | `--timeout` | varies | Request timeout in seconds |
+| `--config` | — | Path to a YAML agent config file (mutually exclusive with adapter type) |
 
 **Adapter-specific options:**
 
@@ -180,6 +203,60 @@ hybro-hub agent start n8n --webhook-url http://localhost:5678/webhook/my-agent
 | `--agent-id` | openclaw | OpenClaw agent ID |
 | `--openclaw-path` | openclaw | Path to the openclaw binary |
 | `--webhook-url` | n8n | Webhook URL (required) |
+
+#### Using a config file
+
+For options not available as CLI flags (e.g. Ollama `temperature`, OpenClaw `working_directory`), use `--config` with a YAML file:
+
+```bash
+hybro-hub agent start --config hybro-agent.yaml
+```
+
+CLI flags (`--port`, `--name`, `--timeout`) override values in the config file when explicitly provided.
+
+If `hybro-agent.yaml` or `.hybro-agent.yaml` exists in the current directory, `hybro-hub agent start` (with no arguments) auto-discovers and uses it.
+
+**Ollama config file:**
+
+```yaml
+adapter: ollama
+name: "My Ollama Agent"           # display name in hybro.ai
+port: 10010                        # local A2A server port
+
+model: llama3.2                    # any model pulled via `ollama pull`
+base_url: http://localhost:11434   # Ollama server URL (default shown)
+system_prompt: "You are a helpful assistant"
+temperature: 0.7                   # omit to use Ollama's default
+timeout: 120                       # request timeout in seconds
+keep_alive: "5m"                   # how long Ollama keeps the model loaded
+```
+
+**OpenClaw config file:**
+
+```yaml
+adapter: openclaw
+name: "My OpenClaw Agent"          # display name in hybro.ai
+port: 10010                         # local A2A server port
+
+thinking: low                       # off / minimal / low / medium / high / xhigh
+agent_id: main                      # OpenClaw agent ID (optional)
+openclaw_path: openclaw             # path to binary if not on PATH
+timeout: 600                        # command timeout in seconds
+working_directory: /path/to/repo    # working directory for openclaw (optional)
+env_vars:                           # environment variables for the subprocess (optional)
+  MY_VAR: "value"
+```
+
+**n8n config file:**
+
+```yaml
+adapter: n8n
+name: "My n8n Agent"
+port: 10010
+webhook_url: http://localhost:5678/webhook/my-agent
+message_field: event                # field in the webhook payload that carries the user message
+timeout: 30
+```
 
 ## Agent Discovery
 
@@ -281,11 +358,7 @@ hybro-hub agent start ollama --model llama3.2
 
 This starts an A2A server on port 10010 (configurable with `--port`). The hub will auto-discover it and make it available on the Hybro platform.
 
-```bash
-hybro-hub agent start ollama \
-  --model llama3.2 \
-  --system-prompt "You are a helpful coding assistant"
-```
+For full configuration (temperature, custom base URL, keep-alive), use a config file — see [Using a config file](#using-a-config-file) in the CLI Commands section.
 
 ### OpenClaw
 
@@ -295,6 +368,8 @@ Run an AI coding agent:
 hybro-hub agent start openclaw
 hybro-hub agent start openclaw --thinking medium --agent-id main
 ```
+
+To set a working directory or pass environment variables to the subprocess, use a config file — see [Using a config file](#using-a-config-file) in the CLI Commands section.
 
 ### n8n
 
