@@ -39,6 +39,13 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
   font-weight: 500 !important;
 }
 
+/* ── Navbar height: match hybro-frontend h-14 (56px) ── */
+.nextra-navbar,
+.nextra-navbar nav,
+.nextra-navbar .nextra-navbar-blur {
+  height: 3.5rem !important; /* 56px = h-14, same as hybro-frontend headers */
+}
+
 /* ── HYBRO logo colors (matches hybro-frontend) ── */
 .hybro-logo-hy {
   color: hsl(192 85% 38%);
