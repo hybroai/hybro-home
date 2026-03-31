@@ -4,7 +4,7 @@ interface LogoProps {
 
 export function Logo({ className }: LogoProps) {
   return (
-    <div className={`flex items-center gap-0.5 ${className ?? ''}`} style={{ marginLeft: '-0.5rem' }}>
+    <div className={`flex items-center gap-0.5 -ml-2 ${className ?? ''}`}>
       <span
         className="hybro-logo-hy font-bold text-2xl"
         style={{ fontFamily: 'var(--font-space-grotesk), sans-serif' }}
