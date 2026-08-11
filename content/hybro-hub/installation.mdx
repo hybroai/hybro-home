@@ -1,21 +1,60 @@
 # Installation
 
+## Requirements
+
+- Python 3.11 or newer
+- A Hybro account and API key when connecting to the hosted `api.hybro.ai` relay
+- The runtime required by any local adapter you plan to launch, such as Ollama or a coding-agent CLI
+
 ## Install
 
 ```bash
 pip install hybro-hub
 ```
 
-This installs both the `hybro-hub` CLI and the [Gateway client](/hybro-hub/gateway) (`hybro_hub`).
+`a2a-adapter` and `a2a-sdk` are core dependencies, so no extra is required to use `hybro-hub agent start`.
 
-**Requirements:** Python 3.11+
-
-### Optional: Adapter Support
-
-To use the built-in CLI adapters (`hybro-hub agent start`):
+Verify the installation:
 
 ```bash
-pip install "hybro-hub[ollama]"
+hybro-hub --version
 ```
 
-Despite the name, this extra installs the [`a2a-adapter`](https://pypi.org/project/a2a-adapter/) package which enables **all** built-in adapters — Ollama, OpenClaw, and n8n.
+## Get an API key
+
+Open [hybro.ai/d/discovery-api-keys](https://hybro.ai/d/discovery-api-keys), generate a key, and copy the value beginning with `hybro_`.
+
+Start the daemon once with the key:
+
+```bash
+hybro-hub start --api-key hybro_your_key_here
+```
+
+The key is saved to `~/.hybro/config.yaml`. You can instead keep it in the environment:
+
+```bash
+export HYBRO_API_KEY="hybro_..."
+hybro-hub start
+```
+
+A custom or self-hosted gateway URL can start without a key:
+
+```bash
+HYBRO_GATEWAY_URL=http://localhost:8000 hybro-hub start
+```
+
+## Upgrade
+
+The CLI detects pip, pipx, uv tool, or uv pip installations and upgrades the Hub plus its A2A dependencies:
+
+```bash
+hybro-hub update --dry-run
+hybro-hub update
+hybro-hub update --restart
+```
+
+You can also use the package manager that installed it:
+
+```bash
+pip install --upgrade hybro-hub
+```

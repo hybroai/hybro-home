@@ -1,9 +1,11 @@
 # A2A Adapter
 
-**Open Source A2A Protocol Adapter SDK** — Convert any AI agent framework into a fully compliant A2A Protocol server in 3 lines of code.
+**Expose an AI agent as an A2A Protocol server with either a CLI command or a few lines of Python.**
 
 - [PyPI Package](https://pypi.org/project/a2a-adapter/)
 - [GitHub Repository](https://github.com/hybroai/a2a-adapter)
+
+The current `0.2.x` release uses `a2a-sdk` 1.x and supports A2A 1.0 while retaining compatibility routes for older clients.
 
 ## Installation
 
@@ -11,70 +13,72 @@
 pip install a2a-adapter
 ```
 
-## Quick Example
+Python 3.11 or newer is required.
+
+## CLI: expose an installed coding agent
+
+Run the command from the project directory the agent should work in:
+
+```bash
+a2a-adapter pi --port 9012
+a2a-adapter codex --port 9011
+a2a-adapter claude --port 9010
+a2a-adapter openclaw --port 9008
+```
+
+Use `--cwd /path/to/project` to select another directory. Server options go before `--`; native agent options go after it:
+
+```bash
+a2a-adapter pi --port 9012 -- --model <model> --thinking high
+a2a-adapter codex --port 9011 -- --model <model> --sandbox workspace-write
+```
+
+Run `a2a-adapter -help` or `a2a-adapter <agent> -help` for the complete command reference.
+
+## Python SDK: wrap an application or framework
 
 ```python
-from a2a_adapter import N8nAdapter, serve_agent
+from a2a_adapter import CallableAdapter, serve_agent
 
-adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/agent")
+async def echo(inputs):
+    return f"Echo: {inputs['message']}"
+
+adapter = CallableAdapter(func=echo, name="Echo")
 serve_agent(adapter, port=9000)
 ```
 
-That's it. Your n8n workflow is now an A2A-compliant server with:
+The generated Agent Card is available at:
 
-- Auto-generated Agent Card at `/.well-known/agent.json`
-- Task management and lifecycle
-- Push notifications
-- A2A JSON-RPC endpoint
-
-See the [Quick Start](/a2a-adapter/quick-start) to get your first agent running.
-
-## Framework Support
-
-| Framework                                                           | Adapter            | Streaming     | Status |
-| ------------------------------------------------------------------- | ------------------ | ------------- | ------ |
-| **n8n**                                                             | `N8nAdapter`       | No            | Stable |
-| **LangChain**                                                       | `LangChainAdapter` | Auto-detected | Stable |
-| **LangGraph**                                                       | `LangGraphAdapter` | Auto-detected | Stable |
-| **CrewAI**                                                          | `CrewAIAdapter`    | No            | Stable |
-| **OpenClaw** ([openclaw.ai](https://openclaw.ai) — AI coding agent) | `OpenClawAdapter`  | No            | Stable |
-| **Ollama**                                                          | `OllamaAdapter`    | Yes           | Stable |
-| **Custom Function**                                                 | `CallableAdapter`  | Optional      | Stable |
-| **Custom Class**                                                    | `BaseA2AAdapter`   | Optional      | Stable |
-
-## Key Benefits
-
-- **3-line setup** — Expose any agent as A2A-compliant with minimal code
-- **Built-in adapters** — n8n, LangChain, LangGraph, CrewAI, OpenClaw, Ollama, and callable functions
-- **Streaming support** — auto-detected for LangChain and LangGraph, always on for Ollama, optional for callables
-- **ASGI deployment** — use `to_a2a()` when you want to run under your own server
-- **Extensible** — create custom adapters or register third-party ones
-
-## Three Levels of Control
-
-| Level       | Method                             | Use Case                                 |
-| ----------- | ---------------------------------- | ---------------------------------------- |
-| **Level 1** | `invoke(input) -> str`             | 90% of use cases — just return text      |
-| **Level 2** | `stream(input) -> AsyncIterator`   | Streaming frameworks (LangChain, Ollama) |
-| **Level 3** | Implement `AgentExecutor` directly | Full SDK access for advanced scenarios   |
-
-## Architecture
-
-```
-Layer 1: Public API
-    serve_agent() / to_a2a() / build_agent_card()
-         |
-Layer 2: A2A SDK
-    DefaultRequestHandler, TaskStore
-         |
-Layer 3: Bridge
-    AdapterAgentExecutor (thin ~80-line bridge)
-         |
-Layer 4: Adapter Interface
-    BaseA2AAdapter (invoke / stream / cancel)
-         |
-Layer 5: Framework Drivers
-    N8nAdapter, LangChainAdapter, CrewAIAdapter, ...
+```text
+http://localhost:9000/.well-known/agent-card.json
 ```
 
-The key design insight is the **bridge layer** (`AdapterAgentExecutor`) that translates between the simple adapter interface (just implement `invoke()`) and the full A2A SDK event-driven model. This means adapters stay simple while getting full protocol compliance for free.
+The legacy `/.well-known/agent.json` alias is also served.
+
+## Supported adapters
+
+| Framework or agent | Adapter | Streaming |
+| --- | --- | ---: |
+| Claude Code | `ClaudeCodeAdapter` | Yes |
+| Codex | `CodexAdapter` | No |
+| Pi | `PiAdapter` | Yes |
+| OpenClaw | `OpenClawAdapter` | No |
+| Hermes Agent | `HermesAdapter` | Yes |
+| n8n | `N8nAdapter` | No |
+| LangGraph | `LangGraphAdapter` | Yes |
+| LangChain | `LangChainAdapter` | Yes |
+| CrewAI | `CrewAIAdapter` | No |
+| Ollama | `OllamaAdapter` | Yes |
+| Python callable | `CallableAdapter` | Optional |
+| Custom class | `BaseA2AAdapter` | Optional |
+
+See [Adapters](/a2a-adapter/adapters) for setup notes and [API Reference](/a2a-adapter/api-reference) for the public Python surface.
+
+## What the adapter handles
+
+- A2A Agent Card generation
+- JSON-RPC and REST routes from the official A2A SDK
+- Task lifecycle and SSE streaming
+- Push-notification configuration
+- A2A 1.0 and v0.3 compatibility handling
+- Adapter cleanup when the server shuts down

@@ -1,27 +1,42 @@
 # Hybro Hub
 
-Hybro Hub is a local daemon that **bridges your private A2A agents to the Hybro cloud**. It discovers agents running on your machine, registers them with the platform, and relays messages between the cloud and your local agents — so you can use local and cloud agents side by side in one portal.
+Hybro Hub is a lightweight background daemon that connects A2A agents on your machine to [hybro.ai](https://hybro.ai). It discovers local agents, keeps their status synchronized, and relays tasks over an outbound-only connection.
 
-> **Note:** The `hybro-hub` package includes both the Hub daemon and the [Gateway client](/hybro-hub/gateway) (`from hybro_hub import HybroGateway`). One install, two entry points: the Hub bridges local agents to the cloud; the SDK is the programmatic client for calling cloud agents from code.
+The same package also includes `HybroGateway`, an async Python client for discovering and calling cloud agents programmatically.
 
-## Why Hybro Hub?
+## Key properties
 
-Cloud platforms are powerful but require sending your data to third-party servers. Local runtimes keep data private but are isolated. Hybro Hub bridges the two:
+| Capability | Description |
+| --- | --- |
+| **Outbound-only relay** | No inbound firewall rule or public local-agent URL is required |
+| **A2A discovery** | Probes `/.well-known/agent-card.json` and the legacy `/.well-known/agent.json` path |
+| **Local-agent launchers** | Starts Ollama, OpenClaw, n8n, Claude Code, Codex, and Hermes adapters |
+| **Health monitoring** | Periodically checks agents and synchronizes availability |
+| **Task handling** | Supports streaming, input-required tasks, and cancellation |
+| **Offline resilience** | Persists failed publish events to disk and retries them |
+| **Privacy classification** | Detects PII and custom patterns; currently logs warnings without blocking |
 
-1. **Auto-discovering** A2A agents on your machine
-2. **Maintaining a persistent outbound connection** to the Hybro cloud relay (no inbound ports, no firewall changes)
-3. **Relaying messages** between cloud users and your local agents
-4. **Health monitoring** — Automatically removes unhealthy agents
+## Quick start
 
-## Key Features
+```bash
+pip install hybro-hub
+hybro-hub start --api-key hybro_your_key_here
+hybro-hub agent start ollama --model llama3.2
+```
 
-| Feature                    | Description                                                                                               |
-| -------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Auto-discovery**         | Probes localhost ports for A2A agent cards (`/.well-known/agent.json` and `/.well-known/agent-card.json`) |
-| **Manual config**          | Specify agent URLs in `config.yaml` (localhost or LAN)                                                    |
-| **Health monitoring**      | Removes agents after 3 consecutive health check failures                                                  |
-| **Privacy classification** | Detects sensitive data (PII, custom keywords/patterns) and logs warnings                                  |
-| **HITL support**           | Forwards human-in-the-loop requests between cloud and local agents                                        |
-| **Task cancellation**      | Relays cancel requests to local agents                                                                    |
-| **Retry queue**            | Disk-backed queue buffers failed publishes and retries when connection is restored                        |
-| **Built-in adapters**      | Start Ollama, OpenClaw, or n8n agents directly from the CLI                                               |
+Then open [hybro.ai](https://hybro.ai) and use the local agent alongside cloud agents.
+
+The daemon runs in the background by default. Use:
+
+```bash
+hybro-hub status
+hybro-hub agents
+hybro-hub stop
+```
+
+## One package, two uses
+
+- **Hub daemon:** `hybro-hub start` connects local agents to the Hybro relay.
+- **Gateway client:** `from hybro_hub import HybroGateway` calls cloud agents from Python.
+
+Continue with [Installation](/hybro-hub/installation), [Usage](/hybro-hub/usage), or the [Gateway guide](/hybro-hub/gateway).

@@ -1,0 +1,50 @@
+# Rooms and Teams
+
+Rooms are persistent agent conversations. Open previous rooms from **Chat History** in the sidebar.
+
+## Create a room
+
+1. Open **New Chat** (`/chat`)
+2. Choose the agent scope and execution mode
+3. Add text or files
+4. Send the message
+
+Hybro creates the room and opens `/room/{id}`.
+
+## Choose the agent scope
+
+| Choice | Behavior |
+| --- | --- |
+| **All Agents** | Makes all currently available agents candidates for the request |
+| **Saved Team** | Uses the members of a reusable Team |
+| **Mention** | `@agent-name` targets the mentioned agent or agents |
+| **Room default** | Subsequent messages can reuse the room's snapshotted agent membership |
+
+The backend authorizes and expands saved-Team membership. The frontend does not send a copied list of Team IDs as the canonical saved-Team request.
+
+## Saved Teams
+
+The product UI calls reusable agent groups **Teams**. Create one from the agent selector:
+
+1. Select **Create Team**
+2. Enter a Team name
+3. Choose agents
+4. Save
+
+When a Team starts a room, Hybro snapshots its current membership for that room. Editing the saved Team later does not silently rewrite the room's existing membership.
+
+## Room features
+
+- Persistent timeline with stable pagination
+- File attachments stored in the `room_files` volume
+- Quoting and agent mentions
+- Streaming agent responses and artifacts
+- Task progress and terminal status
+- Cancellation
+- Human-in-the-loop questions and replies
+- Recovery from reloads or delayed SSE delivery
+
+## Next steps
+
+- [Orchestration Modes](/hybro/agent-users/orchestration-modes)
+- [Agents](/hybro/agent-users/agents)

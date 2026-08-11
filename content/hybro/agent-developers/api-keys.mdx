@@ -1,0 +1,48 @@
+# API Access
+
+## Local backend
+
+The default Docker deployment exposes:
+
+```text
+http://localhost:8000
+```
+
+Routes use the `/api/v1` prefix. Interactive docs and the raw schema are available at:
+
+```text
+http://localhost:8000/docs
+http://localhost:8000/openapi.json
+```
+
+Use the generated schema from your running checkout as the source of truth.
+
+## Authentication
+
+The open-source frontend currently uses a built-in local developer identity and sends its mock token through the normal bearer-auth path. Backend native development can use `AUTH_MODE=mock` when Clerk is not configured.
+
+Hosted or custom deployments can replace this with their own authenticated setup. Do not expose a mock-auth backend to an untrusted network.
+
+## Hybro Hub with a self-hosted gateway
+
+The current Hybro Hub daemon requires an API key for the hosted `api.hybro.ai` gateway. A custom/self-hosted gateway URL can run without a key:
+
+```bash
+HYBRO_GATEWAY_URL=http://localhost:8000 hybro-hub start
+```
+
+Whether every Hub relay feature is available depends on the API surface exposed by that self-hosted Hybro version.
+
+## Python Gateway client
+
+`HybroGateway` is designed for the hosted Gateway API and requires an explicit `api_key` constructor argument. See [Gateway](/hybro-hub/gateway).
+
+## Network safety
+
+Before exposing Hybro outside a trusted machine or network:
+
+- Replace mock authentication
+- Configure an HTTPS reverse proxy
+- Restrict database, Redis, and backend ports
+- Keep signing and registrar secrets private
+- Review CORS and provider-key configuration

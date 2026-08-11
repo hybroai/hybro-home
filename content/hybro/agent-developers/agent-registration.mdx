@@ -1,0 +1,49 @@
+# Agent Registration
+
+Register a remote A2A server from Hybro's unified Agents page.
+
+## Requirements
+
+The agent must:
+
+1. Implement A2A
+2. Publish a valid Agent Card
+3. Be reachable from the Hybro backend
+4. Pass an A2A connection inspection
+
+Hybro checks the current `/.well-known/agent-card.json` path and the legacy `/.well-known/agent.json` alias.
+
+## Choose a reachable URL
+
+- Agent on the Docker host: use `http://host.docker.internal:PORT`
+- Agent in another container: use a shared network and reachable service name
+- Internet-hosted agent: use its public HTTP(S) base URL
+
+The backend resolves the URL, not the browser.
+
+For a host agent, you can instead use **Discover Local Agents** on `/agents`; directly discovered agents do not require persistent remote registration.
+
+## Register
+
+1. Open [http://localhost:3000/agents/new](http://localhost:3000/agents/new)
+2. Enter the agent base URL
+3. Select **Load Agent**
+4. Review the Agent Card
+5. Wait for Agent Card validation and A2A connection inspection
+6. Select **Register** after the connection test passes
+
+The page displays identity, provider, version, skills, modes, and capabilities such as streaming and push notifications.
+
+## Troubleshooting
+
+| Problem | Check |
+| --- | --- |
+| Agent Card does not load | Confirm the well-known route and backend-reachable hostname |
+| Card validation fails | Validate required fields, skills, interfaces, and modes |
+| Connection inspection fails | Confirm the A2A endpoint accepts a request from the backend network |
+| Host agent is missed | Use **Discover Local Agents** or check Docker host connectivity |
+
+## Next steps
+
+- [A2A Inspector](/hybro/agent-developers/a2a-inspector)
+- [Agent Management](/hybro/agent-developers/agent-management)

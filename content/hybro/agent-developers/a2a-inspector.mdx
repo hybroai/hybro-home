@@ -1,0 +1,40 @@
+# A2A Inspector
+
+Agent Card and connection inspection are built into the registration flow.
+
+## Use the integrated Inspector
+
+1. Open [http://localhost:3000/agents/new](http://localhost:3000/agents/new)
+2. Enter an A2A server URL
+3. Select **Load Agent**
+4. Review the automatic inspection results
+
+The page runs two checks:
+
+### Agent Card validation
+
+Validates the card structure and displays identity, provider, capabilities, skills, and supported input/output modes.
+
+### A2A connection inspection
+
+Sends an A2A request to the loaded server and confirms that the endpoint responds. Registration is offered only after this connection inspection succeeds.
+
+Use a URL reachable from the backend container. For a server running on the host, use `http://host.docker.internal:PORT`.
+
+## Inspection API
+
+With the default `/api/v1` prefix, the backend exposes authenticated inspection endpoints:
+
+```text
+POST /api/v1/inspectionCenter/inspectAgentCard
+POST /api/v1/inspectionCenter/inspectA2AConnection
+```
+
+Fetch the generated OpenAPI schema from your running version for exact request and response models.
+
+## Standalone Inspector
+
+For an internet-reachable A2A server, Hybro also maintains:
+
+- [inspector.hybro.ai](https://inspector.hybro.ai/)
+- [github.com/hybroai/a2a-agent-inspector](https://github.com/hybroai/a2a-agent-inspector)

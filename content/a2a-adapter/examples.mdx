@@ -1,160 +1,97 @@
 # Examples
 
-Run the examples from the [a2a-adapter repository](https://github.com/hybroai/a2a-adapter).
+Runnable examples live in the [a2a-adapter repository](https://github.com/hybroai/a2a-adapter/tree/main/examples).
 
 ## Setup
-
-### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/hybroai/a2a-adapter.git
 cd a2a-adapter
+pip install 'a2a-adapter[all]'
+pip install langchain-openai  # used by the LangChain example
 ```
 
-### 2. Install Dependencies
+Framework-specific extras are also available:
 
 ```bash
-pip install a2a-adapter
+pip install 'a2a-adapter[crewai]'
+pip install 'a2a-adapter[langchain]'
+pip install 'a2a-adapter[langgraph]'
 ```
 
-### 3. Start an Agent Server
+## CLI examples
 
-In a terminal, run one of the agent examples (the server will listen on port 9000 by default):
+No Python file is required for the supported CLI-backed agents:
 
 ```bash
-# N8n workflow agent
-python examples/n8n_agent.py
+a2a-adapter pi --port 9012
+a2a-adapter codex --port 9011
+a2a-adapter claude --port 9010
+a2a-adapter openclaw --port 9008
+```
 
-# LangChain streaming agent
-python examples/langchain_agent.py
+Hermes is currently available through the Python SDK, not the thin CLI.
 
-# LangGraph workflow
-python examples/langgraph_server.py
+## Python example files
 
-# CrewAI crew
-python examples/crewai_agent.py
+| File | Integration | Streaming | Default port |
+| --- | --- | ---: | ---: |
+| `claude_code_agent.py` | Claude Code | Yes | 9010 |
+| `codex_agent.py` | Codex | No | 9011 |
+| `pi_agent.py` | Pi | Yes | 9012 |
+| `openclaw_agent.py` | OpenClaw | No | 9008 |
+| `hermes_agent.py` | Hermes Agent | Yes | 9010 |
+| `n8n_agent.py` | n8n | No | 9000 |
+| `langgraph_server.py` | LangGraph | Yes | 9002 |
+| `langchain_agent.py` | LangChain | Yes | 8002 |
+| `crewai_agent.py` | CrewAI | No | 8001 |
+| `ollama_agent.py` | Ollama | Yes | 10010 |
+| `custom_adapter.py` | `BaseA2AAdapter` | Optional | 8003 |
+| `v02_quickstart.py` | Callable/n8n/custom | Optional | 9000 |
+| `single_agent_client.py` | Test client | — | — |
 
-# OpenClaw agent
-python examples/openclaw_agent.py
+Run a server in one terminal:
 
-# Ollama local LLM
+```bash
 python examples/ollama_agent.py
-
-# Custom adapter
-python examples/custom_adapter.py
 ```
 
-Leave this terminal running.
-
-### 4. Test the Agent
-
-Open a **second terminal** and run the A2A client:
+Then test it from another:
 
 ```bash
-cd a2a-adapter
 python examples/single_agent_client.py
 ```
 
-The client sends a test message to `http://localhost:9000` and prints the response.
-
-## Example: Custom Sentiment Analyzer
-
-A minimal custom adapter that classifies text sentiment:
+## Minimal callable
 
 ```python
-from a2a_adapter import BaseA2AAdapter, AdapterMetadata, serve_agent
+from a2a_adapter import CallableAdapter, serve_agent
 
-class SentimentAdapter(BaseA2AAdapter):
-    async def invoke(self, user_input: str, context_id=None, **kwargs) -> str:
-        positive_words = {"good", "great", "excellent", "happy", "love"}
-        words = set(user_input.lower().split())
-        if words & positive_words:
-            return "Sentiment: Positive"
-        return "Sentiment: Neutral/Negative"
+async def echo(inputs):
+    return f"Echo: {inputs['message']}"
 
-    def get_metadata(self) -> AdapterMetadata:
-        return AdapterMetadata(
-            name="Sentiment Analyzer",
-            description="Classifies text as positive or negative",
-            skills=[{
-                "id": "sentiment",
-                "name": "Sentiment Analysis",
-                "description": "Analyze the sentiment of input text",
-            }],
-        )
-
-serve_agent(SentimentAdapter(), port=8003)
+adapter = CallableAdapter(func=echo, name="Echo")
+serve_agent(adapter, port=9000)
 ```
 
-## Example: Config-Driven Deployment
-
-Use `load_adapter()` for config-driven agent setup:
+## Config-driven deployment
 
 ```python
 from a2a_adapter import load_adapter, serve_agent
 
-# Load from a config dict (could come from YAML, env vars, etc.)
 adapter = load_adapter({
     "adapter": "n8n",
     "webhook_url": "http://localhost:5678/webhook/agent",
-    "name": "Config-Driven Agent",
+    "name": "Workflow Agent",
 })
-
 serve_agent(adapter, port=9000)
 ```
 
-## Example: Production ASGI Deployment
+## Prerequisites by integration
 
-Use `to_a2a()` for production deployments with any ASGI server:
-
-```python
-# app.py
-from a2a_adapter import LangChainAdapter, to_a2a
-from langchain_openai import ChatOpenAI
-
-chain = ChatOpenAI(model="gpt-4o-mini")
-adapter = LangChainAdapter(runnable=chain, input_key="input")
-app = to_a2a(adapter, name="Production Agent", url="https://my-agent.example.com")
-```
-
-Deploy with Gunicorn + Uvicorn workers:
-
-```bash
-gunicorn app:app -k uvicorn.workers.UvicornWorker -w 4
-```
-
-## Example: Multimodal Response
-
-Return files, images, and text in a single response:
-
-```python
-from a2a.types import Part, TextPart, FilePart, FileWithUri
-from a2a_adapter import BaseA2AAdapter, serve_agent
-
-class ReportAgent(BaseA2AAdapter):
-    async def invoke(self, user_input: str, context_id=None, **kwargs):
-        return [
-            Part(root=TextPart(text="Here's your generated report:")),
-            Part(root=FilePart(file=FileWithUri(
-                uri="http://example.com/report.pdf",
-                name="report.pdf",
-                mimeType="application/pdf"
-            )))
-        ]
-
-serve_agent(ReportAgent(), port=9000)
-```
-
-## Example Files Reference
-
-| File                     | Description                      |
-| ------------------------ | -------------------------------- |
-| `n8n_agent.py`           | N8n webhook agent                |
-| `langchain_agent.py`     | LangChain streaming agent        |
-| `langgraph_server.py`    | LangGraph workflow as A2A server |
-| `crewai_agent.py`        | CrewAI multi-agent crew          |
-| `openclaw_agent.py`      | OpenClaw personal AI agent       |
-| `ollama_agent.py`        | Local Ollama LLM agent           |
-| `custom_adapter.py`      | Custom adapter implementation    |
-| `single_agent_client.py` | A2A client for testing           |
-| `v02_quickstart.py`      | Quick start showcase             |
+- **OpenAI-backed examples:** set `OPENAI_API_KEY`
+- **Claude Code:** install `@anthropic-ai/claude-code` and authenticate it
+- **Codex:** install `@openai/codex` and authenticate it
+- **Pi:** install Pi or set `A2A_PI_COMMAND`
+- **Ollama:** start Ollama and pull the configured model
+- **Hermes:** put a Hermes Agent checkout on `PYTHONPATH` and run `hermes setup`

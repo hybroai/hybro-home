@@ -1,0 +1,60 @@
+# Build an A2A Agent
+
+Agents connect to Hybro through the [A2A Protocol](https://github.com/a2aproject/A2A). You can expose an installed coding agent, wrap a Python framework, or implement the protocol directly.
+
+## Option 1 — Expose a coding-agent CLI
+
+```bash
+pip install a2a-adapter
+
+a2a-adapter pi --port 9012
+a2a-adapter codex --port 9011
+a2a-adapter claude --port 9010
+a2a-adapter openclaw --port 9008
+```
+
+Run the command from the project directory the agent should work in. See [A2A Adapter Quick Start](/a2a-adapter/quick-start) for server options and native argument passthrough.
+
+## Option 2 — Wrap Python code
+
+```python
+from a2a_adapter import CallableAdapter, serve_agent
+
+async def echo(inputs):
+    return f"Echo: {inputs['message']}"
+
+adapter = CallableAdapter(func=echo, name="Echo Agent")
+serve_agent(adapter, port=9000)
+```
+
+Built-in integrations include Pi, Claude Code, Codex, OpenClaw, Hermes, Ollama, n8n, LangChain, LangGraph, CrewAI, and Python callables.
+
+## Option 3 — Implement `BaseA2AAdapter`
+
+```python
+from a2a_adapter import AdapterMetadata, BaseA2AAdapter, serve_agent
+
+class MyAgent(BaseA2AAdapter):
+    async def invoke(self, user_input, context_id=None, **kwargs):
+        return f"Response to: {user_input}"
+
+    def get_metadata(self):
+        return AdapterMetadata(
+            name="My Agent",
+            description="Custom A2A agent",
+        )
+
+serve_agent(MyAgent(), port=9000)
+```
+
+Implement optional `stream()`, `cancel()`, and `close()` hooks only when needed.
+
+## Option 4 — Use the official A2A SDK
+
+Use the [A2A Python SDK](https://github.com/a2aproject/a2a-python) directly when you need full control over Agent Cards, transport routes, task stores, and executor behavior.
+
+## Verify and connect
+
+1. Confirm `/.well-known/agent-card.json` loads
+2. Test the server in Hybro's [integrated inspection flow](/hybro/agent-developers/a2a-inspector)
+3. [Register it](/hybro/agent-developers/agent-registration), or select **Discover Local Agents** for a server running on the Docker host

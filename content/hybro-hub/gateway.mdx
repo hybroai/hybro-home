@@ -1,57 +1,63 @@
 # Gateway
 
-The `hybro-hub` package includes a Python client for the **Hybro Gateway API**. Use `HybroGateway` to discover and call cloud agents from your own code.
+The `hybro-hub` package includes `HybroGateway`, an async Python client for the hosted Hybro Gateway API.
 
-> The client is async (`async`/`await`). All examples below must run inside an async function. Wrap your code with `asyncio.run(main())` — see the [Full Example](#full-example) at the bottom.
+> The Gateway client is separate from the local Hub relay. Use it to discover and call cloud agents from code.
 
-> **Scope:** `HybroGateway` talks to `/api/v1/gateway/*`. It is the right tool for calling cloud agents from code. Hub-sourced local agents are reached through the Hybro UI and relay flow, not through direct Gateway send/stream calls.
-
-## Setup
+## Create a client
 
 ```python
 from hybro_hub import HybroGateway
 
 gw = HybroGateway(api_key="hybro_...")
+```
 
-# or use as async context manager (auto-closes on exit)
+Prefer the async context manager so the underlying HTTP client closes automatically:
+
+```python
 async with HybroGateway(api_key="hybro_...") as gw:
     ...
 ```
 
-You can also set the API key via environment variable:
-
-```bash
-export HYBRO_API_KEY=hybro_...
-```
-
-## Discover Agents
+Constructor options:
 
 ```python
-agents = await gw.discover("data analysis")
+HybroGateway(
+    api_key: str,
+    base_url: str = "https://api.hybro.ai/api/v1",
+    *,
+    timeout: float = 120.0,
+    client: httpx.AsyncClient | None = None,
+)
+```
+
+## Discover agents
+
+```python
+agents = await gw.discover("data analysis", limit=5)
 
 for agent in agents:
-    print(f"{agent.agent_card.get('name')} — score: {agent.match_score:.2f}")
-    print(f"  ID: {agent.agent_id}")
+    print(agent.agent_id, agent.match_score, agent.agent_card.get("name"))
 ```
 
-## Send a Message
+## Send a message
 
 ```python
-result = await gw.send(agents[0].agent_id, "What is the integral of x^2?")
+result = await gw.send(agents[0].agent_id, "Analyze this dataset")
 print(result)
 ```
 
-For multi-turn conversations, pass a `context_id`:
+Reuse a `context_id` for multiple turns:
 
 ```python
-r1 = await gw.send(agent_id, "My name is Alice", context_id="conv-1")
-r2 = await gw.send(agent_id, "What's my name?", context_id="conv-1")
+await gw.send(agent_id, "My name is Alice", context_id="conversation-1")
+await gw.send(agent_id, "What is my name?", context_id="conversation-1")
 ```
 
-## Stream a Response
+## Stream a response
 
 ```python
-async for event in gw.stream(agent_id, "Write a haiku about coding"):
+async for event in gw.stream(agent_id, "Write a short report"):
     if event.is_error:
         print(f"Error: {event.data}")
         break
@@ -65,60 +71,57 @@ card = await gw.get_card(agent_id)
 print(card["agent_card"]["name"])
 ```
 
-## Error Handling
+## Error handling
 
 ```python
 from hybro_hub import (
-    HybroGateway,
-    GatewayError,
-    AuthError,
     AccessDeniedError,
-    AgentNotFoundError,
-    RateLimitError,
     AgentCommunicationError,
+    AgentNotFoundError,
+    AuthError,
+    GatewayError,
+    RateLimitError,
 )
 
 try:
-    result = await gw.send("agent-123", "Hello")
+    result = await gw.send(agent_id, "Hello")
 except AuthError:
     print("Invalid API key")
+except AccessDeniedError:
+    print("No access to this agent")
 except AgentNotFoundError:
     print("Agent not found or inactive")
-except RateLimitError as e:
-    print(f"Rate limited — retry after {e.retry_after}s")
+except RateLimitError as error:
+    print(f"Retry after {error.retry_after}s")
 except AgentCommunicationError:
-    print("Agent failed to respond")
-except GatewayError as e:
-    print(f"Gateway error ({e.status_code}): {e}")
+    print("The upstream agent failed")
+except GatewayError as error:
+    print(error)
 ```
 
-| Exception | Status | When |
-|-----------|--------|------|
-| `AuthError` | 401 | Missing or invalid API key |
-| `AccessDeniedError` | 403 | No access to a private agent |
-| `AgentNotFoundError` | 404 | Agent doesn't exist or is inactive |
-| `RateLimitError` | 429 | Rate limit exceeded |
-| `AgentCommunicationError` | 502 | Upstream agent failed to respond |
-| `GatewayError` | any | Base class for all errors |
+| Exception | HTTP status |
+| --- | ---: |
+| `AuthError` | 401 |
+| `AccessDeniedError` | 403 |
+| `AgentNotFoundError` | 404 |
+| `RateLimitError` | 429 |
+| `AgentCommunicationError` | 502 |
+| `GatewayError` | any |
 
-## Full Example
+## Full example
 
 ```python
 import asyncio
 from hybro_hub import HybroGateway
 
 async def main():
-    async with HybroGateway(api_key="hybro_...") as gw:
-        # Discover
-        agents = await gw.discover("legal contract review")
-        print(f"Found {len(agents)} agents")
-
-        # Send
-        result = await gw.send(agents[0].agent_id, "Review this contract...")
-        print(result)
-
-        # Stream
-        async for event in gw.stream(agents[0].agent_id, "Summarize findings"):
+    async with HybroGateway(api_key="hybro_...") as gateway:
+        agents = await gateway.discover("legal contract review", limit=3)
+        async for event in gateway.stream(
+            agents[0].agent_id,
+            "Review this NDA",
+            context_id="nda-review",
+        ):
             print(event.data)
 
 asyncio.run(main())

@@ -196,8 +196,8 @@ export async function POST(req: Request) {
     return textStreamResponse(
       "I couldn't find relevant information in the Hybro documentation for your question. " +
         "Try rephrasing, or browse the docs directly:\n\n" +
-        "- [Getting Started](/hybro-platform/agent-users/getting-started)\n" +
-        "- [For Agent Developers](/hybro-platform/agent-developers)\n" +
+        "- [Getting Started](/hybro/agent-users/getting-started)\n" +
+        "- [For Agent Developers](/hybro/agent-developers)\n" +
         "- [Gateway](/hybro-hub/gateway)\n" +
         "- [A2A Adapter](/a2a-adapter)"
     );

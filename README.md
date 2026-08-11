@@ -4,7 +4,9 @@ Documentation site for HYBRO AI products, built with [Next.js](https://nextjs.or
 
 ## Contents
 
-- **A2A Adapter** — Open Source A2A Protocol Adapter SDK ([GitHub](https://github.com/hybroai/a2a-adapter) · [PyPI](https://pypi.org/project/a2a-adapter/))
+- **Hybro** — Open-source hybrid multi-agent platform ([GitHub](https://github.com/hybroai/hybro))
+- **A2A Adapter** — Expose agent CLIs and Python frameworks as A2A servers ([GitHub](https://github.com/hybroai/a2a-adapter) · [PyPI](https://pypi.org/project/a2a-adapter/))
+- **Hybro Hub** — Bridge local A2A agents into Hybro ([GitHub](https://github.com/hybroai/hybro-hub) · [PyPI](https://pypi.org/project/hybro-hub/))
 
 ## Getting Started
 
@@ -27,6 +29,8 @@ Open [http://localhost:3000](http://localhost:3000) to view the documentation.
 - `app/` — Next.js App Router (layout, catch-all route for MDX)
 - `content/` — Documentation content (MDX + `_meta.js` for sidebar)
   - `content/index.mdx` — Home page
+  - `content/hybro/` — Hybro docs
+  - `content/hybro-hub/` — Hybro Hub docs
   - `content/a2a-adapter/` — A2A Adapter docs
 - `mdx-components.tsx` — MDX component overrides
 - `next.config.mjs` — Nextra config

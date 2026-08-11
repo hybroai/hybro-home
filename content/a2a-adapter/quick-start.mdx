@@ -1,134 +1,140 @@
 # Quick Start
 
-Get your first A2A-compatible agent running in about 5 minutes.
+Choose the CLI when you already have a supported coding-agent command installed. Choose the Python SDK when you are embedding A2A support in an application or framework.
 
-## Step 1 — Install
+## Option A — CLI
+
+### 1. Install
 
 ```bash
 pip install a2a-adapter
 ```
 
-## Step 2 — Your First Agent (3 Lines)
+Also install the underlying agent CLI (`pi`, `codex`, `claude`, or `openclaw`) and complete its normal authentication setup.
 
-Save the following as `my_agent.py`:
+### 2. Start an A2A server
+
+From the target project directory:
+
+```bash
+a2a-adapter pi --port 9012
+```
+
+Equivalent examples:
+
+```bash
+a2a-adapter codex --port 9011
+a2a-adapter claude --port 9010
+a2a-adapter openclaw --port 9008
+```
+
+Common server options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--cwd` | current directory | Agent working directory |
+| `--host` | `127.0.0.1` | A2A bind host |
+| `--port` | `9000` | A2A server port |
+| `--timeout` | `600` | Agent timeout in seconds |
+| `--name` | adapter default | Agent Card display name |
+| `--description` | adapter default | Agent Card description |
+| `--executable` | command on `PATH` | Underlying executable |
+
+Adapter-owned OpenClaw options stay before any separator:
+
+```bash
+a2a-adapter openclaw --port 9008 --agent-id main --thinking high
+```
+
+Pass native agent CLI arguments after `--`:
+
+```bash
+a2a-adapter claude --port 9010 -- --model <model>
+```
+
+The adapter protects protocol/session flags that it owns. Run `a2a-adapter <agent> -help` for agent-specific options.
+
+For a Pi source checkout, set the command without a shell wrapper:
+
+```bash
+A2A_PI_COMMAND='npx tsx /path/to/pi/packages/coding-agent/src/cli.ts' \
+  a2a-adapter pi --port 9012
+```
+
+## Option B — Python SDK
+
+### 1. Install
+
+```bash
+pip install a2a-adapter
+```
+
+Install optional framework dependencies when needed:
+
+```bash
+pip install 'a2a-adapter[all]'
+# or: [crewai], [langchain], [langgraph]
+
+# Required by the ChatOpenAI example below:
+pip install langchain-openai
+```
+
+### 2. Create an agent
+
+Save as `my_agent.py`:
 
 ```python
-from a2a_adapter import N8nAdapter, serve_agent
+from a2a_adapter import CallableAdapter, serve_agent
 
-adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/my-workflow")
+async def echo(inputs):
+    return f"You said: {inputs['message']}"
+
+adapter = CallableAdapter(func=echo, name="Echo Agent")
 serve_agent(adapter, port=9000)
 ```
 
-Replace the webhook URL with your real n8n webhook URL.
-
-## Step 3 — Start the Agent Server
+### 3. Run it
 
 ```bash
 python my_agent.py
 ```
 
-Leave this terminal running. The server listens on **port 9000** and serves:
-
-- A2A endpoint at `http://localhost:9000`
-
-## Step 4 — Test the Agent
-
-Open a **second terminal** and use the A2A client:
+Verify the Agent Card:
 
 ```bash
-git clone https://github.com/hybroai/a2a-adapter.git
-cd a2a-adapter
-python examples/single_agent_client.py
+curl http://localhost:9000/.well-known/agent-card.json
 ```
 
-The client sends a test message to `http://localhost:9000` and prints the response.
-
-## Other Frameworks
-
-### LangChain (with streaming)
+## Framework example
 
 ```python
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 from a2a_adapter import LangChainAdapter, serve_agent
 
-chain = ChatPromptTemplate.from_template("Answer: {input}") | ChatOpenAI(model="gpt-4o-mini")
-adapter = LangChainAdapter(runnable=chain, input_key="input", name="Chat Agent")
-serve_agent(adapter, port=9000)  # Streaming auto-detected
-```
-
-### LangGraph
-
-```python
-from a2a_adapter import LangGraphAdapter, serve_agent
-
-adapter = LangGraphAdapter(
-    graph=your_compiled_graph,
-    input_key="messages",
-    output_key="output",
-    name="Workflow Agent",
+adapter = LangChainAdapter(
+    runnable=ChatOpenAI(model="gpt-4o-mini"),
+    input_key="input",
+    name="LangChain Agent",
 )
 serve_agent(adapter, port=9000)
 ```
 
-### CrewAI
+## Production ASGI deployment
+
+Use `to_a2a()` when another ASGI server owns the process:
 
 ```python
-from a2a_adapter import CrewAIAdapter, serve_agent
+from a2a_adapter import CallableAdapter, to_a2a
 
-adapter = CrewAIAdapter(crew=your_crew_instance, name="Research Crew")
-serve_agent(adapter, port=9000)
+async def hello(inputs):
+    return "Hello"
+
+adapter = CallableAdapter(func=hello, name="Hello Agent")
+app = to_a2a(adapter, url="https://agent.example.com/")
 ```
 
-### Ollama (local LLM)
+Run it with an ASGI server such as Uvicorn:
 
-```python
-from a2a_adapter import OllamaAdapter, serve_agent
-
-adapter = OllamaAdapter(model="llama3.2:8b", name="Local LLM")
-serve_agent(adapter, port=9000)  # Streaming enabled by default
-```
-
-### Custom Function
-
-```python
-from a2a_adapter import CallableAdapter, serve_agent
-
-async def my_agent(inputs: dict) -> str:
-    return f"You said: {inputs['message']}"
-
-adapter = CallableAdapter(func=my_agent, name="Echo Agent")
-serve_agent(adapter, port=9000)
-```
-
-### Custom Class
-
-```python
-from a2a_adapter import BaseA2AAdapter, AdapterMetadata, serve_agent
-
-class SentimentAdapter(BaseA2AAdapter):
-    async def invoke(self, user_input: str, context_id=None, **kwargs) -> str:
-        sentiment = "positive" if "good" in user_input.lower() else "negative"
-        return f"Sentiment: {sentiment}"
-
-    def get_metadata(self) -> AdapterMetadata:
-        return AdapterMetadata(
-            name="Sentiment Analyzer",
-            description="Analyzes text sentiment",
-        )
-
-serve_agent(SentimentAdapter(), port=9000)
-```
-
-## Production Deployment
-
-For production, use `to_a2a()` to get an ASGI app you can deploy with any server:
-
-```python
-from a2a_adapter import N8nAdapter, to_a2a
-
-adapter = N8nAdapter(webhook_url="http://localhost:5678/webhook/agent")
-app = to_a2a(adapter)
-
-# Deploy with: gunicorn app:app -k uvicorn.workers.UvicornWorker
+```bash
+uvicorn app:app --host 0.0.0.0 --port 9000
 ```

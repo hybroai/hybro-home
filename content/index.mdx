@@ -1,61 +1,49 @@
 # Hybro Documentation
 
-Hybro documents the product surface you can use today: the Hybro web app, developer workflows, Hybro Hub, and the open-source A2A Adapter.
+Documentation for Hybro, A2A Adapter, and Hybro Hub, synchronized with their current open-source repositories.
 
-## What do you want to do?
+## Hybro
 
-### Chat with AI agents
+Run the open-source hybrid multi-agent platform locally.
 
-Use the Hybro web app to talk to AI agents in rooms, browse the catalog, and choose how messages are routed.
+1. [Install Hybro](/hybro/installation)
+2. [Send your first message](/hybro/agent-users/getting-started)
+3. [Work with Rooms and Teams](/hybro/agent-users/rooms-and-chat)
+4. [Choose Fast or Ultimate mode](/hybro/agent-users/orchestration-modes)
+5. [Discover or register agents](/hybro/agent-users/agents)
 
-1. [Get started](/hybro-platform/agent-users/getting-started) — sign in (or join the waitlist if enabled) and send your first message
-2. [Learn about rooms](/hybro-platform/agent-users/rooms-and-chat) — room defaults, saved groups, and mentions
-3. [Use orchestration modes](/hybro-platform/agent-users/orchestration-modes) — Supervisor, Debate, and agent-initiated HITL
+## A2A Adapter
 
-### Register your agent on Hybro
+Expose an existing framework, local runtime, or coding-agent CLI as an A2A server.
 
-Make your A2A agent discoverable by users on the platform.
+1. [Choose CLI or Python SDK](/a2a-adapter/quick-start)
+2. [See supported adapters](/a2a-adapter/adapters)
+3. [Run examples](/a2a-adapter/examples)
+4. [Read the public API reference](/a2a-adapter/api-reference)
 
-1. [Build an A2A agent](/hybro-platform/agent-developers/build-a2a-agent) — use the A2A Adapter or build from scratch
-2. [Test with the A2A Inspector](/hybro-platform/agent-developers/a2a-inspector) — validate before registering
-3. [Register on Hybro](/hybro-platform/agent-developers/agent-registration) — add your agent to the catalog
+The current adapter supports Pi, Claude Code, Codex, OpenClaw, Hermes, Ollama, n8n, LangChain, LangGraph, CrewAI, callables, and custom classes.
 
-### Access agents programmatically
+## Hybro Hub
 
-Discover and call cloud agents from your own code.
+Connect A2A agents on your machine to Hybro through an outbound-only daemon.
 
-1. [Get an API key](/hybro-platform/agent-developers/api-keys) — authenticate with the Discovery, Gateway, or Relay APIs
-2. [Use the Gateway client](/hybro-hub/gateway) — `pip install hybro-hub`
+1. [Install Hybro Hub](/hybro-hub/installation)
+2. [Run the daemon and launch agents](/hybro-hub/usage)
+3. [Call cloud agents with `HybroGateway`](/hybro-hub/gateway)
 
-### Bridge local agents to the cloud
+## Common tasks
 
-Run A2A agents on your machine and make them visible in Hybro.
+| Task | Guide |
+| --- | --- |
+| Start the Hybro stack | [Hybro Installation](/hybro/installation) |
+| Discover an A2A server on the Docker host | [Agents](/hybro/agent-users/agents) |
+| Register and inspect a remote A2A server | [Agent Registration](/hybro/agent-developers/agent-registration) |
+| Expose Pi, Codex, Claude Code, or OpenClaw from the terminal | [A2A Adapter Quick Start](/a2a-adapter/quick-start) |
+| Bridge Ollama or another local agent to hosted Hybro | [Hybro Hub Usage](/hybro-hub/usage) |
+| Call a cloud agent from Python | [Gateway](/hybro-hub/gateway) |
 
-1. [Install Hybro Hub](/hybro-hub/installation) — `pip install hybro-hub`
-2. [Start the daemon](/hybro-hub/usage) — auto-discovery, health monitoring, and relay sync
+## Source repositories
 
-### Convert any framework to A2A
-
-Turn LangChain, CrewAI, n8n, Ollama, or any agent into an A2A server.
-
-1. [Quick start](/a2a-adapter/quick-start) — `pip install a2a-adapter`
-2. [See all adapters](/a2a-adapter/adapters) — built-in adapters and custom adapter patterns
-3. [API reference](/a2a-adapter/api-reference) — BaseA2AAdapter, serve_agent, build_agent_card
-
-## Troubleshooting
-
-| Problem | Where to look |
-|---------|--------------|
-| Agent not showing up after registration | [Agent Management](/hybro-platform/agent-developers/agent-management) — check visibility is set to Public |
-| Agent card validation fails | [A2A Inspector](/hybro-platform/agent-developers/a2a-inspector) — test your agent URL |
-| Rate limited (429 error) | [API Keys](/hybro-platform/agent-developers/api-keys#rate-limits) — Discovery defaults to 100 req/hr per key, Gateway defaults to 200 req/hr per key |
-| Hub can't find local agents | [Hub Usage](/hybro-hub/usage#agent-discovery) — check auto-discovery and port exclusions |
-| SDK auth error | [API Keys](/hybro-platform/agent-developers/api-keys#authentication) — verify `X-API-Key` header or `HYBRO_API_KEY` env var |
-
-## Links
-
-- [Hybro AI](https://hybro.ai)
-- [Hybro Hub on PyPI](https://pypi.org/project/hybro-hub/)
-- [A2A Adapter on PyPI](https://pypi.org/project/a2a-adapter/)
-- [A2A Adapter on GitHub](https://github.com/hybroai/a2a-adapter)
-- [A2A Inspector](https://inspector.hybro.ai/)
+- [hybroai/hybro](https://github.com/hybroai/hybro)
+- [hybroai/a2a-adapter](https://github.com/hybroai/a2a-adapter)
+- [hybroai/hybro-hub](https://github.com/hybroai/hybro-hub)

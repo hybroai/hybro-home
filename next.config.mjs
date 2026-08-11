@@ -6,6 +6,16 @@ const withNextra = nextra({
 })
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/hybro-platform/:path*',
+        destination: '/hybro/:path*',
+        permanent: true,
+      },
+    ]
+  },
+}
 
 export default withNextra(nextConfig)

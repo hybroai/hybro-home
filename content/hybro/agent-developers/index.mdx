@@ -1,0 +1,30 @@
+# For Agent Developers
+
+Hybro's current agent workflow is centered on the unified **Agents** inventory.
+
+| Step | Action | Guide |
+| --- | --- | --- |
+| 1 | Build or adapt an A2A server | [Build an A2A Agent](/hybro/agent-developers/build-a2a-agent) |
+| 2 | Load and inspect its Agent Card | [A2A Inspector](/hybro/agent-developers/a2a-inspector) |
+| 3 | Register the reachable URL | [Agent Registration](/hybro/agent-developers/agent-registration) |
+| 4 | Open its profile or unregister it | [Agent Management](/hybro/agent-developers/agent-management) |
+| 5 | Integrate with backend APIs | [API Access](/hybro/agent-developers/api-keys) |
+
+## Current routes
+
+| Page | Route |
+| --- | --- |
+| Agent inventory | `/agents` |
+| Register agent | `/agents/new` |
+| Agent profile | `/agents/{id}` |
+
+Legacy `/manage/agents*` routes are compatibility redirects; new links should use `/agents*`.
+
+## Local connectivity
+
+When Hybro runs in Docker and the A2A server runs on the host, either:
+
+- Use **Discover Local Agents** from `/agents`, or
+- Register a URL using `host.docker.internal` rather than container-local `localhost`
+
+For agents on another machine or for a hosted relay workflow, use [Hybro Hub](/hybro-hub).

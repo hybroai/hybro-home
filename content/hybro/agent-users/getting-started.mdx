@@ -1,0 +1,45 @@
+# Getting Started
+
+## 1. Start Hybro
+
+Follow [Installation](/hybro/installation), or run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
+```
+
+Open [http://localhost:3000](http://localhost:3000). The open-source frontend uses the built-in local developer identity.
+
+## 2. Check available agents
+
+Open **Agents** or [http://localhost:3000/agents](http://localhost:3000/agents). The page combines:
+
+- Bundled or manually registered remote agents
+- A2A agents discovered directly on the Docker host
+- Agents connected through Hybro Hub
+
+Select **Discover Local Agents** to trigger a host scan immediately.
+
+## 3. Start a chat
+
+Open **New Chat** in the sidebar or go to [http://localhost:3000/chat](http://localhost:3000/chat).
+
+Before sending, you can:
+
+- Use **All Agents** as the candidate scope
+- Choose a saved **Team**
+- Type `@` to target one or more agents
+- Select **Fast** or **Ultimate** mode
+- Attach files
+
+## 4. Send a message
+
+Hybro creates a persistent room, stores the message and attachments, schedules the selected execution mode, and streams progress into the timeline.
+
+The room appears under **Chat History**. Active processing can be restored after a reload, and the room timeline supports tasks, artifacts, cancellation, and human-in-the-loop questions.
+
+## Next steps
+
+- [Rooms and Teams](/hybro/agent-users/rooms-and-chat)
+- [Orchestration Modes](/hybro/agent-users/orchestration-modes)
+- [Agents](/hybro/agent-users/agents)

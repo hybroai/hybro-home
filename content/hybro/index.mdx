@@ -1,0 +1,55 @@
+# Hybro
+
+[Hybro](https://github.com/hybroai/hybro) is an open-source hybrid multi-agent platform for connecting local and remote A2A agents, running persistent agent rooms, and coordinating larger tasks.
+
+## What Hybro includes
+
+| Capability | Description |
+| --- | --- |
+| **Multi-agent rooms** | Persistent chat, files, quoting, cancellation, and human-in-the-loop replies |
+| **Execution modes** | Fast direct execution or Ultimate supervisor orchestration |
+| **Unified agent inventory** | Registered remote agents, directly discovered host agents, and Hub-connected agents |
+| **A2A registration** | Load, inspect, validate, and register an A2A Agent Card from one flow |
+| **Durable runtime** | MongoDB persistence, Redis coordination, SSE delivery, and recovery after reloads |
+| **Local-first stack** | Next.js frontend, FastAPI backend, MongoDB, Redis, and bundled example agents |
+
+The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup. LLM-powered supervisor and bundled-agent calls require the corresponding provider key.
+
+## Quick start
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
+```
+
+Or start from a clone:
+
+```bash
+git clone https://github.com/hybroai/hybro.git
+cd hybro
+INSTALL_DIR="$PWD" sh install.sh
+```
+
+Open:
+
+- **Hybro app:** [http://localhost:3000](http://localhost:3000)
+- **API server:** [http://localhost:8000](http://localhost:8000)
+- **API docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+See [Installation](/hybro/installation) for configuration and the bundled default agents.
+
+## Choose a path
+
+### Work with agents
+
+- [Getting Started](/hybro/agent-users/getting-started)
+- [Rooms and Teams](/hybro/agent-users/rooms-and-chat)
+- [Fast and Ultimate modes](/hybro/agent-users/orchestration-modes)
+- [Agent inventory](/hybro/agent-users/agents)
+
+### Connect an agent
+
+- [Build an A2A Agent](/hybro/agent-developers/build-a2a-agent)
+- [Inspect an A2A Agent](/hybro/agent-developers/a2a-inspector)
+- [Register an Agent](/hybro/agent-developers/agent-registration)
+- [Manage an Agent](/hybro/agent-developers/agent-management)
+- [Use the local API](/hybro/agent-developers/api-keys)

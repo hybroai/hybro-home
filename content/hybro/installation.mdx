@@ -1,0 +1,87 @@
+# Installation
+
+Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, FastAPI backend, MongoDB 7 replica set, Redis, persistent room-file storage, four example agents, and a one-shot registrar.
+
+## Prerequisites
+
+- Git
+- Docker with Docker Compose
+
+For native development, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+.
+
+## Install with the script
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
+```
+
+The script:
+
+1. Clones or updates `${INSTALL_DIR:-$HOME/hybro}`
+2. Creates backend, frontend, and default-agent environment files
+3. Generates webhook and default-agent registrar secrets
+4. Regenerates default-agent Compose services from `default_agents/agents.yaml`
+5. Runs `docker compose up -d --build`
+
+Choose another directory with:
+
+```bash
+INSTALL_DIR=/path/to/hybro \
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh)"
+```
+
+## Install manually
+
+```bash
+git clone https://github.com/hybroai/hybro.git
+cd hybro
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+cp default_agents/.env.example default_agents/.env
+```
+
+For a manual install, follow the comments in the env files and generate matching webhook/registrar secrets before starting the stack. The installation script performs those steps automatically.
+
+Then run:
+
+```bash
+docker compose up -d --build
+```
+
+## Configure model access
+
+The backend supervisor and bundled default agents use OpenAI-backed models by default. Put the same `OPENAI_API_KEY` in:
+
+- `backend/.env`
+- `default_agents/.env`
+
+The bundled agents still register without a key, but calls that need OpenAI fail until a valid key is configured.
+
+The default-agent manifest currently starts Weather, Image Generator, Travel Planner, and Story agents.
+
+## Open Hybro
+
+| Service | URL |
+| --- | --- |
+| Hybro app | [http://localhost:3000](http://localhost:3000) |
+| API server | [http://localhost:8000](http://localhost:8000) |
+| Health check | [http://localhost:8000/health](http://localhost:8000/health) |
+| Interactive API docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
+
+## Update
+
+```bash
+cd ~/hybro   # or your INSTALL_DIR
+git pull
+docker compose up -d --build
+```
+
+The `mongo_data`, `redis_data`, and `room_files` volumes persist across container recreation.
+
+## Stop
+
+```bash
+docker compose down
+```
+
+Avoid `docker compose down --volumes` unless you intend to delete local data.
