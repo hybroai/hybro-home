@@ -10,6 +10,8 @@ curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
 
 Open [http://localhost:3000](http://localhost:3000). The open-source frontend uses the built-in local developer identity.
 
+The stack can start without an `.env`, but bundled agents and LLM-backed orchestration require `OPENAI_API_KEY` in the repo-root `.env`. See [Installation](/hybro/installation) for the current configuration and lifecycle commands.
+
 ## 2. Check available agents
 
 Open **Agents** or [http://localhost:3000/agents](http://localhost:3000/agents). The page combines:

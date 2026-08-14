@@ -5,7 +5,9 @@ Hybro's open-source stack runs with Docker Compose. It includes the Next.js fron
 ## Prerequisites
 
 - Git
-- Docker with Docker Compose
+- Docker with Compose v2.24+ (`docker compose`)
+
+The legacy `docker-compose` v1 binary is not supported.
 
 For native development, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+.
 
@@ -15,13 +17,7 @@ For native development, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+.
 curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
 ```
 
-The script:
-
-1. Clones or updates `${INSTALL_DIR:-$HOME/hybro}`
-2. Creates backend, frontend, and default-agent environment files
-3. Generates webhook and default-agent registrar secrets
-4. Regenerates default-agent Compose services from `default_agents/agents.yaml`
-5. Runs `docker compose up -d --build`
+The installer clones or updates `${INSTALL_DIR:-$HOME/hybro}`, prepares the repo-root environment, generates required secrets and default-agent services, then starts a freshly built stack.
 
 Choose another directory with:
 
@@ -30,34 +26,43 @@ INSTALL_DIR=/path/to/hybro \
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh)"
 ```
 
+Existing installations that used `backend/.env`, `frontend/.env.local`, or `default_agents/.env` are migrated to the current repo-root configuration. The old frontend file is backed up as `frontend/.env.local.legacy` before regeneration.
+
 ## Install manually
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-cp default_agents/.env.example default_agents/.env
+./scripts/hybro start
 ```
 
-For a manual install, follow the comments in the env files and generate matching webhook/registrar secrets before starting the stack. The installation script performs those steps automatically.
-
-Then run:
-
-```bash
-docker compose up -d --build
-```
+A fresh clone can start without an `.env`. This is the zero-config demo path: Hybro uses mock authentication, but bundled agents and LLM-backed orchestration fail until `OPENAI_API_KEY` is configured.
 
 ## Configure model access
 
-The backend supervisor and bundled default agents use OpenAI-backed models by default. Put the same `OPENAI_API_KEY` in:
+The repo-root `.env` is the single source of truth for the backend, bundled agents, and frontend build configuration. Create it from the example and set at least the OpenAI key:
 
-- `backend/.env`
-- `default_agents/.env`
+```bash
+cp .env.example .env
+# Edit .env and set OPENAI_API_KEY
+./scripts/hybro start --recreate
+```
 
-The bundled agents still register without a key, but calls that need OpenAI fail until a valid key is configured.
+`./scripts/hybro start` generates webhook and registrar secrets when needed, renders the default-agent Compose services from `default_agents/agents.yaml`, and regenerates `frontend/.env.local`. Do not hand-edit `frontend/.env.local`.
 
-The default-agent manifest currently starts Weather, Image Generator, Travel Planner, and Story agents.
+The bundled agents still register without an OpenAI key, but calls that use OpenAI fail until a valid key is configured. The default manifest starts Weather, Image Generator, Travel Planner, and Story agents.
+
+If you change a runtime setting in `.env`, use `--recreate`. If you change a `NEXT_PUBLIC_*` value, rebuild as well because those values are baked into the frontend image:
+
+```bash
+./scripts/hybro start --build --recreate
+```
+
+Use `--check-key` to fail fast when `.env` or `OPENAI_API_KEY` is not ready:
+
+```bash
+./scripts/hybro start --check-key
+```
 
 ## Open Hybro
 
@@ -68,20 +73,26 @@ The default-agent manifest currently starts Weather, Image Generator, Travel Pla
 | Health check | [http://localhost:8000/health](http://localhost:8000/health) |
 | Interactive API docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
+## Manage the stack
+
+Use `./scripts/hybro` for day-to-day lifecycle operations:
+
+```bash
+./scripts/hybro status          # Show all container states
+./scripts/hybro logs backend    # Stream one service; omit it for all services
+./scripts/hybro restart backend # Restart one service; omit it for the full stack
+./scripts/hybro stop            # Stop containers but keep them
+./scripts/hybro down            # Remove containers and the default network
+```
+
+Run `./scripts/hybro --help` for the complete command reference. Named volumes remain intact after `stop` or `down`; avoid `./scripts/hybro down -v` unless you intend to delete local data.
+
 ## Update
 
 ```bash
 cd ~/hybro   # or your INSTALL_DIR
 git pull
-docker compose up -d --build
+./scripts/hybro start --build --recreate
 ```
 
 The `mongo_data`, `redis_data`, and `room_files` volumes persist across container recreation.
-
-## Stop
-
-```bash
-docker compose down
-```
-
-Avoid `docker compose down --volumes` unless you intend to delete local data.

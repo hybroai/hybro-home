@@ -26,8 +26,10 @@ Or start from a clone:
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-INSTALL_DIR="$PWD" sh install.sh
+./scripts/hybro start
 ```
+
+This starts the zero-config demo in mock-auth mode. Configure `OPENAI_API_KEY` in the repo-root `.env` before using bundled agents or LLM-backed orchestration.
 
 Open:
 
