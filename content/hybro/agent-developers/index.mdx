@@ -27,4 +27,4 @@ When Hybro runs in Docker and the A2A server runs on the host, either:
 - Use **Discover Local Agents** from `/agents`, or
 - Register a URL using `host.docker.internal` rather than container-local `localhost`
 
-For agents on another machine or for a hosted relay workflow, use [Hybro Hub](/hybro-hub).
+For an agent on another machine, register it by its reachable HTTP(S) base URL. Agents that are not reachable from the backend cannot be registered.

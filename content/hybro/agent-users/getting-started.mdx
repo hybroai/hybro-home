@@ -5,20 +5,22 @@
 Follow [Installation](/hybro/installation), or run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
+git clone https://github.com/hybroai/hybro.git
+cd hybro
+./scripts/hybro setup
+./scripts/hybro start --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The open-source frontend uses the built-in local developer identity.
+`setup` selects a Provider and models and saves them under `~/.hybro`; `start` builds and runs the stack. See [Configuration](/hybro/configuration) for the full contract and the migration path from an older setup.
 
-The stack can start without an `.env`, but bundled agents and LLM-backed orchestration require `OPENAI_API_KEY` in the repo-root `.env`. See [Installation](/hybro/installation) for the current configuration and lifecycle commands.
+Open [http://localhost:3000](http://localhost:3000). The app opens on the Hybro Core page, which does not require sign-in and doubles as a live demo of the chat composer. The open-source frontend uses the built-in local developer identity.
 
 ## 2. Check available agents
 
 Open **Agents** or [http://localhost:3000/agents](http://localhost:3000/agents). The page combines:
 
-- Bundled or manually registered remote agents
+- Remote agents registered with this backend, including the bundled Weather, Image Generator, Travel Planner, and Story agents
 - A2A agents discovered directly on the Docker host
-- Agents connected through Hybro Hub
 
 Select **Discover Local Agents** to trigger a host scan immediately.
 
@@ -26,10 +28,10 @@ Select **Discover Local Agents** to trigger a host scan immediately.
 
 Open **New Chat** in the sidebar or go to [http://localhost:3000/chat](http://localhost:3000/chat).
 
-Before sending, you can:
+Featured Use Case cards can prefill the composer and set up the Agents they need. Before sending, you can also:
 
 - Use **All Agents** as the candidate scope
-- Choose a saved **Team**
+- Choose the room's current membership, or a saved **Team**
 - Type `@` to target one or more agents
 - Select **Fast** or **Ultimate** mode
 - Attach files
@@ -38,7 +40,7 @@ Before sending, you can:
 
 Hybro creates a persistent room, stores the message and attachments, schedules the selected execution mode, and streams progress into the timeline.
 
-The room appears under **Chat History**. Active processing can be restored after a reload, and the room timeline supports tasks, artifacts, cancellation, and human-in-the-loop questions.
+Each turn renders a Trace that shows agent calls, tool activity, and any question waiting for your answer, followed by the final answer and one card per delegated agent. The room appears under **Chat History**. Active processing can be restored after a reload, and the room timeline supports artifacts, cancellation, and human-in-the-loop questions.
 
 ## Next steps
 

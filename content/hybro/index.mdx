@@ -8,12 +8,13 @@
 | --- | --- |
 | **Multi-agent rooms** | Persistent chat, files, quoting, cancellation, and human-in-the-loop replies |
 | **Execution modes** | Fast direct execution or Ultimate supervisor orchestration |
-| **Unified agent inventory** | Registered remote agents, directly discovered host agents, and Hub-connected agents |
+| **Unified agent inventory** | Registered remote agents and directly discovered host agents |
 | **A2A registration** | Load, inspect, validate, and register an A2A Agent Card from one flow |
 | **Durable runtime** | MongoDB persistence, Redis coordination, SSE delivery, and recovery after reloads |
 | **Local-first stack** | Next.js frontend, FastAPI backend, MongoDB, Redis, and bundled example agents |
+| **CLI-managed configuration** | Configure models and credentials once, then start backend, frontend, and Agents without maintaining environment files |
 
-The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup. LLM-powered supervisor and bundled-agent calls require the corresponding provider key.
+The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup. Hybro speaks A2A protocol 1.0 and still accepts agents and cards built for A2A 0.3.
 
 ## Quick start
 
@@ -26,10 +27,11 @@ Or start from a clone:
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-./scripts/hybro start
+./scripts/hybro setup
+./scripts/hybro start --build
 ```
 
-This starts the zero-config demo in mock-auth mode. Configure `OPENAI_API_KEY` in the repo-root `.env` before using bundled agents or LLM-backed orchestration.
+`setup` chooses a Provider and models and saves them to `~/.hybro/config.json`; `start` builds and runs the stack. Configure the Provider before using bundled agents or LLM-backed orchestration.
 
 Open:
 
@@ -37,7 +39,7 @@ Open:
 - **API server:** [http://localhost:8000](http://localhost:8000)
 - **API docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
-See [Installation](/hybro/installation) for configuration and the bundled default agents.
+See [Installation](/hybro/installation) and [Configuration](/hybro/configuration).
 
 ## Choose a path
 

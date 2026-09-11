@@ -11,16 +11,20 @@ Rooms are persistent agent conversations. Open previous rooms from **Chat Histor
 
 Hybro creates the room and opens `/room/{id}`.
 
+On an empty `/chat`, **Featured Use Cases** cards resolve the Agents a scenario needs, save them as a Team, select it, and prefill the composer. Nothing is created until you send the message.
+
 ## Choose the agent scope
 
 | Choice | Behavior |
 | --- | --- |
-| **All Agents** | Makes all currently available agents candidates for the request |
+| **All Agents** | Makes every currently available agent a candidate for the request |
+| **Room Team** | Uses the membership already snapshotted for this room |
 | **Saved Team** | Uses the members of a reusable Team |
 | **Mention** | `@agent-name` targets the mentioned agent or agents |
-| **Room default** | Subsequent messages can reuse the room's snapshotted agent membership |
 
-The backend authorizes and expands saved-Team membership. The frontend does not send a copied list of Team IDs as the canonical saved-Team request.
+The backend authorizes and expands the membership. The frontend does not send a copied list of agent IDs as the canonical Team request.
+
+Naming an agent with `@` is an instruction, not just a filter: a mentioned agent is called for that turn.
 
 ## Saved Teams
 
@@ -50,8 +54,8 @@ Pinned rooms appear separately and can be reordered by dragging on desktop. Dele
 - Persistent timeline with stable pagination
 - File attachments stored in the `room_files` volume
 - Quoting and agent mentions
+- Per-turn Trace showing agent calls, tool activity, retries, and preparation steps
 - Streaming agent responses and artifacts
-- Task progress and terminal status
 - Cancellation
 - Human-in-the-loop questions and replies
 - Recovery from reloads or delayed SSE delivery

@@ -40,8 +40,10 @@ hybro-hub start
 A custom or self-hosted gateway URL can start without a key:
 
 ```bash
-HYBRO_GATEWAY_URL=http://localhost:8000 hybro-hub start
+HYBRO_GATEWAY_URL=https://your-gateway.example.com hybro-hub start
 ```
+
+Whether every Hub relay feature is available depends on the API surface exposed by that gateway. The open-source Hybro stack in [hybroai/hybro](https://github.com/hybroai/hybro) does not serve the relay API, so it cannot act as a Hub gateway.
 
 ## Upgrade
 

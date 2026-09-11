@@ -13,11 +13,11 @@ The page runs two checks:
 
 ### Agent Card validation
 
-Validates the card structure and displays identity, provider, capabilities, skills, and supported input/output modes.
+Validates the card structure and displays identity, provider, capabilities, skills, and supported input/output modes. A2A 1.0 cards list their endpoints under `supportedInterfaces`; pre-1.0 cards are also accepted.
 
 ### A2A connection inspection
 
-Sends an A2A request to the loaded server and confirms that the endpoint responds. Registration is offered only after this connection inspection succeeds.
+Sends an A2A request to the loaded server and confirms that the endpoint responds. Hybro accepts both JSON-RPC and HTTP+JSON bindings and prefers JSON-RPC when an agent advertises both. Registration is offered only after this connection inspection succeeds.
 
 Use a URL reachable from the backend container. For a server running on the host, use `http://host.docker.internal:PORT`.
 

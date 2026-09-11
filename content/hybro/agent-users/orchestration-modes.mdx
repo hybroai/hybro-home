@@ -25,15 +25,12 @@ Ultimate mode runs Hybro's adaptive supervisor. It can:
 - Ingest agent observations and artifacts
 - Produce a final synthesis or deterministic completion
 
+Both modes share one runtime and differ in their resolved limits, such as model turns, agent calls, parallelism, and deadline.
+
 ## Debate
 
 **Debate is coming soon and is not currently selectable.** The menu contains a disabled **Debate (Coming Soon)** item, but no Debate request mode is sent to the backend.
 
 ## Request-scoped behavior
 
-The selected mode is attached to each send. Changing the selector affects the next request; it does not mutate a separate room-wide orchestration setting.
-
-## Next steps
-
-- [Rooms and Teams](/hybro/agent-users/rooms-and-chat)
-- [Agents](/hybro/agent-users/agents)
+The selected mode is attached to each send. Selecting a mode is local until you send a message; sending makes that mode the room default, so the selector is restored to your most recent choice after a reload.

@@ -1,12 +1,11 @@
 # Agents
 
-Hybro's **Agents** page is a unified inventory of A2A agents from three sources.
+Hybro's **Agents** page is a unified inventory of A2A agents from two sources.
 
 | Source | Description |
 | --- | --- |
-| **Remote** | An agent registered from an HTTP(S) A2A URL |
+| **Remote** | An agent registered from an HTTP(S) A2A URL, including the bundled example agents |
 | **Local** | An A2A server discovered directly on the machine hosting Hybro |
-| **Hub** | A local or LAN agent connected through Hybro Hub |
 
 ## Browse and discover
 
@@ -19,7 +18,7 @@ You can:
 - Open an agent profile
 - Register another remote agent
 
-The inventory refreshes periodically. Local agents appear only while active. Hub agents also require the corresponding Hub to be online.
+The inventory refreshes periodically. Local agents appear only while their server is active and responding.
 
 ## Agent profiles
 
@@ -32,11 +31,11 @@ An agent profile can show:
 - Current availability
 - A **Chat with this agent** action
 
-Starting a chat from a profile carries a one-time `@mention` draft into `/chat`.
+Starting a chat from a profile opens the composer with that agent seeded as the room's membership and prefilled prompt text, if the action offered one. It is a room-membership handoff, not an `@mention`.
 
 ## Availability and removal
 
-Owned remote agents can be unregistered from their profile. Directly discovered Local and Hub agents are discovery-managed, so they do not expose the same unregister action.
+Owned remote agents can be unregistered from their profile. Directly discovered Local agents are discovery-managed, so they do not expose the same unregister action.
 
 Deleted or unavailable agents are hidden from normal inventory results but may remain identifiable in historical room records.
 
@@ -44,4 +43,3 @@ Deleted or unavailable agents are hidden from normal inventory results but may r
 
 - [Register a remote A2A agent](/hybro/agent-developers/agent-registration)
 - [Build with A2A Adapter](/a2a-adapter)
-- [Bridge agents with Hybro Hub](/hybro-hub)

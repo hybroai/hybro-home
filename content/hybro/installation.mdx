@@ -1,6 +1,6 @@
 # Installation
 
-Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, FastAPI backend, MongoDB 7 replica set, Redis, persistent room-file storage, four example agents, and a one-shot registrar.
+Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, the FastAPI backend, a MongoDB 7 replica set, Redis, persistent room-file storage, four example agents, and a one-shot registrar.
 
 ## Prerequisites
 
@@ -9,7 +9,9 @@ Hybro's open-source stack runs with Docker Compose. It includes the Next.js fron
 
 The legacy `docker-compose` v1 binary is not supported.
 
-For native development, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+.
+- [uv](https://docs.astral.sh/uv/) — the `./scripts/hybro` CLI runs its configuration tool through uv.
+
+For native development outside Docker, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+ (Docker Compose pins MongoDB 7.0).
 
 ## Install with the script
 
@@ -17,7 +19,7 @@ For native development, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+.
 curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
 ```
 
-The installer clones or updates `${INSTALL_DIR:-$HOME/hybro}`, prepares the repo-root environment, generates required secrets and default-agent services, then starts a freshly built stack.
+The installer requires `git`, `docker`, and `uv`. It clones or updates `${INSTALL_DIR:-$HOME/hybro}`, prints the setup and start commands, and opens the interactive CLI when a terminal is attached. It does not create environment files, generate secrets, build images, or start services.
 
 Choose another directory with:
 
@@ -26,43 +28,33 @@ INSTALL_DIR=/path/to/hybro \
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh)"
 ```
 
-Existing installations that used `backend/.env`, `frontend/.env.local`, or `default_agents/.env` are migrated to the current repo-root configuration. The old frontend file is backed up as `frontend/.env.local.legacy` before regeneration.
-
 ## Install manually
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-./scripts/hybro start
+./scripts/hybro setup
+./scripts/hybro start --build
 ```
 
-A fresh clone can start without an `.env`. This is the zero-config demo path: Hybro uses mock authentication, but bundled agents and LLM-backed orchestration fail until `OPENAI_API_KEY` is configured.
+A fresh checkout cannot start before it is configured. Running `./scripts/hybro start` without configuration stops with a message pointing at `./scripts/hybro setup` (or `config migrate` for an older YAML setup).
 
-## Configure model access
+## Configure Hybro
 
-The repo-root `.env` is the single source of truth for the backend, bundled agents, and frontend build configuration. Create it from the example and set at least the OpenAI key:
+Hybro keeps backend, frontend, and bundled-agent settings in one local JSON directory instead of repository environment files:
+
+```text
+~/.hybro/
+├── config.json   # User settings and Provider/model selection
+└── auth.json     # Provider credentials and scoped service tokens
+```
 
 ```bash
-cp .env.example .env
-# Edit .env and set OPENAI_API_KEY
-./scripts/hybro start --recreate
+./scripts/hybro setup          # Choose a Provider, authenticate, select models
+./scripts/hybro start --build  # Build and start the stack
 ```
 
-`./scripts/hybro start` generates webhook and registrar secrets when needed, renders the default-agent Compose services from `default_agents/agents.yaml`, and regenerates `frontend/.env.local`. Do not hand-edit `frontend/.env.local`.
-
-The bundled agents still register without an OpenAI key, but calls that use OpenAI fail until a valid key is configured. The default manifest starts Weather, Image Generator, Travel Planner, and Story agents.
-
-If you change a runtime setting in `.env`, use `--recreate`. If you change a `NEXT_PUBLIC_*` value, rebuild as well because those values are baked into the frontend image:
-
-```bash
-./scripts/hybro start --build --recreate
-```
-
-Use `--check-key` to fail fast when `.env` or `OPENAI_API_KEY` is not ready:
-
-```bash
-./scripts/hybro start --check-key
-```
+See [Configuration](/hybro/configuration) for the full contract, the `config` commands, and the one-time migration from an older setup.
 
 ## Open Hybro
 
@@ -73,19 +65,36 @@ Use `--check-key` to fail fast when `.env` or `OPENAI_API_KEY` is not ready:
 | Health check | [http://localhost:8000/health](http://localhost:8000/health) |
 | Interactive API docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
+The app opens on the Hybro Core page. The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup.
+
 ## Manage the stack
 
-Use `./scripts/hybro` for day-to-day lifecycle operations:
+`./scripts/hybro` is the day-to-day lifecycle CLI:
 
 ```bash
-./scripts/hybro status          # Show all container states
-./scripts/hybro logs backend    # Stream one service; omit it for all services
-./scripts/hybro restart backend # Restart one service; omit it for the full stack
-./scripts/hybro stop            # Stop containers but keep them
-./scripts/hybro down            # Remove containers and the default network
+./scripts/hybro start                     # Start services, no rebuild (fast daily loop)
+./scripts/hybro start --build             # Rebuild images (after code or dependency changes)
+./scripts/hybro start --recreate          # Recreate containers (runtime configuration changes)
+./scripts/hybro start --build --recreate  # Rebuild and recreate (public frontend or image changes)
+./scripts/hybro status                    # Show all containers, including stopped ones
+./scripts/hybro logs backend              # Follow one service; omit the name for all
+./scripts/hybro logs --container <name>   # Follow one exact container or replica
+./scripts/hybro restart backend           # Restart one service; omit the name for the stack
+./scripts/hybro stop                      # Stop containers but keep them
+./scripts/hybro down                      # Remove containers and the default network
 ```
 
-Run `./scripts/hybro --help` for the complete command reference. Named volumes remain intact after `stop` or `down`; avoid `./scripts/hybro down -v` unless you intend to delete local data.
+`start` also generates missing internal service tokens and regenerates the default-agent Compose services from `default_agents/agents.yaml`.
+
+Named volumes remain intact after `stop` or `down`; avoid `./scripts/hybro down -v` unless you intend to delete local data.
+
+Run `./scripts/hybro --help` for the complete command reference. Running `./scripts/hybro` with no command opens the interactive Models/Services UI when a terminal is available; otherwise it prints that same help text.
+
+## Bundled agents
+
+The default manifest starts Weather, Image Generator, Travel Planner, and Story, plus a one-shot registrar that registers them with the backend on startup.
+
+Registration itself does not need a Provider credential. Calls that use a model — the bundled agents and Hybro's own orchestration — need the Provider configured through `./scripts/hybro setup`.
 
 ## Update
 

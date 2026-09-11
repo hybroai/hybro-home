@@ -30,6 +30,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the documentation.
 - `content/` — Documentation content (MDX + `_meta.js` for sidebar)
   - `content/index.mdx` — Home page
   - `content/hybro/` — Hybro docs
+  - `content/hybro/configuration.mdx` — Local JSON configuration contract
   - `content/hybro-hub/` — Hybro Hub docs
   - `content/a2a-adapter/` — A2A Adapter docs
 - `mdx-components.tsx` — MDX component overrides

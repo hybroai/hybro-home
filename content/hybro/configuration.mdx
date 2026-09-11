@@ -1,0 +1,105 @@
+# Configuration
+
+Backend, frontend, and bundled-agent user settings belong to one local JSON configuration, not repository environment files.
+
+## Configuration files
+
+```text
+~/.hybro/
+├── config.json   # User settings; edit through the CLI or directly
+└── auth.json     # Credentials; managed through the CLI
+```
+
+`HYBRO_HOME` relocates that directory and must be an absolute path. Hybro creates the directory with mode `0700`; `auth.json` requires mode `0600`.
+
+`config.json` holds the shared user configuration:
+
+| Field | Purpose |
+| --- | --- |
+| `provider` | Provider ID (`openai`, `deepseek`, `anthropic`) and authentication method (`api_key` or `oauth`) |
+| `models` | Selected text model, and an image model when the connection supports one |
+| `backend` | Deployment overrides such as `log_level`, `auth_mode`, or local discovery settings |
+| `frontend` | Public frontend overrides such as `max_message_length` |
+| `image_size` | Generated image size: `1024x1024`, `1536x1024`, `1024x1536`, or `auto` |
+
+Startup validates JSON syntax, known fields, types, ranges, and required combinations, and reports safe field-level errors. `backend` accepts deployment settings only — credential fields and model/route fields belong in `auth.json` and the top-level provider/model selection.
+
+`.env`, `.env.example`, and `frontend/.env.local` are not required by this contract. Provider keys placed in the environment are one-time inputs to `setup` and are saved privately; running services do not read Provider keys from environment files.
+
+Settings are a startup snapshot. Restart services after changes, and rebuild the frontend when public frontend settings change.
+
+## Run setup
+
+```bash
+./scripts/hybro setup
+```
+
+Setup selects a Provider and authentication method, authenticates, chooses models, verifies text with one request, and saves `config.json` and `auth.json`. The verification request uses Provider billing or subscription quota; images are never probed. It requires `uv` and an interactive terminal for browser OAuth or hidden API-key input.
+
+| Provider | Authentication | Notes |
+| --- | --- | --- |
+| OpenAI | API key or ChatGPT/Codex OAuth | Image generation requires the API-key connection |
+| DeepSeek | API key | |
+| Anthropic | API key | |
+
+A custom OpenAI-compatible endpoint can be supplied with `OPENAI_BASE_URL` when setting up an OpenAI connection.
+
+`setup` also accepts explicit automation flags:
+
+```bash
+./scripts/hybro setup --non-interactive \
+  --provider openai --auth api_key --text-model gpt-5-mini
+```
+
+`--auth oauth` cannot be combined with `--non-interactive`.
+
+## Edit configuration
+
+```bash
+./scripts/hybro config show        # User configuration only, never auth.json
+./scripts/hybro config check       # Validate structure and credentials, no Provider calls
+./scripts/hybro config set backend.log_level '"DEBUG"'
+./scripts/hybro config set frontend.max_message_length 12000
+./scripts/hybro config secret webhook_signing_key
+./scripts/hybro start --recreate
+```
+
+`config set` validates and saves a deployment setting; its path must start with `backend`, `frontend`, or be `image_size`. Provider and model changes go through `setup`. `config secret <name>` reads a service credential from hidden terminal input.
+
+Apply changes with `./scripts/hybro start --recreate`. When a public frontend setting changes, rebuild as well:
+
+```bash
+./scripts/hybro start --build --recreate
+```
+
+## Migrate an existing installation
+
+If a previous release configured `~/.hybro/config.yaml`, and possibly a repository `.env`, convert it once:
+
+```bash
+./scripts/hybro config migrate --from-env .env
+./scripts/hybro config check
+./scripts/hybro start --build --recreate
+```
+
+`migrate`:
+
+- refuses to overwrite an existing `config.json`
+- imports known deployment settings, service secrets, and public frontend values
+- warns about legacy model and route fields it cannot map, and points back to `setup`
+- never deletes the original files
+
+Omit `--from-env` when no deployment values need importing. Installations that only used the old root `.env` have no `config.yaml` to convert, so re-run `./scripts/hybro setup` instead. After either path, normal setup and start use JSON only, even if the old files remain.
+
+## Interactive CLI
+
+Running `./scripts/hybro` with no command opens a terminal UI when a terminal is available:
+
+- **Models** edits the same connection, models, and verification flow as `setup`.
+- **Services** starts, stops, and reloads the stack, and tails container logs. Each long-running service is shown as active or inactive; status refreshes on entry and after actions.
+
+Reload configuration confirms before rebuilding and recreating containers. Compact terminals omit the logo to keep the controls visible.
+
+## Lifecycle commands
+
+See [Installation](/hybro/installation) for the day-to-day `start`, `status`, `logs`, `restart`, `stop`, and `down` commands, and run `./scripts/hybro --help` for the complete reference.

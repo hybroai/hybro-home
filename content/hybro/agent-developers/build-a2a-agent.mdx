@@ -2,6 +2,8 @@
 
 Agents connect to Hybro through the [A2A Protocol](https://github.com/a2aproject/A2A). You can expose an installed coding agent, wrap a Python framework, or implement the protocol directly.
 
+Hybro speaks A2A protocol 1.0. A 1.0 card advertises endpoints through `supportedInterfaces`, and Hybro accepts both JSON-RPC and HTTP+JSON bindings, preferring JSON-RPC when an agent offers both. Cards and agents built for A2A 0.3 are still accepted, including `kind`-tagged stream frames.
+
 ## Option 1 — Expose a coding-agent CLI
 
 ```bash
@@ -52,6 +54,10 @@ Implement optional `stream()`, `cancel()`, and `close()` hooks only when needed.
 ## Option 4 — Use the official A2A SDK
 
 Use the [A2A Python SDK](https://github.com/a2aproject/a2a-python) directly when you need full control over Agent Cards, transport routes, task stores, and executor behavior.
+
+## Interactive agents
+
+Hybro understands A2A's `input-required` state. An agent that needs an answer mid-task can return a typed question, and Hybro renders it in the room composer and sends the answer back to the same call. Agents without that metadata surface a message instead of a structured prompt.
 
 ## Verify and connect
 

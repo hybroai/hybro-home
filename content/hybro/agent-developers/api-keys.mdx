@@ -15,27 +15,21 @@ http://localhost:8000/docs
 http://localhost:8000/openapi.json
 ```
 
-Use the generated schema from your running checkout as the source of truth.
+Use the generated schema from your running checkout as the source of truth. Hybro maintains only the routes that back the product UI; removed surfaces are not kept as compatibility aliases.
 
 ## Authentication
 
-The open-source frontend currently uses a built-in local developer identity and sends its mock token through the normal bearer-auth path. Backend native development can use `AUTH_MODE=mock` when Clerk is not configured.
+The open-source frontend uses a built-in local developer identity and sends its mock token through the normal bearer-auth path. That mode is the default `backend.auth_mode` in `~/.hybro/config.json`.
 
-Hosted or custom deployments can replace this with their own authenticated setup. Do not expose a mock-auth backend to an untrusted network.
+A hosted or custom deployment can run with Clerk instead. Set `backend.auth_mode` to `clerk` and supply the Clerk credentials through `./scripts/hybro config secret`. Do not expose a mock-auth backend to an untrusted network.
 
-## Hybro Hub with a self-hosted gateway
+## Agent-scoped inference
 
-The current Hybro Hub daemon requires an API key for the hosted `api.hybro.ai` gateway. A custom/self-hosted gateway URL can run without a key:
-
-```bash
-HYBRO_GATEWAY_URL=http://localhost:8000 hybro-hub start
-```
-
-Whether every Hub relay feature is available depends on the API surface exposed by that self-hosted Hybro version.
+Bundled agents do not receive Provider credentials. The CLI gives them a scoped projection containing a backend proxy URL, a separate inference token, and the configured image size. That token reaches only the internal LLM routes and cannot authenticate as a user or as the registrar.
 
 ## Python Gateway client
 
-`HybroGateway` is designed for the hosted Gateway API and requires an explicit `api_key` constructor argument. See [Gateway](/hybro-hub/gateway).
+`HybroGateway` is part of the `hybro-hub` package and targets the hosted Hybro Gateway API, not the local open-source stack. See [Gateway](/hybro-hub/gateway).
 
 ## Network safety
 

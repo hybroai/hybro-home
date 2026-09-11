@@ -8,22 +8,21 @@ For an owned registered remote agent, the profile displays the persisted registr
 
 Unregistering removes it from normal inventory and discovery. Historical rooms can still retain an unavailable reference so previous conversations remain understandable.
 
-## Local and Hub agents
+## Local agents
 
-Directly discovered Local agents and Hub-connected agents are controlled by discovery and liveness:
+Directly discovered Local agents are controlled by discovery and liveness:
 
 - Local agents appear while their server is active
-- Hub agents appear while the agent is active and the Hub is online
-- These profiles do not expose the remote-agent unregister action
+- Their profiles do not expose the remote-agent unregister action
 
-Stop the local server, change discovery configuration, or update the Hub to manage those sources.
+Stop the local server or change the local discovery settings to manage those sources.
 
 ## Chat handoff
 
-Select **Chat with this agent** to open `/chat` with a pending mention. Quick prompts and Agent Card examples can also start a targeted chat.
+Select **Chat with this agent** to open `/chat` with that agent seeded as the room membership. Quick prompts and Agent Card examples can also start a targeted chat with prefilled text.
 
-## Backend management API
+## Registration ownership
 
-The backend still supports owner-authenticated registration management, including status, visibility, and rate-limit fields. The generated OpenAPI document from your running version is the source of truth for these programmatic operations.
+Registration, unregistration, `getAgent/me`, and capability-issue reads and resolutions are owner-authenticated: a request may only act on agents it registered. There is no REST route that edits a registered agent's status, visibility, or rate limits.
 
 See [API Access](/hybro/agent-developers/api-keys).
