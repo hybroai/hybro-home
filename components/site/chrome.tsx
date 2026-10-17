@@ -23,26 +23,26 @@ function NavLink({ href, children, className, current }: { href: string; childre
 
 type Page = 'home' | 'a2a-adapter'
 
-/** The site header shared by every page: logo, centered nav, GitHub button. */
+/** The floating site header shared by every page: logo, centered nav, GitHub button. */
 export function SiteHeader({ current }: { current: Page }) {
   // Section links scroll in place on the home page and navigate there from other pages.
   const section = (id: string) => (current === 'home' ? `#${id}` : `/#${id}`)
   const items = [
-    { href: section('agents'), label: 'Agents', hideSmall: true },
+    { href: section('product'), label: 'Product', hideSmall: true },
     { href: section('features'), label: 'Features', hideSmall: true },
-    { href: section('start'), label: 'Get started', hideSmall: true },
-    { href: section('use-cases'), label: 'Use cases', hideSmall: true },
+    { href: section('agents'), label: 'Agents', hideSmall: true },
     { href: '/a2a-adapter', label: 'A2A Adapter', hideSmall: true, current: current === 'a2a-adapter' },
     { href: '/docs', label: 'Docs' },
   ]
   return (
-    <header className="site-header">
-      <div className="container site-header-row">
-        <Link href="/" aria-label="Hybro home" style={{ justifySelf: 'start', display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text)' }}>
-          <HybroMark size={28} />
-          <HybroWordmark size={22} />
+    <div className="site-header">
+      <header className="site-header-row">
+        <Link href="/" aria-label="Hybro home" style={{ justifySelf: 'start', display: 'flex', alignItems: 'center', gap: 9, color: 'var(--text)' }}>
+          <HybroMark size={26} />
+          <HybroWordmark size={20} />
+          <span className="mono hide-sm site-header-badge">Open source</span>
         </Link>
-        <nav aria-label="Primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 14 }}>
+        <nav aria-label="Primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, fontSize: 14 }}>
           {items.map((item) => (
             <NavLink key={item.label} href={item.href} current={item.current} className={`nav-pill${item.hideSmall ? ' hide-sm' : ''}`}>
               {item.label}
@@ -53,8 +53,8 @@ export function SiteHeader({ current }: { current: Page }) {
           <GithubIcon className="github-btn-icon" />
           <span className="hide-sm">GitHub</span>
         </a>
-      </div>
-    </header>
+      </header>
+    </div>
   )
 }
 

@@ -2,7 +2,6 @@
 
 import { Fragment, useRef } from 'react'
 import { useTick } from '../use-tick'
-import { WindowBar } from './window-bar'
 
 // Braille logo frames from the Hybro CLI (llm_gateway/tui_brand.py): [text, color] per row.
 const FRAMES: [string, string][][] = [
@@ -65,20 +64,24 @@ function frame(t: number) {
   }
 }
 
+/** The hybro terminal UI walking its Models and Services pages, as the bottom of a feature card. */
 export function Tui() {
-  const ref = useRef<HTMLElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   const { t } = useTick(ref)
   const view = frame(t)
   const logo = FRAMES[Math.floor(t / 8) % FRAMES.length]
 
   return (
-    <figure ref={ref} style={{ background: '#0F111A', border: '1px solid var(--line-strong)', borderRadius: 12, overflow: 'hidden' }}>
-      <WindowBar title="~ hybro" />
+    <div ref={ref} className="feature-demo" style={{ background: '#0F111A', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderBottom: '1px solid #1F2228', background: '#15171C' }}>
+        {[0, 1, 2].map((i) => <span key={i} style={{ width: 9, height: 9, borderRadius: '50%', background: '#3A3F48' }} />)}
+        <span className="mono" style={{ marginLeft: 6, fontSize: 11.5, color: 'var(--faint)' }}>~ hybro</span>
+      </div>
       <div
         className="mono tui"
         role="img"
         aria-label="The hybro terminal UI: a Models page to pick the provider and model, and a Services page to start, stop and inspect the stack."
-        style={{ height: 400, padding: '14px 10px', lineHeight: 1.3, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}
+        style={{ height: 300, padding: '14px 10px', lineHeight: 1.3, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}
       >
         <div aria-hidden="true" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
           {logo.map(([text, color], i) => <div key={i} style={{ whiteSpace: 'pre', color }}>{text}</div>)}
@@ -120,6 +123,6 @@ export function Tui() {
           <div style={{ color: '#6E7480', whiteSpace: 'pre-wrap' }}>Up/Down  Enter  Tab page  Esc back  Ctrl-C quit  Space pause</div>
         </div>
       </div>
-    </figure>
+    </div>
   )
 }

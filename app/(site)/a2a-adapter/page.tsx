@@ -250,7 +250,7 @@ export default function A2AAdapterPage() {
             Register your agent by its URL, and talk to it in a room, through MCP, or let other agents reach it.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-            <Link href="/#install" className="btn btn-primary">Get started with Hybro</Link>
+            <Link href="/#start" className="btn btn-primary">Get started with Hybro</Link>
             <Link href="/docs/a2a-adapter/quick-start" className="btn btn-outline">Adapter quick start</Link>
           </div>
         </section>
