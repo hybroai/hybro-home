@@ -66,17 +66,11 @@ Deploy to [Vercel](https://vercel.com) or any platform that runs a Next.js serve
 
 ### Moving docs.hybro.ai to hybro.ai/docs
 
-The docs used to live at the root of `docs.hybro.ai`. Point that host at the same deployment and redirect every path to `hybro.ai/docs`, keeping the path:
+The docs used to live at the root of `docs.hybro.ai`. `next.config.mjs` has a host-matched redirect that sends every path there to `hybro.ai/docs`, keeping the path:
 
 ```text
 docs.hybro.ai/            -> https://hybro.ai/docs
 docs.hybro.ai/:path*      -> https://hybro.ai/docs/:path*
 ```
 
-On Vercel, add `docs.hybro.ai` to the project and set it to redirect to `hybro.ai` (308), or add a host-matched redirect in `next.config.mjs`:
-
-```js
-{ source: '/:path*', has: [{ type: 'host', value: 'docs.hybro.ai' }], destination: 'https://hybro.ai/docs/:path*', permanent: true }
-```
-
-The domain-level redirect keeps the path but does not add `/docs`: `docs.hybro.ai/hybro/installation` lands on `hybro.ai/hybro/installation`, which the redirects above send on to `/docs/hybro/installation`, but `docs.hybro.ai/` lands on the home page. Use the host-matched redirect if the docs root should open `/docs`.
+To turn it on, add `docs.hybro.ai` to the same Vercel project as a plain domain (not a domain-level redirect, which would skip the `/docs` prefix).

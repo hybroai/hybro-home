@@ -28,20 +28,15 @@ export default function HomePage() {
       <main className="container" style={{ position: 'relative' }}>
         {/* Hero */}
         <section id="product" style={{ padding: '104px 0 56px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', scrollMarginTop: 40 }}>
-          <div className="mono" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, fontSize: 11.5, letterSpacing: '0.18em', color: 'var(--muted)' }}>
-            <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--cyan)', boxShadow: '0 0 10px var(--cyan)' }} />
-            OPEN SOURCE · APACHE 2.0
-          </div>
           <h1 className="home-h1" style={{ marginBottom: 22 }}>
-            The Interoperability Engine
+            <span className="home-h1-gradient">The Interoperability Engine</span>
             <br />
             for AI Agents
           </h1>
-          <p style={{ marginBottom: 6, maxWidth: 620, fontSize: 18, color: 'var(--muted)' }}>
-            Connect any agent. Let them work together. Stay in charge of what matters.
-          </p>
-          <p style={{ marginBottom: 36, maxWidth: 620, fontSize: 15, color: 'var(--dim)' }}>
-            Self-hosted, A2A-native, and reachable from your AI assistant through MCP.
+          <p style={{ marginBottom: 36, maxWidth: 620, fontSize: 18, color: 'var(--muted)' }}>
+            Connect any agent. Let them work together.
+            <br />
+            Stay in charge of what matters.
           </p>
           <HeroCopy command="npm i -g @hybroai/cli" />
         </section>
@@ -51,9 +46,9 @@ export default function HomePage() {
         {/* Features */}
         <section id="features" style={{ padding: '120px 0 40px', scrollMarginTop: 40 }}>
           <h2 className="home-h2" style={{ marginBottom: 56, textAlign: 'center' }}>
-            Agents that work together.
+            Agents that work together
             <br />
-            People who stay in charge.
+            People who stay in charge
           </h2>
           <Features />
         </section>

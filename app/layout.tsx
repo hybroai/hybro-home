@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import { Head } from 'nextra/components'
 import { Inter, Space_Grotesk } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'], variable: '--font-space-grotesk' })
+// Inter for body text, Space Grotesk for headings and the wordmark, on the site and in the docs.
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-space-grotesk' })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hybro.ai'),
@@ -20,19 +21,20 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <Head
         color={{
-          hue: { light: 192, dark: 180 },
-          saturation: { light: 85, dark: 100 },
-          lightness: { light: 35, dark: 60 },
+          // Dark: the site's cyan, #3DBFCF.
+          hue: { light: 192, dark: 187 },
+          saturation: { light: 85, dark: 60 },
+          lightness: { light: 35, dark: 52 },
         }}
         backgroundColor={{
           light: 'rgb(243,244,246)',
-          dark: 'rgb(15,17,26)',
+          dark: 'rgb(13,15,18)',
         }}
       />
-      <body className={`${inter.className} ${spaceGrotesk.variable}`}>
+      <body className={inter.className}>
         {children}
       </body>
     </html>

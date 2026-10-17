@@ -85,7 +85,7 @@ function ChatDot({ status }: { status: ChatStatus }) {
 
 function SessionDot({ kind }: { kind: SessionKind }) {
   if (kind === 'working') return <span className="spin app-spin app-spin-sm" />
-  if (kind === 'rejected') return <span className="app-dot" style={{ border: '1px dashed #6E7480' }} />
+  if (kind === 'rejected') return <span className="app-dot" style={{ border: '1px dashed #7A808C' }} />
   return <span className="app-dot" style={{ background: kind === 'needs' ? '#E3A23B' : '#4ADE80' }} />
 }
 
@@ -202,7 +202,7 @@ export function AppPreview() {
                     <span style={{ fontSize: 11.5, color: APP.mutedFg, ...ellipsis }}>{`${s.requester} · ${s.agents} · ${s.updated}`}</span>
                   </span>
                   <SessionStatus kind={s.kind} />
-                  <span style={{ color: '#6E7480' }}>›</span>
+                  <span style={{ color: '#7A808C' }}>›</span>
                 </button>
               ))}
             </div>
@@ -222,7 +222,7 @@ export function AppPreview() {
                         {st.label}
                       </span>
                     )}
-                    <span style={{ color: '#6E7480' }}>›</span>
+                    <span style={{ color: '#7A808C' }}>›</span>
                   </button>
                 )
               })}
@@ -257,7 +257,7 @@ export function AppPreview() {
   } else if (view === 'sessions') {
     const selected = sessionIndex >= 0 ? sessions[sessionIndex] : null
     body = (
-      <div style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="app-pane" style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {!selected ? (
           <>
             <div style={{ fontSize: 20, fontWeight: 600 }}>Sessions</div>
@@ -277,11 +277,11 @@ export function AppPreview() {
                   <span style={{ fontWeight: 600, ...ellipsis }}>{s.name}</span>
                   <SessionStatus kind={s.kind} />
                   <span style={{ color: '#A8AEB8', ...ellipsis }}>{s.requester}</span>
-                  <span className="mono" style={{ fontSize: 12, color: '#6E7480' }}>{s.updated}</span>
+                  <span className="mono" style={{ fontSize: 12, color: '#7A808C' }}>{s.updated}</span>
                 </button>
               ))}
             </div>
-            <div style={{ fontSize: 12, color: '#6E7480' }}>Click a session to open it.</div>
+            <div style={{ fontSize: 12, color: '#7A808C' }}>Click a session to open it.</div>
           </>
         ) : (
           <>
@@ -296,7 +296,7 @@ export function AppPreview() {
                     {e.img ? <Img src={e.img} size={26} radius={13} /> : <span className="app-you">You</span>}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       <div>
-                        <b>{e.who}</b> <span style={{ color: e.actionColor }}>{e.action}</span> <span style={{ color: '#6E7480' }}>· {e.time}</span>
+                        <b>{e.who}</b> <span style={{ color: e.actionColor }}>{e.action}</span> <span style={{ color: '#7A808C' }}>· {e.time}</span>
                       </div>
                       <div style={{ color: '#A8AEB8' }}>{e.body}</div>
                     </div>
@@ -313,9 +313,9 @@ export function AppPreview() {
               </div>
               <div className="app-session-side">
                 <div style={{ fontWeight: 600, fontSize: 13 }}>Details</div>
-                <div><div style={{ color: '#6E7480' }}>Status</div><div style={{ color: SESSION_STATUS[selected.kind].color }}>{SESSION_STATUS[selected.kind].label}</div></div>
-                <div><div style={{ color: '#6E7480' }}>Requester</div><div>{selected.requester}</div></div>
-                <div><div style={{ color: '#6E7480' }}>Agents</div><div>{selected.agents}</div></div>
+                <div><div style={{ color: '#7A808C' }}>Status</div><div style={{ color: SESSION_STATUS[selected.kind].color }}>{SESSION_STATUS[selected.kind].label}</div></div>
+                <div><div style={{ color: '#7A808C' }}>Requester</div><div>{selected.requester}</div></div>
+                <div><div style={{ color: '#7A808C' }}>Agents</div><div>{selected.agents}</div></div>
               </div>
             </div>
           </>
@@ -445,7 +445,7 @@ function ChatView({
 
   return (
     <>
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '18px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="app-pane" style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '18px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ background: '#1E2127', border: '1px solid #2A2E35', borderRadius: 12, padding: '10px 14px' }}>
           {chat.agents.map((a) => (
             <span key={a.name} style={{ marginRight: 6 }}><Mention name={a.name} img={a.img} /></span>
@@ -455,7 +455,7 @@ function ChatView({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
           <span className="app-dot" style={{ background: st.color }} />
           <span style={{ color: '#E3E6EB' }}>{st.state}</span>
-          <span className="mono" style={{ color: '#6E7480' }}>{chat.time}</span>
+          <span className="mono" style={{ color: '#7A808C' }}>{chat.time}</span>
         </div>
         {chat.answer && <div style={{ color: '#E3E6EB', lineHeight: 1.65, whiteSpace: 'pre-line' }}>{chat.answer}</div>}
         {hitl && (
@@ -481,7 +481,7 @@ function ChatView({
                   <span style={{ flex: 1, fontWeight: 500 }}>{r.name}</span>
                   <span style={{ fontSize: 12, color: r.color }}>{r.label}</span>
                 </div>
-                <div style={{ paddingLeft: 34, fontSize: 12, color: '#6E7480' }}>└ {r.task}</div>
+                <div style={{ paddingLeft: 34, fontSize: 12, color: '#7A808C' }}>└ {r.task}</div>
               </div>
             ))}
         </div>
@@ -555,7 +555,7 @@ function NetworkView({
             statusColor: APP.online,
           }
     panel = (
-      <div className="hide-sm" style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', ...cardBox }}>
+      <div className="app-net-panel" style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', ...cardBox }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 14, borderBottom: `1px solid ${APP.border}` }}>
           {isAgent ? (
             <Img src={(selected.item as { img: string }).img} size={36} radius={8} style={{ background: APP.control, objectFit: 'contain' }} />
@@ -600,7 +600,7 @@ function NetworkView({
             </button>
           ))}
         </div>
-        <div className="hide-sm" style={{ flex: 1, minWidth: 160, alignItems: 'center', gap: 8, height: 34, padding: '0 10px', borderRadius: 9, border: '1px solid hsl(220 12% 20%)', color: '#6E7480', fontSize: 13, display: 'flex' }}>
+        <div className="hide-sm" style={{ flex: 1, minWidth: 160, alignItems: 'center', gap: 8, height: 34, padding: '0 10px', borderRadius: 9, border: '1px solid hsl(220 12% 20%)', color: '#7A808C', fontSize: 13, display: 'flex' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
           Find an agent, skill, or subnet
         </div>
@@ -609,7 +609,7 @@ function NetworkView({
       </div>
 
       {mode === 'topology' ? (
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14 }}>
+        <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', gap: 14 }}>
           <div style={{ position: 'relative', flex: 1, minWidth: 0, borderRadius: 12, border: `1px solid ${APP.border}`, background: APP.canvas, overflow: 'hidden' }}>
             <svg viewBox={`0 0 ${GRAPH_W} ${GRAPH_H}`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} role="img" aria-label="Agents and subnets. Subnets are teal, online agents grey, offline agents dashed. Select one to see its details.">
               {GRAPH.links.map(([i, j]) => {
@@ -638,11 +638,12 @@ function NetworkView({
                         setNode(node === i ? -1 : i)
                       }
                     }}
+                    className="app-node"
                     style={{ cursor: 'pointer', outline: 'none' }}
                     opacity={selected && !related.has(i) ? 0.25 : 1}
                   >
                     <circle cx={n.x} cy={n.y} r="16" fill="transparent" />
-                    <circle cx={n.x} cy={n.y} r="10" fill="none" stroke={APP.primary} strokeWidth="2" opacity={node === i ? 1 : 0} />
+                    <circle className="app-node-ring" cx={n.x} cy={n.y} r="10" fill="none" stroke={APP.primary} strokeWidth="2" opacity={node === i ? 1 : 0} />
                     <circle
                       cx={n.x} cy={n.y} r="6"
                       fill={n.kind === 'subnet' ? APP.primary : offline ? 'none' : APP.agent}
@@ -701,7 +702,7 @@ function NetworkView({
 function ConnectView({ tab, setTab }: { tab: McpTab; setTab: (tab: McpTab) => void }) {
   const { copied, copy } = useCopy()
   return (
-    <div style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="app-pane" style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div>
         <div style={{ fontSize: 20, fontWeight: 600 }}>Connect</div>
         <div style={{ color: '#8C929C' }}>Let your AI assistant reach every agent on this Hybro through MCP.</div>

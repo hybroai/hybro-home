@@ -10,6 +10,13 @@ const withNextra = nextra({
 const nextConfig = {
   async redirects() {
     return [
+      // The docs used to live at the root of docs.hybro.ai.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'docs.hybro.ai' }],
+        destination: 'https://hybro.ai/docs/:path*',
+        permanent: true,
+      },
       {
         source: '/hybro-platform/:path*',
         destination: '/docs/hybro/:path*',

@@ -25,7 +25,7 @@ const STATUS: Record<Kind, { label: string; color: string }> = {
 
 function StatusDot({ kind }: { kind: Kind }) {
   if (kind === 'working') return <span className="spin app-spin app-spin-sm" />
-  if (kind === 'rejected') return <span className="app-dot" style={{ border: '1px dashed #6E7480' }} />
+  if (kind === 'rejected') return <span className="app-dot" style={{ border: '1px dashed #7A808C' }} />
   return <span className="app-dot" style={{ background: kind === 'needs' ? '#E3A23B' : '#4ADE80' }} />
 }
 

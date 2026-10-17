@@ -1,28 +1,35 @@
 @import "tailwindcss";
 
-/* ── Match hybro-frontend Inter font ── */
+/* ── Body text in Inter (loaded in app/layout.tsx), matching hybro-frontend ── */
 :root {
   --x-font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* ── Headings in Space Grotesk, as on the home page ── */
+article :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* ── Sidebar nav text colors: match hybro-frontend sidebar-foreground ── */
-aside button, aside a {
+:is(.nextra-sidebar, .nextra-mobile-nav) button, :is(.nextra-sidebar, .nextra-mobile-nav) a {
   color: hsl(220 18% 25%) !important;  /* light: sidebar-foreground */
 }
-.dark aside button, .dark aside a {
+.dark :is(.nextra-sidebar, .nextra-mobile-nav) button, .dark :is(.nextra-sidebar, .nextra-mobile-nav) a {
   color: hsl(210 30% 85%) !important;  /* dark: sidebar-foreground */
 }
 
 /* ── Active page link: bg-black/15 + sidebar-accent-foreground + font-medium ── */
-/* Mirrors hybro-frontend: bg-black/15 dark:bg-white/15 font-medium text-sidebar-accent-foreground */
-aside a[aria-current="page"] {
+/* Nextra 4 marks the active link with x:bg-primary-100, not aria-current. */
+:is(.nextra-sidebar, .nextra-mobile-nav) a[aria-current="page"],
+:is(.nextra-sidebar, .nextra-mobile-nav) a.x\:bg-primary-100 {
   background-color: rgb(0 0 0 / 0.15) !important;
   color: hsl(192 85% 30%) !important;  /* light: sidebar-accent-foreground */
   font-weight: 500 !important;
 }
-.dark aside a[aria-current="page"] {
-  background-color: rgb(255 255 255 / 0.15) !important;
-  color: hsl(0 0% 98%) !important;     /* dark: sidebar-accent-foreground */
+.dark :is(.nextra-sidebar, .nextra-mobile-nav) a[aria-current="page"],
+.dark :is(.nextra-sidebar, .nextra-mobile-nav) a.x\:bg-primary-100 {
+  background-color: rgb(61 191 207 / 0.12) !important;
+  color: #7ad6e1 !important;
   font-weight: 500 !important;
 }
 
@@ -30,11 +37,11 @@ aside a[aria-current="page"] {
 /* Nextra structure: folder-li > [button | div.collapse > ul > child-li > a[aria-current]]
    Fixed depth selector > * > * > li > [aria-current] matches ONLY the direct parent folder.
    Mirrors hybro-frontend: bg-black/15 dark:bg-white/15 font-medium */
-aside li:has(> * > * > li > [aria-current="page"]) > button {
+:is(.nextra-sidebar, .nextra-mobile-nav) li:has(> * > * > li > [aria-current="page"]) > button {
   background-color: rgb(0 0 0 / 0.15) !important;
   font-weight: 500 !important;
 }
-.dark aside li:has(> * > * > li > [aria-current="page"]) > button {
+.dark :is(.nextra-sidebar, .nextra-mobile-nav) li:has(> * > * > li > [aria-current="page"]) > button {
   background-color: rgb(255 255 255 / 0.15) !important;
   font-weight: 500 !important;
 }
@@ -62,7 +69,7 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
 
 /* ── Chat Widget (uses Nextra theme variables) ── */
 
-/* "Ask the docs" pill, in the site's cyan (same as the home page buttons). */
+/* "Ask the docs" pill: the theme color in light mode, the site's cyan in dark mode. */
 .nextra-chat-fab {
   position: fixed;
   bottom: 1.5rem;
@@ -70,8 +77,8 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
   min-height: 3rem;
   padding: 0 1.125rem 0 0.875rem;
   border-radius: 999px;
-  background: #3dbfcf;
-  color: #0d0f12;
+  background: var(--x-color-primary-600);
+  color: white;
   border: none;
   cursor: pointer;
   display: flex;
@@ -84,8 +91,15 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
   transition: background 0.2s, transform 0.2s;
 }
 .nextra-chat-fab:hover {
-  background: #7ad6e1;
+  background: var(--x-color-primary-700);
   transform: translateY(-1px);
+}
+.dark .nextra-chat-fab {
+  background: #3dbfcf;
+  color: #0a0b0d;
+}
+.dark .nextra-chat-fab:hover {
+  background: #7ad6e1;
 }
 
 /* Footer: same centered layout as the home page. */
@@ -350,8 +364,8 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
   font-weight: 500 !important;
 }
 .dark .nextra-scrollbar a.x\:text-primary-600 {
-  background-color: rgb(255 255 255 / 0.15) !important;
+  background-color: rgb(61 191 207 / 0.12) !important;
   border-radius: 0.25rem;
-  color: hsl(0 0% 98%) !important;     /* dark: sidebar-accent-foreground */
+  color: #7ad6e1 !important;
   font-weight: 500 !important;
 }

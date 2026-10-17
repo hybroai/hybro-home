@@ -1,20 +1,21 @@
 /* Styles for the public site pages (/ and /a2a-adapter). Scoped under .site so
    they do not leak into the docs after a client-side navigation. */
 
-body {
+/* Only while a site page is mounted, so the docs theme keeps its own body color. */
+body:has(.site) {
   margin: 0;
-  background: #0d0f12;
+  background: #0a0b0d;
 }
 
 .site {
-  --bg: #0d0f12;
+  --bg: #0a0b0d;
   --panel: #121418;
   --line: #24272e;
   --line-strong: #2a2e35;
   --text: #e3e6eb;
   --muted: #a8aeb8;
   --faint: #8c929c;
-  --dim: #6e7480;
+  --dim: #7a808c; /* 4.5:1 on --bg and --panel */
   --cyan: #3dbfcf;
   --purple: #b385f0;
   --amber: #e3a23b;
@@ -24,11 +25,12 @@ body {
   --hybro-bro: hsl(270 80% 70%);
 
   min-height: 100vh;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden would make .site the sticky header's scroll container. */
+  overflow-x: clip;
   background-color: var(--bg);
   background-repeat: no-repeat;
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -122,6 +124,16 @@ body {
 .site :focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
+}
+/* SVG groups don't draw outlines reliably, so a focused graph node shows its ring. */
+.site .app-node:focus-visible .app-node-ring {
+  opacity: 1;
+}
+
+.site h1,
+.site h2,
+.site h3 {
+  font-family: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 .site h1,
@@ -480,7 +492,9 @@ body {
   .site .h1.h1-compact {
     font-size: 40px;
   }
-  .site .h2,
+  .site .h2 {
+    font-size: 30px;
+  }
   .site .hide-sm {
     display: none !important;
   }
@@ -521,9 +535,6 @@ body {
 
 /* ---------- Home page ---------- */
 
-.site.home {
-  --bg: #0a0b0d;
-}
 .site .home-mist {
   position: absolute;
   left: 0;
@@ -542,6 +553,28 @@ body {
   letter-spacing: -0.025em;
   font-weight: 500;
   color: #f2f4f7;
+}
+/* Blue to purple, drifting slowly back and forth. */
+.site .home-h1-gradient {
+  background-image: linear-gradient(90deg, #4f8ff0, #8b7cf6, #b385f0, #4f8ff0);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: home-h1-gradient 12s ease-in-out infinite alternate;
+}
+@keyframes home-h1-gradient {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site .home-h1-gradient {
+    animation: none;
+  }
 }
 .site .home-h2 {
   font-size: 44px;
@@ -575,18 +608,13 @@ body {
 .site .hero-copy {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-height: 46px;
-  padding: 0 16px;
+  padding: 0 6px 0 16px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(10, 11, 13, 0.5);
   color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
-.site .hero-copy:hover {
-  border-color: rgba(255, 255, 255, 0.28);
 }
 .site .req-chip {
   display: inline-flex;
@@ -1068,6 +1096,25 @@ body {
   }
   .site .app-overview-cols {
     flex: none;
+  }
+  /* Panes with more content than the fixed-height window scroll instead of clipping. */
+  .site .app-pane {
+    overflow-y: auto !important;
+  }
+  .site .app-pane > * {
+    flex-shrink: 0;
+  }
+  /* The node details float over the graph instead of sitting beside it. */
+  .site .app-net-panel {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto !important;
+    max-height: 70%;
+    overflow-y: auto !important;
+    z-index: 2;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   }
   .site .app-overview-cols,
   .site .app-session-detail {

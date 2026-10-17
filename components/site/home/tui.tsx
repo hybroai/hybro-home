@@ -37,7 +37,7 @@ const SERVICES = [['backend', 'frontend', 'mongo', 'redis', 'mcp'], ['weather-ag
 const SELECTED = { background: '#33FFFF', color: '#0F111A', whiteSpace: 'pre-wrap' } as const
 const PLAIN = { color: '#C9CDD4', whiteSpace: 'pre-wrap' } as const
 const ACTIVE_TAB = { fontWeight: 700, textDecoration: 'underline', color: '#E3E6EB' } as const
-const IDLE_TAB = { color: '#6E7480' } as const
+const IDLE_TAB = { color: '#7A808C' } as const
 const blank = <div style={{ height: '1.3em' }} />
 
 // One 172-tick loop: walk the Models page, then the Services page.
@@ -118,9 +118,9 @@ export function Tui() {
             </Fragment>
           ))}
           {blank}
-          {view.notes.filter(Boolean).map((note) => <div key={note} style={{ color: '#6E7480' }}>{note}</div>)}
+          {view.notes.filter(Boolean).map((note) => <div key={note} style={{ color: '#7A808C' }}>{note}</div>)}
           {blank}
-          <div style={{ color: '#6E7480', whiteSpace: 'pre-wrap' }}>Up/Down  Enter  Tab page  Esc back  Ctrl-C quit  Space pause</div>
+          <div style={{ color: '#7A808C', whiteSpace: 'pre-wrap' }}>Up/Down  Enter  Tab page  Esc back  Ctrl-C quit  Space pause</div>
         </div>
       </div>
     </div>

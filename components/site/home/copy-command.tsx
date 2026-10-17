@@ -2,17 +2,19 @@
 
 import { useCopy } from '../use-tick'
 
-/** The hero's one-line install command; the whole button copies it. */
+/** The hero's one-line install command, with the same copy button as the command cards. */
 export function HeroCopy({ command }: { command: string }) {
   const { copied, copy } = useCopy()
   return (
-    <button type="button" onClick={() => copy(command)} className="hero-copy" aria-label={`Copy: ${command}`}>
-      <span className="mono" style={{ fontSize: 14 }}>
+    <div className="hero-copy">
+      <code className="mono" style={{ fontSize: 14 }}>
         <span style={{ color: 'var(--cyan)' }}>$ </span>
         {command}
-      </span>
-      <span aria-live="polite" style={{ fontSize: 12.5, color: 'var(--faint)' }}>{copied ? 'Copied' : 'Copy'}</span>
-    </button>
+      </code>
+      <button type="button" onClick={() => copy(command)} className="copy-btn copy-btn-accent" aria-label="Copy the install command">
+        <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+      </button>
+    </div>
   )
 }
 
