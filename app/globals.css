@@ -62,33 +62,49 @@ aside li:has(> * > * > li > [aria-current="page"]) > button {
 
 /* ── Chat Widget (uses Nextra theme variables) ── */
 
+/* "Ask the docs" pill, in the site's cyan (same as the home page buttons). */
 .nextra-chat-fab {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 50%;
-  background: var(--x-color-primary-600);
-  color: white;
+  min-height: 3rem;
+  padding: 0 1.125rem 0 0.875rem;
+  border-radius: 999px;
+  background: #3dbfcf;
+  color: #0d0f12;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   z-index: 50;
   transition: background 0.2s, transform 0.2s;
 }
 .nextra-chat-fab:hover {
-  background: var(--x-color-primary-700);
-  transform: scale(1.05);
+  background: #7ad6e1;
+  transform: translateY(-1px);
 }
-.dark .nextra-chat-fab {
-  background: hsl(192 55% 20%);
+
+/* Footer: same centered layout as the home page. */
+.hybro-docs-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  text-align: center;
+  font-size: 0.875rem;
 }
-.dark .nextra-chat-fab:hover {
-  background: hsl(192 55% 26%);
+.hybro-docs-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+}
+.hybro-docs-footer-links a:hover {
+  text-decoration: underline;
 }
 
 .nextra-chat-panel {

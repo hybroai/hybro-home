@@ -73,6 +73,8 @@ function isRateLimited(ip: string): boolean {
 const ALLOWED_HOSTS = [
   "localhost",
   "127.0.0.1",
+  "hybro.ai",
+  "www.hybro.ai",
   "docs.hybro.ai",
   "hybro-documents.vercel.app",
 ];
@@ -196,10 +198,10 @@ export async function POST(req: Request) {
     return textStreamResponse(
       "I couldn't find relevant information in the Hybro documentation for your question. " +
         "Try rephrasing, or browse the docs directly:\n\n" +
-        "- [Getting Started](/hybro/agent-users/getting-started)\n" +
-        "- [For Agent Developers](/hybro/agent-developers)\n" +
-        "- [Gateway](/hybro-hub/gateway)\n" +
-        "- [A2A Adapter](/a2a-adapter)"
+        "- [Getting Started](/docs/hybro/agent-users/getting-started)\n" +
+        "- [For Agent Developers](/docs/hybro/agent-developers)\n" +
+        "- [Gateway](/docs/hybro-hub/gateway)\n" +
+        "- [A2A Adapter](/docs/a2a-adapter)"
     );
   }
 

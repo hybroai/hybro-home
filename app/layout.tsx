@@ -1,32 +1,20 @@
-import { Layout, Navbar } from 'nextra-theme-docs'
+import type { Metadata } from 'next'
 import { Head } from 'nextra/components'
-import { getPageMap } from 'nextra/page-map'
 import { Inter, Space_Grotesk } from 'next/font/google'
-import { ChatWidget } from '../components/chat-widget'
-import { Logo } from '../components/logo'
-import 'nextra-theme-docs/style.css'
-import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'], variable: '--font-space-grotesk' })
 
-export const metadata = {
-  title: { default: 'HYBRO AI Documentation', template: '%s | HYBRO AI Docs' },
-  description: 'Documentation for HYBRO AI products',
+export const metadata: Metadata = {
+  metadataBase: new URL('https://hybro.ai'),
+  title: { default: 'Hybro: The Interoperability Engine for AI Agents', template: '%s | Hybro' },
+  description: 'Connect any agent. Let them work together. Stay in charge of what matters.',
   icons: {
     icon: '/favicon.svg',
   }
 }
 
-const navbar = (
-  <Navbar
-    logoLink="https://hybro.ai"
-    logo={<Logo />}
-  />
-)
-
-
-export default async function RootLayout({
+export default function RootLayout({
   children
 }: {
   children: React.ReactNode
@@ -45,19 +33,7 @@ export default async function RootLayout({
         }}
       />
       <body className={`${inter.className} ${spaceGrotesk.variable}`}>
-        <Layout
-          navbar={navbar}
-          pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/hybroai/hybro-documents"
-          editLink={null}
-          feedback={{
-            content: 'Question? Give us feedback',
-            labels: 'feedback'
-          }}
-        >
-          {children}
-        </Layout>
-        <ChatWidget />
+        {children}
       </body>
     </html>
   )

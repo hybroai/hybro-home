@@ -103,11 +103,11 @@ export function ChatWidget() {
       <button
         onClick={() => setIsOpen(true)}
         className="nextra-chat-fab"
-        aria-label="Open AI Assistant"
       >
         <svg
-          width="24"
-          height="24"
+          aria-hidden="true"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -117,6 +117,7 @@ export function ChatWidget() {
         >
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
+        Ask the docs
       </button>
     );
   }
@@ -125,8 +126,10 @@ export function ChatWidget() {
     <div className="nextra-chat-panel">
       {/* Header */}
       <div className="nextra-chat-header">
-        <span style={{ fontWeight: 600, fontSize: "0.875rem" }}>
-          Hybro AI Assistant
+        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 600, fontSize: "0.875rem" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- small static raster mark */}
+          <img src="/logo-mark.png" alt="" width={20} height={20} style={{ borderRadius: 5 }} />
+          Ask the docs
         </span>
         <button
           onClick={() => setIsOpen(false)}

@@ -45,13 +45,16 @@ function stripMdxSyntax(content) {
   );
 }
 
+// Docs are served under this prefix (nextra contentDirBasePath in next.config.mjs).
+const DOCS_BASE_PATH = "/docs";
+
 function filePathToUrlPath(filePath) {
   let rel = relative(CONTENT_DIR, filePath)
     .replace(/\.mdx$/, "")
     .replace(/\\/g, "/");
-  if (rel === "index") return "/";
+  if (rel === "index") return DOCS_BASE_PATH;
   if (rel.endsWith("/index")) rel = rel.replace(/\/index$/, "");
-  return "/" + rel;
+  return DOCS_BASE_PATH + "/" + rel;
 }
 
 function chunkText(text, filePath) {
