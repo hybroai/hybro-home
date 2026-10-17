@@ -4,6 +4,8 @@ Hybro Hub is a lightweight background daemon that connects A2A agents on your ma
 
 The same package also includes `HybroGateway`, an async Python client for discovering and calling cloud agents programmatically.
 
+> Hybro Hub and `HybroGateway` work only with the hosted service at [hybro.ai](https://hybro.ai). The self-hosted, open-source [Hybro](/docs/hybro) platform does not use the Hub: it discovers agents on your machine itself.
+
 ## Key properties
 
 | Capability | Description |
@@ -24,7 +26,7 @@ hybro-hub start --api-key hybro_your_key_here
 hybro-hub agent start ollama --model llama3.2
 ```
 
-Then open [hybro.ai](https://hybro.ai) and use the local agent alongside cloud agents.
+`hybro-hub agent start` stays in the foreground, so run it in a separate terminal. The running daemon picks up the new agent on its next re-sync (within about two minutes), or right away after `hybro-hub restart`. Then open [hybro.ai](https://hybro.ai) and use the local agent alongside cloud agents.
 
 The daemon runs in the background by default. Use:
 
@@ -33,6 +35,8 @@ hybro-hub status
 hybro-hub agents
 hybro-hub stop
 ```
+
+`hybro-hub agents` runs its own local scan, so it works even when the daemon is stopped.
 
 ## One package, two uses
 

@@ -21,6 +21,8 @@ serve_agent(adapter, port=9012)
 
 For the common case, use `a2a-adapter pi --port 9012`.
 
+Other options: `pi_command` (an argument list, default `["pi"]`), `cli_args`, `session_id` (default `a2a-pi-agent`), `session_dir` (default `<working_dir>/.a2a-adapter/pi/sessions`), `model_provider`, `timeout` (600 s), `startup_timeout` (30 s), `cancel_grace_timeout` (10 s), and `env_vars`. Pi starts on the first request and handles one turn at a time. With `enforce_single_context=True` (the default), the adapter binds to the first A2A `context_id` and rejects other contexts.
+
 ### ClaudeCodeAdapter
 
 Runs Claude Code in a project directory with streaming and multi-turn session support.
@@ -34,6 +36,8 @@ adapter = ClaudeCodeAdapter(
 )
 serve_agent(adapter, port=9010)
 ```
+
+Options: `claude_path` (default `claude`), `cli_args`, `timeout` (600 s), `env_vars`, `session_store_path` (default `<working_dir>/.a2a-adapter/claude-code/sessions.json`), and `skip_permissions` (default from `A2A_CLAUDE_SKIP_PERMISSIONS`). The adapter disables Claude's `AskUserQuestion` tool because no user is attached. The default Agent Card name is `Claude Code`.
 
 ### CodexAdapter
 
@@ -49,6 +53,8 @@ adapter = CodexAdapter(
 serve_agent(adapter, port=9011)
 ```
 
+Options: `codex_path` (default `codex`), `cli_args`, `timeout`, `env_vars`, `session_store_path` (default `<working_dir>/.a2a-adapter/codex/sessions.json`), `bypass_approvals` (default from `A2A_CODEX_BYPASS_APPROVALS`), and `skip_git_check` (default from `A2A_CODEX_SKIP_GIT_CHECK`). The default Agent Card name is `Codex`.
+
 ### OpenClawAdapter
 
 Runs OpenClaw as a subprocess and supports session IDs, agent IDs, thinking levels, cancellation, custom environment variables, and a working directory.
@@ -63,6 +69,8 @@ adapter = OpenClawAdapter(
 )
 serve_agent(adapter, port=9008)
 ```
+
+`thinking` is one of `off`, `minimal`, `low`, `medium`, `high`, or `xhigh` (default `low`). Other options: `session_id` (generated if omitted; each A2A context maps to `<session_id>-<context>`), `agent_id`, `openclaw_path`, `cli_args`, `timeout` (600 s), and `env_vars`. The default Agent Card name is `OpenClaw`.
 
 ## Local and hosted runtimes
 
@@ -81,7 +89,7 @@ adapter = HermesAdapter(
 serve_agent(adapter, port=9010)
 ```
 
-A Hermes Agent checkout must be available on `PYTHONPATH`; run `hermes setup` first.
+A Hermes Agent checkout must be available on `PYTHONPATH`; run `hermes setup` first. When `model` is omitted, Hermes uses its configured default. `provider` selects the Hermes runtime provider; the Agent Card provider is `agent_provider`. `max_workers` (default 4) sizes the thread pool.
 
 ### OllamaAdapter
 
@@ -99,7 +107,7 @@ adapter = OllamaAdapter(client=client, name="Local LLM")
 serve_agent(adapter, port=10010)
 ```
 
-`OllamaAdapter(model="llama3.2")` remains available as a convenience form.
+`OllamaAdapter(model="llama3.2")` remains available as a convenience form. `OllamaClient` also accepts `temperature`, `timeout` (120 s), and `keep_alive`. Each request sends the system prompt and the current message only; earlier turns are not carried over.
 
 ### N8nAdapter
 
@@ -116,7 +124,11 @@ adapter = N8nAdapter(
 serve_agent(adapter, port=9000)
 ```
 
+File and image payloads need `multimodal_mode=True`, with `file_field`, `image_field`, `encode_files_base64`, `supported_input_types`, and `supported_output_types`. Other options: `timeout` (30 s), `headers`, `max_retries` (2), `backoff` (0.25 s), `payload_template`, `parse_json_input`, `input_mapper`, and `default_inputs`.
+
 ## Python frameworks
+
+LangChain, LangGraph, and CrewAI adapters all accept `timeout` (60 s for LangChain and LangGraph, 300 s for CrewAI), `parse_json_input` (a JSON object message is passed through as the input dict), `input_mapper(user_input, context_id)`, and `default_inputs`.
 
 ### LangChainAdapter
 
@@ -133,7 +145,7 @@ adapter = LangChainAdapter(
 
 ### LangGraphAdapter
 
-Wraps a compiled LangGraph graph and can stream graph output.
+Wraps a compiled LangGraph graph and can stream graph output. It also accepts `state_key`. With `input_key="messages"`, the text is wrapped in a `HumanMessage`.
 
 ```python
 adapter = LangGraphAdapter(
@@ -169,7 +181,7 @@ async def echo(inputs):
 adapter = CallableAdapter(func=echo, streaming=False, name="Echo")
 ```
 
-Set `streaming=True` when `func` is an async generator.
+`func` receives `{"message": ..., "context_id": ...}`. A returned dict is reduced to its `response`, `output`, `result`, `answer`, `text`, or `message` key. Set `streaming=True` when `func` is an async generator.
 
 ### BaseA2AAdapter
 
@@ -191,4 +203,4 @@ class MyAdapter(BaseA2AAdapter):
 serve_agent(MyAdapter(), port=9000)
 ```
 
-Implement `stream()`, `cancel()`, and `close()` only when the underlying runtime needs them.
+Implement `stream()`, `cancel()`, and `close()` only when the underlying runtime needs them. Adapters are also async context managers: `async with` calls `close()`.

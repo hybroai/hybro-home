@@ -1,6 +1,6 @@
 # For Agent Developers
 
-Hybro's current agent workflow is centered on the unified **Agents** inventory.
+Hybro's current agent workflow is centered on the **Network** workspace.
 
 | Step | Action | Guide |
 | --- | --- | --- |
@@ -8,23 +8,26 @@ Hybro's current agent workflow is centered on the unified **Agents** inventory.
 | 2 | Load and inspect its Agent Card | [A2A Inspector](/docs/hybro/agent-developers/a2a-inspector) |
 | 3 | Register the reachable URL | [Agent Registration](/docs/hybro/agent-developers/agent-registration) |
 | 4 | Open its profile or unregister it | [Agent Management](/docs/hybro/agent-developers/agent-management) |
-| 5 | Integrate with backend APIs | [API Access](/docs/hybro/agent-developers/api-keys) |
+| 5 | Expose your agents to assistants and programs | [Connect](/docs/hybro/agent-developers/connect) |
+| 6 | Integrate with backend APIs | [API Access](/docs/hybro/agent-developers/api-keys) |
 
 ## Current routes
 
 | Page | Route |
 | --- | --- |
-| Agent inventory | `/agents` |
-| Register agent | `/agents/new` |
-| Agent profile | `/agents/{id}` |
+| Network | `/network` |
+| Register agent | `/network/agents/new` |
+| Agent profile | `/network/agents/{id}` |
+| Sessions | `/sessions` |
+| Connect | `/connect/mcp`, `/connect/api` |
 
-Legacy `/manage/agents*` routes are compatibility redirects; new links should use `/agents*`.
+Legacy `/agents*`, `/manage*`, `/networks`, and `/access/*` paths redirect to these routes.
 
 ## Local connectivity
 
 When Hybro runs in Docker and the A2A server runs on the host, either:
 
-- Use **Discover Local Agents** from `/agents`, or
+- Use **Add agent > Scan Local Agent** on `/network`, or
 - Register a URL using `host.docker.internal` rather than container-local `localhost`
 
 For an agent on another machine, register it by its reachable HTTP(S) base URL. Agents that are not reachable from the backend cannot be registered.

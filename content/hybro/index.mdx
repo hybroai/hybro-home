@@ -1,28 +1,33 @@
 # Hybro
 
-[Hybro](https://github.com/hybroai/hybro) is an open-source hybrid multi-agent platform for connecting local and remote A2A agents, running persistent agent rooms, and coordinating larger tasks.
+[Hybro](https://github.com/hybroai/hybro) is an open-source agent interoperability platform. It connects local and remote A2A agents, runs persistent multi-agent chats, lets other agents and assistants reach yours through sessions, and keeps a person in charge of what matters.
 
 ## What Hybro includes
 
 | Capability | Description |
 | --- | --- |
-| **Multi-agent rooms** | Persistent chat, files, quoting, cancellation, and human-in-the-loop replies |
+| **Overview** | Home dashboard with Sessions, Chats, Agents, and MCP gateway tiles, recent activity, a mini network map, and the most-called agents |
+| **Multi-agent chats** | Persistent rooms with files, quoting, cancellation, and human-in-the-loop replies |
 | **Execution modes** | Fast direct execution or Ultimate supervisor orchestration |
-| **Unified agent inventory** | Registered remote agents and directly discovered host agents |
+| **Network workspace** | Topology and structure views of registered remote agents, local agents discovered on the host, and saved subnets |
+| **Sessions** | External clients (MCP or REST) open sessions with your agents; you approve or reject agent questions in the app |
+| **MCP gateway** | Streamable HTTP MCP server at `http://127.0.0.1:8001/mcp` with agent-network and session tools |
 | **A2A registration** | Load, inspect, validate, and register an A2A Agent Card from one flow |
 | **Durable runtime** | MongoDB persistence, Redis coordination, SSE delivery, and recovery after reloads |
-| **Local-first stack** | Next.js frontend, FastAPI backend, MongoDB, Redis, and bundled example agents |
-| **CLI-managed configuration** | Configure models and credentials once, then start backend, frontend, and Agents without maintaining environment files |
+| **Local-first stack** | Next.js frontend, FastAPI backend, MongoDB, Redis, the MCP adapter, and bundled example agents |
+| **CLI-managed configuration** | Configure models and credentials once, then start every service without maintaining environment files |
 
 The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup. Hybro speaks A2A protocol 1.0 and still accepts agents and cards built for A2A 0.3.
 
 ## Quick start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
+npm install -g @hybroai/cli
+hybro setup
+hybro start
 ```
 
-Or start from a clone:
+Or build from a source checkout:
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
@@ -31,13 +36,14 @@ cd hybro
 ./scripts/hybro start --build
 ```
 
-`setup` chooses a Provider and models and saves them to `~/.hybro/config.json`; `start` builds and runs the stack. Configure the Provider before using bundled agents or LLM-backed orchestration.
+`setup` chooses a Provider, authentication, and models, and saves them to `~/.hybro/config.json` and `auth.json`. `hybro start` pulls the images published for the CLI's version; `./scripts/hybro start --build` builds them from the checkout. Nothing starts until setup has run.
 
 Open:
 
 - **Hybro app:** [http://localhost:3000](http://localhost:3000)
 - **API server:** [http://localhost:8000](http://localhost:8000)
 - **API docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **MCP server:** `http://127.0.0.1:8001/mcp` (same-host clients only)
 
 See [Installation](/docs/hybro/installation) and [Configuration](/docs/hybro/configuration).
 
@@ -46,14 +52,16 @@ See [Installation](/docs/hybro/installation) and [Configuration](/docs/hybro/con
 ### Work with agents
 
 - [Getting Started](/docs/hybro/agent-users/getting-started)
-- [Rooms and Teams](/docs/hybro/agent-users/rooms-and-chat)
+- [Chats and Subnets](/docs/hybro/agent-users/rooms-and-chat)
 - [Fast and Ultimate modes](/docs/hybro/agent-users/orchestration-modes)
-- [Agent inventory](/docs/hybro/agent-users/agents)
+- [Network](/docs/hybro/agent-users/agents)
+- [Sessions](/docs/hybro/agent-users/sessions)
 
 ### Connect an agent
 
 - [Build an A2A Agent](/docs/hybro/agent-developers/build-a2a-agent)
-- [Inspect an A2A Agent](/docs/hybro/agent-developers/a2a-inspector)
 - [Register an Agent](/docs/hybro/agent-developers/agent-registration)
+- [Inspect an A2A Agent](/docs/hybro/agent-developers/a2a-inspector)
 - [Manage an Agent](/docs/hybro/agent-developers/agent-management)
-- [Use the local API](/docs/hybro/agent-developers/api-keys)
+- [Connect over MCP or HTTP](/docs/hybro/agent-developers/connect)
+- [API access](/docs/hybro/agent-developers/api-keys)

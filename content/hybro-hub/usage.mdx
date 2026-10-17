@@ -8,7 +8,9 @@ Start in the background:
 hybro-hub start --api-key hybro_...
 ```
 
-The first CLI-provided key is saved to `~/.hybro/config.yaml`. Logs are written to `~/.hybro/hub.log` with rotation.
+A key passed with `--api-key` is saved to `~/.hybro/config.yaml`, unless that field is an environment reference. In the background, logs go to `~/.hybro/hub.log` (rotating, 10 MB × 3); with `--foreground` they print to the terminal.
+
+Only one Hub daemon runs per machine (lock file `~/.hybro/hub.lock`). `stop` sends SIGTERM, waits 10 seconds, then sends SIGKILL. `restart --foreground` (or `-f`) restarts the daemon attached to the terminal.
 
 Useful lifecycle commands:
 
@@ -79,19 +81,23 @@ Unknown configuration keys produce warnings, and invalid values fail with a read
 
 ## Agent discovery
 
-With `auto_discover: true`, the Hub enumerates listening localhost ports and probes:
+With `auto_discover: true`, the Hub lists listening localhost ports with OS tools (`lsof` on macOS, `/proc/net/tcp` on Linux, psutil on Windows), skips `auto_discover_exclude_ports`, and probes:
 
 - `/.well-known/agent-card.json`
 - `/.well-known/agent.json`
 
-Agent Cards are validated through the official A2A SDK. Discovery runs at startup and during periodic re-sync. Restrict scanning when needed:
+Cards are validated with the A2A SDK (A2A v0.3 or v1.0) and must expose a JSON-RPC interface. Discovery runs at startup and every 120 seconds. Agents are health-checked every 60 seconds and removed after 3 consecutive failures.
+
+If the OS tools fail, the Hub falls back to a TCP connect-scan of ports 1024–65535. `auto_discover_scan_range` narrows only that fallback scan:
 
 ```yaml
 agents:
   auto_discover_scan_range: [10000, 11000]
 ```
 
-Manually configured localhost or LAN agents are always probed even when auto-discovery is disabled; only reachable agents with valid A2A cards are registered.
+To keep a port out of discovery, add it to `auto_discover_exclude_ports`.
+
+Manually configured localhost or LAN agents are always probed even when auto-discovery is disabled; only reachable agents with valid A2A cards and a JSON-RPC interface are registered. Auto-discovery scans localhost only, so add LAN agents under `agents.local`.
 
 ## Launch an agent
 
@@ -114,7 +120,7 @@ hybro-hub agent start ollama --model mistral:7b --port 10020 \
   --system-prompt "You are a helpful assistant"
 ```
 
-The Hub checks that Ollama is reachable and the selected model is installed.
+With the `ollama` shortcut, the Hub checks that Ollama at `http://localhost:11434` is reachable and the model is pulled. YAML configs (`--config`) skip this check.
 
 ### Claude Code and Codex
 
@@ -175,7 +181,7 @@ timeout: 120
 keep_alive: "5m"
 ```
 
-Explicit `--port`, `--name`, `--timeout`, and supported runtime flags override file values.
+With `--config`, these flags override file values: `--port`, `--name`, `--timeout`, `--working-dir`, `--claude-path`, `--codex-path`, `--provider`, and `--enabled-toolsets`. Other adapter flags (`--model`, `--system-prompt`, `--thinking`, `--agent-id`, `--openclaw-path`, `--webhook-url`) are ignored; set them in the file. `--config` cannot be combined with an adapter argument, and the file must contain `adapter:`.
 
 ## Update the Hub
 

@@ -1,6 +1,6 @@
 # API Reference
 
-Reference for the public `a2a-adapter` 0.2.x API. The current release depends on `a2a-sdk>=1,<2`.
+Reference for the public `a2a-adapter` 0.2.x API. The current release depends on `a2a-sdk[http-server]>=1,<2`, and `a2a_adapter.__version__` reports the installed version.
 
 ## Server functions
 
@@ -17,7 +17,7 @@ def serve_agent(
 ) -> None
 ```
 
-Builds the A2A app and runs it with Uvicorn. Extra keyword arguments are passed to `uvicorn.run()`.
+Builds the A2A app and runs it with Uvicorn. Extra keyword arguments are passed to `uvicorn.run()`. When `agent_card` is omitted, the card URL is `http://<host>:<port>/`, with `0.0.0.0` and `::` shown as `localhost`.
 
 ### `to_a2a()`
 
@@ -32,7 +32,7 @@ def to_a2a(
 
 Returns a Starlette ASGI application. The app exposes A2A 1.0 JSON-RPC and REST routes, enables v0.3 compatibility, and calls `adapter.close()` on shutdown.
 
-If no task store is supplied, `InMemoryTaskStore` is used.
+If no task store is supplied, `InMemoryTaskStore` is used. JSON-RPC is mounted at `/`, and push-notification configs are kept in memory. Without a `url` override, the generated card advertises `http://localhost:9000/`, so pass `url=` when deploying.
 
 ### `build_agent_card()`
 
@@ -43,7 +43,7 @@ def build_agent_card(
 ) -> AgentCard
 ```
 
-Builds an A2A 1.0 Agent Card from adapter metadata. Supported overrides include `name`, `description`, `version`, `streaming`, `url`, `provider`, `documentation_url`, and `icon_url`.
+Builds an A2A 1.0 Agent Card from adapter metadata. Supported overrides include `name`, `description`, `version`, `streaming`, `url`, `provider`, `documentation_url`, and `icon_url`. `streaming=False` does not turn streaming off when `adapter.supports_streaming()` returns `True`. Cards always advertise push notifications. Skill dicts accept `id`, `name`, `description`, `tags`, `examples`, `input_modes`, and `output_modes`.
 
 Generated cards are served at both:
 
@@ -78,7 +78,7 @@ async def stream(
 ) -> AsyncIterator[str | Part]
 ```
 
-Optional. Yield text or `Part` chunks. If not overridden, the executor falls back to `invoke()`.
+Optional. Yield text or `Part` chunks. The executor calls `stream()` when `supports_streaming()` returns `True`, and `invoke()` otherwise.
 
 ### `cancel()`
 
@@ -86,7 +86,7 @@ Optional. Yield text or `Part` chunks. If not overridden, the executor falls bac
 async def cancel(self, context_id: str | None = None, **kwargs) -> None
 ```
 
-Optional cancellation hook.
+Optional cancellation hook. The executor calls `cancel(context=request_context)`, so read the task with `kwargs["context"].task_id`. Raise `CancelledByAdapterError` from `invoke()` or `stream()` to end a cancelled task without marking it failed.
 
 ### `close()`
 
@@ -148,7 +148,7 @@ adapter = load_adapter({
 })
 ```
 
-Built-in registry names include `n8n`, `crewai`, `langchain`, `langgraph`, `callable`, `openclaw`, `ollama`, `claude-code`, `codex`, `hermes`, and `pi`.
+Built-in registry names include `n8n`, `crewai`, `langchain`, `langgraph`, `callable`, `openclaw`, `ollama`, `claude-code`, `codex`, `hermes`, and `pi`. Every key other than `adapter` becomes a constructor argument. Registered names take precedence over built-ins, and an unknown name raises `ValueError` listing the available names.
 
 ### `register_adapter()`
 
@@ -189,7 +189,7 @@ The 0.1 compatibility names still exist but are deprecated:
 | `build_agent_app()` | `to_a2a()` |
 | `*AgentAdapter` classes | shorter `*Adapter` classes |
 
-New code should use the 0.2 API shown above.
+`load_a2a_agent()` is async and supports only `n8n`, `crewai`, `langchain`, `langgraph`, `callable`, and `openclaw`. The `*AgentAdapter` classes exist only for those six and are imported from `a2a_adapter.integrations`. All deprecated names are slated for removal in 0.3. New code should use the 0.2 API shown above.
 
 ## Thin CLI
 
@@ -197,4 +197,15 @@ New code should use the 0.2 API shown above.
 a2a-adapter {pi,codex,claude,openclaw} [server options] -- [agent options]
 ```
 
-Server options include `--cwd`, `--host`, `--port`, `--timeout`, `--name`, `--description`, `--log-level`, and `--executable`. Pi also supports `--session-id` and `--session-dir`; OpenClaw supports `--session-id`, `--agent-id`, and `--thinking`.
+Server options include `--cwd`, `--host` (default `127.0.0.1`), `--port` (`9000`), `--timeout` (`600`), `--name` (`<Agent> (<folder>)`), `--description`, `--log-level` (`info`), and `--executable`. Pi also supports `--session-id` (default `a2a-pi-agent`) and `--session-dir`; OpenClaw supports `--session-id`, `--agent-id`, and `--thinking` (`off`, `minimal`, `low`, `medium`, `high`, `xhigh`; default `low`). `-h`, `--help`, and `-help` print usage. See [Quick Start](/docs/a2a-adapter/quick-start) for managed flags.
+
+## Environment variables
+
+| Variable | Read by | Effect |
+| --- | --- | --- |
+| `A2A_CLAUDE_SKIP_PERMISSIONS` | `ClaudeCodeAdapter` | `1` or `true` adds `--dangerously-skip-permissions` |
+| `A2A_CODEX_BYPASS_APPROVALS` | `CodexAdapter` | `1` or `true` adds `--dangerously-bypass-approvals-and-sandbox` |
+| `A2A_CODEX_SKIP_GIT_CHECK` | `CodexAdapter` | `1` or `true` adds `--skip-git-repo-check` |
+| `A2A_PI_COMMAND` | CLI | Pi command when `--executable` is not given, split like a shell command |
+
+Use the permission and approval variables only in trusted, sandboxed environments.

@@ -5,33 +5,32 @@
 Follow [Installation](/docs/hybro/installation), or run:
 
 ```bash
-git clone https://github.com/hybroai/hybro.git
-cd hybro
-./scripts/hybro setup
-./scripts/hybro start --build
+npm install -g @hybroai/cli
+hybro setup
+hybro start
 ```
 
-`setup` selects a Provider and models and saves them under `~/.hybro`; `start` builds and runs the stack. See [Configuration](/docs/hybro/configuration) for the full contract and the migration path from an older setup.
+`setup` selects a Provider and models and saves them under `~/.hybro`; `start` runs the stack. See [Configuration](/docs/hybro/configuration) for the full contract and the migration path from an older setup.
 
-Open [http://localhost:3000](http://localhost:3000). The app opens on the Hybro Core page, which does not require sign-in and doubles as a live demo of the chat composer. The open-source frontend uses the built-in local developer identity.
+Open [http://localhost:3000](http://localhost:3000). The app opens on **Overview**. The open-source frontend uses the built-in local developer identity, so no sign-in is needed.
 
 ## 2. Check available agents
 
-Open **Agents** or [http://localhost:3000/agents](http://localhost:3000/agents). The page combines:
+Open **Network** in the sidebar ([http://localhost:3000/network](http://localhost:3000/network)). It shows, in a Topology or Structure view:
 
 - Remote agents registered with this backend, including the bundled Weather, Image Generator, Travel Planner, and Story agents
 - A2A agents discovered directly on the Docker host
 
-Select **Discover Local Agents** to trigger a host scan immediately.
+To scan the host now, choose **Add agent > Scan Local Agent**.
 
 ## 3. Start a chat
 
-Open **New Chat** in the sidebar or go to [http://localhost:3000/chat](http://localhost:3000/chat).
+Open **Chats** in the sidebar, select **New chat** on Overview, or go to [http://localhost:3000/chat](http://localhost:3000/chat).
 
-Featured Use Case cards can prefill the composer and set up the Agents they need. Before sending, you can also:
+**Featured Use Cases** cards create or reuse a preset subnet with the agents they need, select it, and prefill the composer. Before sending, you can also:
 
-- Use **All Agents** as the candidate scope
-- Choose the room's current membership, or a saved **Team**
+- Use **All agents** as the candidate scope
+- Choose **Room agents** or a saved **subnet**
 - Type `@` to target one or more agents
 - Select **Fast** or **Ultimate** mode
 - Attach files
@@ -40,10 +39,11 @@ Featured Use Case cards can prefill the composer and set up the Agents they need
 
 Hybro creates a persistent room, stores the message and attachments, schedules the selected execution mode, and streams progress into the timeline.
 
-Each turn renders a Trace that shows agent calls, tool activity, and any question waiting for your answer, followed by the final answer and one card per delegated agent. The room appears under **Chat History**. Active processing can be restored after a reload, and the room timeline supports artifacts, cancellation, and human-in-the-loop questions.
+Each turn renders a Trace that shows agent calls, tool activity, and any question waiting for your answer, followed by the final answer and one card per delegated agent. The chat appears in the **History** column next to the sidebar. Active processing can be restored after a reload, and the room timeline supports artifacts, cancellation, and human-in-the-loop questions.
 
 ## Next steps
 
-- [Rooms and Teams](/docs/hybro/agent-users/rooms-and-chat)
+- [Chats and Subnets](/docs/hybro/agent-users/rooms-and-chat)
 - [Orchestration Modes](/docs/hybro/agent-users/orchestration-modes)
-- [Agents](/docs/hybro/agent-users/agents)
+- [Network](/docs/hybro/agent-users/agents)
+- [Sessions](/docs/hybro/agent-users/sessions)

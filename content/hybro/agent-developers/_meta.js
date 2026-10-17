@@ -4,5 +4,6 @@ export default {
   'a2a-inspector': 'A2A Inspector',
   'agent-registration': 'Agent Registration',
   'agent-management': 'Agent Management',
+  connect: 'Connect (MCP and HTTP)',
   'api-keys': 'API Access',
 }

@@ -1,6 +1,6 @@
 # Agent Registration
 
-Register a remote A2A server from Hybro's unified Agents page.
+Register a remote A2A server from **Network > Add agent > Add Remote Agent** (`/network/agents/new`).
 
 ## Requirements
 
@@ -23,18 +23,18 @@ Hybro speaks A2A protocol 1.0, where a card advertises its endpoints through `su
 
 The backend resolves the URL, not the browser. Use the agent's base URL, not an interface endpoint that already includes a subpath; Hybro appends the well-known card path when probing.
 
-For a host agent, you can instead use **Discover Local Agents** on `/agents`; directly discovered agents do not require persistent remote registration.
+For a host agent, you can instead use **Add agent > Scan Local Agent** on `/network`; directly discovered agents do not require persistent remote registration.
 
 ## Register
 
-1. Open [http://localhost:3000/agents/new](http://localhost:3000/agents/new)
+1. Open [http://localhost:3000/network/agents/new](http://localhost:3000/network/agents/new)
 2. Enter the agent base URL
-3. Select **Load Agent**
+3. Select **Load agent**
 4. Review the Agent Card
-5. Wait for Agent Card validation and A2A connection inspection
-6. Select **Register** after the connection test passes
+5. Wait for Agent Card validation and A2A connection inspection; both run automatically after loading, and **Re-inspect** runs them again
+6. Select **Register agent**, which appears after the connection inspection passes
 
-The page displays identity, provider, version, skills, modes, and capabilities such as streaming and push notifications.
+The page displays identity, provider, version, skills, modes, and capabilities such as streaming, push notifications, extensions, and state transition history.
 
 ## Troubleshooting
 
@@ -43,7 +43,7 @@ The page displays identity, provider, version, skills, modes, and capabilities s
 | Agent Card does not load | Confirm the well-known route and a backend-reachable hostname |
 | Card validation fails | Validate required fields, skills, interfaces, and modes |
 | Connection inspection fails | Confirm the A2A endpoint accepts a request from the backend network, and that the card advertises a supported binding |
-| Host agent is missed | Use **Discover Local Agents** or check Docker host connectivity |
+| Host agent is missed | Use **Scan Local Agent** or check Docker host connectivity |
 
 ## Next steps
 

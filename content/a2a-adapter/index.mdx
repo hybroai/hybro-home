@@ -5,15 +5,19 @@
 - [PyPI Package](https://pypi.org/project/a2a-adapter/)
 - [GitHub Repository](https://github.com/hybroai/a2a-adapter)
 
-The current `0.2.x` release uses `a2a-sdk` 1.x and supports A2A 1.0 while retaining compatibility routes for older clients.
+The current `0.2.x` release uses `a2a-sdk[http-server]` 1.x and supports A2A 1.0 while retaining compatibility routes for older clients.
 
 ## Installation
 
-```bash
-pip install a2a-adapter
-```
+Python 3.11 or newer is required. There are two ways to use the package:
 
-Python 3.11 or newer is required.
+| | CLI | Python SDK |
+| --- | --- | --- |
+| Use it when | You want to put an existing local agent, such as Claude Code or Pi, on A2A without writing code | You are writing an agent, or wrapping a framework, and want it to speak A2A |
+| Install | `uv tool install a2a-adapter` (or `pipx install a2a-adapter`) | `pip install a2a-adapter` in your project's virtual environment |
+| Run | `a2a-adapter claude --port 9010` | `serve_agent(adapter, port=9000)` in your code |
+
+Install the CLI as an isolated tool so the `a2a-adapter` command lands on your `PATH`. Avoid a system-wide `pip install`: the built-in `pip` on macOS runs Python 3.9, and Homebrew and many Linux distributions block it (PEP 668).
 
 ## CLI: expose an installed coding agent
 
@@ -32,6 +36,8 @@ Use `--cwd /path/to/project` to select another directory. Server options go befo
 a2a-adapter pi --port 9012 -- --model <model> --thinking high
 a2a-adapter codex --port 9011 -- --model <model> --sandbox workspace-write
 ```
+
+CLI servers name their Agent Card `<Agent> (<folder>)`, for example `Claude Code (my-app)`, with the description `<Agent> agent working in <folder>`. Override them with `--name` and `--description`.
 
 Run `a2a-adapter -help` or `a2a-adapter <agent> -help` for the complete command reference.
 

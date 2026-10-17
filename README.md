@@ -8,9 +8,9 @@ The public Hybro website (hybro.ai), built with [Next.js](https://nextjs.org) an
 
 ## Contents
 
-- **Hybro** — Open-source hybrid multi-agent platform ([GitHub](https://github.com/hybroai/hybro))
+- **Hybro** — Open-source agent interoperability platform ([GitHub](https://github.com/hybroai/hybro))
 - **A2A Adapter** — Expose agent CLIs and Python frameworks as A2A servers ([GitHub](https://github.com/hybroai/a2a-adapter) · [PyPI](https://pypi.org/project/a2a-adapter/))
-- **Hybro Hub** — Bridge local A2A agents into Hybro ([GitHub](https://github.com/hybroai/hybro-hub) · [PyPI](https://pypi.org/project/hybro-hub/))
+- **Hybro Hub** — Bridge local A2A agents into hosted hybro.ai ([GitHub](https://github.com/hybroai/hybro-hub) · [PyPI](https://pypi.org/project/hybro-hub/))
 
 ## Getting Started
 

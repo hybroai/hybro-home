@@ -6,11 +6,15 @@ Choose the CLI when you already have a supported coding-agent command installed.
 
 ### 1. Install
 
+Install the CLI as an isolated tool, so the `a2a-adapter` command lands on your `PATH`:
+
 ```bash
-pip install a2a-adapter
+uv tool install a2a-adapter    # or: pipx install a2a-adapter
 ```
 
-Also install the underlying agent CLI (`pi`, `codex`, `claude`, or `openclaw`) and complete its normal authentication setup.
+Upgrade later with `uv tool upgrade a2a-adapter`. Avoid a system-wide `pip install`: the built-in `pip` on macOS runs Python 3.9, which is too old, and Homebrew and many Linux distributions block it (PEP 668).
+
+The adapter wraps the agent you already have; it does not install it. Install the underlying agent CLI (`pi`, `codex`, `claude`, or `openclaw`) and complete its normal sign-in, for example by running `claude` once.
 
 ### 2. Start an A2A server
 
@@ -36,9 +40,22 @@ Common server options:
 | `--host` | `127.0.0.1` | A2A bind host |
 | `--port` | `9000` | A2A server port |
 | `--timeout` | `600` | Agent timeout in seconds |
-| `--name` | adapter default | Agent Card display name |
-| `--description` | adapter default | Agent Card description |
-| `--executable` | command on `PATH` | Underlying executable |
+| `--name` | `<Agent> (<folder>)`, e.g. `Claude Code (my-app)` | Agent Card display name |
+| `--description` | `<Agent> agent working in <folder>` | Agent Card description |
+| `--log-level` | `info` | Uvicorn log level |
+| `--executable` | `claude`, `codex`, `pi` (or `$A2A_PI_COMMAND`), `openclaw` | Underlying executable |
+
+The CLI binds `127.0.0.1` by default. Pass `--host 0.0.0.0` to accept connections from other machines.
+
+Agent-specific options:
+
+| Agent | Option | Default |
+| --- | --- | --- |
+| `pi` | `--session-id` | `a2a-pi-agent` |
+| `pi` | `--session-dir` | `<cwd>/.a2a-adapter/pi/sessions` |
+| `openclaw` | `--session-id` | generated |
+| `openclaw` | `--agent-id` | OpenClaw default |
+| `openclaw` | `--thinking` | `low` (one of `off`, `minimal`, `low`, `medium`, `high`, `xhigh`) |
 
 Adapter-owned OpenClaw options stay before any separator:
 
@@ -52,7 +69,16 @@ Pass native agent CLI arguments after `--`:
 a2a-adapter claude --port 9010 -- --model <model>
 ```
 
-The adapter protects protocol/session flags that it owns. Run `a2a-adapter <agent> -help` for agent-specific options.
+The adapter owns protocol and session flags, and rejects them after `--`:
+
+| Agent | Managed flags |
+| --- | --- |
+| Pi | `--mode`, `--print`/`-p`, `--continue`/`-c`, `--resume`/`-r`, `--session`, `--session-id`, `--session-dir`, `--fork`, `--no-session` |
+| Codex | `--json`, `--output-last-message`/`-o`, `--ephemeral`, `--cd`/`-C`, and the `resume` and `review` subcommands |
+| Claude Code | `--print`/`-p`, `--output-format`, `--resume`, `--continue`/`-c`, `--session-id`, `--disallowedTools` |
+| OpenClaw | `--local`, `--message`, `--json`, `--session-id`, `--thinking`, `--agent` (use `--thinking` and `--agent-id` before `--`) |
+
+Run `a2a-adapter <agent> -help` for agent-specific options.
 
 For a Pi source checkout, set the command without a shell wrapper:
 
@@ -61,15 +87,36 @@ A2A_PI_COMMAND='npx tsx /path/to/pi/packages/coding-agent/src/cli.ts' \
   a2a-adapter pi --port 9012
 ```
 
+### Configuring the agent
+
+The adapter runs the agent non-interactively (for example `claude -p` or `codex exec`), so there is no agent UI to change settings in. Configure it the same way you would without the adapter:
+
+- **The agent's own config files.** The adapter runs the agent as you, in the `--cwd` folder, so it reads your usual setup: `~/.claude/settings.json`, `CLAUDE.md`, and MCP servers for Claude Code; `~/.codex/config.toml` and `AGENTS.md` for Codex; Pi's settings and installed extensions. Claude Code, Codex, and OpenClaw start a fresh process for each request, so changes apply to the next request. Pi keeps one process running, so restart the server after changing Pi's config.
+- **Native CLI flags after `--`.** Use these for settings that should apply only to this server, such as a different model or sandbox mode.
+
+Claude Code and Codex ask for approval before risky actions. Because no one is attached to answer, opt in explicitly when the agent should run unattended:
+
+| Variable | Effect |
+| --- | --- |
+| `A2A_CLAUDE_SKIP_PERMISSIONS=1` | Adds `--dangerously-skip-permissions` to Claude Code |
+| `A2A_CODEX_BYPASS_APPROVALS=1` | Adds `--dangerously-bypass-approvals-and-sandbox` to Codex |
+| `A2A_CODEX_SKIP_GIT_CHECK=1` | Adds `--skip-git-repo-check` to Codex |
+
+Use these only in trusted, sandboxed environments.
+
+Claude Code, Codex, and Pi keep session state under `<cwd>/.a2a-adapter/`. Add that folder to `.gitignore`.
+
 ## Option B — Python SDK
 
 ### 1. Install
+
+Install into your project's virtual environment:
 
 ```bash
 pip install a2a-adapter
 ```
 
-Install optional framework dependencies when needed:
+Install optional framework dependencies when needed. n8n, Ollama, callable and the CLI-backed adapters need no extra:
 
 ```bash
 pip install 'a2a-adapter[all]'
@@ -107,15 +154,19 @@ curl http://localhost:9000/.well-known/agent-card.json
 
 ## Framework example
 
+The adapter passes the message as `{"input": ...}`, so put a prompt template in front of the chat model:
+
 ```python
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from a2a_adapter import LangChainAdapter, serve_agent
 
-adapter = LangChainAdapter(
-    runnable=ChatOpenAI(model="gpt-4o-mini"),
-    input_key="input",
-    name="LangChain Agent",
-)
+chain = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant."),
+    ("user", "{input}"),
+]) | ChatOpenAI(model="gpt-4o-mini", streaming=True)
+
+adapter = LangChainAdapter(runnable=chain, input_key="input", name="LangChain Agent")
 serve_agent(adapter, port=9000)
 ```
 

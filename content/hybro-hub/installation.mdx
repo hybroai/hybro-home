@@ -30,24 +30,24 @@ Start the daemon once with the key:
 hybro-hub start --api-key hybro_your_key_here
 ```
 
-The key is saved to `~/.hybro/config.yaml`. You can instead keep it in the environment:
+The key is saved to `~/.hybro/config.yaml`, unless `cloud.api_key` there is already an environment reference such as `${HYBRO_API_KEY}`. Precedence is `--api-key`, then `HYBRO_API_KEY`, then `config.yaml`. You can instead keep the key in the environment:
 
 ```bash
 export HYBRO_API_KEY="hybro_..."
 hybro-hub start
 ```
 
-A custom or self-hosted gateway URL can start without a key:
+To use a different relay endpoint, set `HYBRO_GATEWAY_URL` (or `cloud.gateway_url`). An API key is still required; `hybro-hub start` exits if none is configured:
 
 ```bash
-HYBRO_GATEWAY_URL=https://your-gateway.example.com hybro-hub start
+HYBRO_GATEWAY_URL=https://your-gateway.example.com hybro-hub start --api-key hybro_...
 ```
 
-Whether every Hub relay feature is available depends on the API surface exposed by that gateway. The open-source Hybro stack in [hybroai/hybro](https://github.com/hybroai/hybro) does not serve the relay API, so it cannot act as a Hub gateway.
+The open-source Hybro stack in [hybroai/hybro](https://github.com/hybroai/hybro) serves neither the relay API nor the Gateway API, so it cannot act as a Hub gateway. It discovers local agents itself.
 
 ## Upgrade
 
-The CLI detects pip, pipx, uv tool, or uv pip installations and upgrades the Hub plus its A2A dependencies:
+The CLI detects pipx, uv tool, pip, or uv pip and runs the matching upgrade. With pip or uv pip it upgrades `hybro-hub`, `a2a-adapter`, and `a2a-sdk` together. Editable and conda installs are not upgraded; the command prints the manual command instead:
 
 ```bash
 hybro-hub update --dry-run

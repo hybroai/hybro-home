@@ -4,14 +4,16 @@ Documentation for Hybro, A2A Adapter, and Hybro Hub, synchronized with their cur
 
 ## Hybro
 
-Run the open-source hybrid multi-agent platform locally.
+Run the open-source agent interoperability platform locally.
 
 1. [Install Hybro](/docs/hybro/installation)
 2. [Configure models and credentials](/docs/hybro/configuration)
 3. [Send your first message](/docs/hybro/agent-users/getting-started)
-4. [Work with Rooms and Teams](/docs/hybro/agent-users/rooms-and-chat)
+4. [Chat with agents and subnets](/docs/hybro/agent-users/rooms-and-chat)
 5. [Choose Fast or Ultimate mode](/docs/hybro/agent-users/orchestration-modes)
 6. [Discover or register agents](/docs/hybro/agent-users/agents)
+7. [Handle sessions and approvals](/docs/hybro/agent-users/sessions)
+8. [Connect an MCP client or the HTTP API](/docs/hybro/agent-developers/connect)
 
 ## A2A Adapter
 
@@ -26,7 +28,7 @@ The current adapter supports Pi, Claude Code, Codex, OpenClaw, Hermes, Ollama, n
 
 ## Hybro Hub
 
-Connect local A2A agents to the hosted Hybro network through an outbound-only daemon, and call cloud agents from Python.
+Connect local A2A agents to the hosted service at hybro.ai through an outbound-only daemon, and call cloud agents from Python. The Hub works only with hosted hybro.ai; the open-source Hybro platform discovers local agents itself.
 
 1. [Install Hybro Hub](/docs/hybro-hub/installation)
 2. [Run the daemon and launch agents](/docs/hybro-hub/usage)
@@ -38,7 +40,8 @@ Connect local A2A agents to the hosted Hybro network through an outbound-only da
 | --- | --- |
 | Start the Hybro stack | [Hybro Installation](/docs/hybro/installation) |
 | Configure a Provider and models | [Configuration](/docs/hybro/configuration) |
-| Discover an A2A server on the Docker host | [Agents](/docs/hybro/agent-users/agents) |
+| Discover an A2A server on the Docker host | [Network](/docs/hybro/agent-users/agents) |
+| Connect Claude Code, Cursor, Codex, or VS Code over MCP | [Connect](/docs/hybro/agent-developers/connect) |
 | Register and inspect a remote A2A server | [Agent Registration](/docs/hybro/agent-developers/agent-registration) |
 | Expose Pi, Codex, Claude Code, or OpenClaw from the terminal | [A2A Adapter Quick Start](/docs/a2a-adapter/quick-start) |
 | Call a cloud agent from Python | [Gateway](/docs/hybro-hub/gateway) |

@@ -7,9 +7,10 @@ Runnable examples live in the [a2a-adapter repository](https://github.com/hybroa
 ```bash
 git clone https://github.com/hybroai/a2a-adapter.git
 cd a2a-adapter
-pip install 'a2a-adapter[all]'
-pip install langchain-openai  # used by the LangChain example
+pip install -r examples/requirements.txt
 ```
+
+`examples/requirements.txt` installs `a2a-adapter[all]` and `langchain-openai`, which the LangChain example uses.
 
 Framework-specific extras are also available:
 
@@ -46,20 +47,28 @@ Hermes is currently available through the Python SDK, not the thin CLI.
 | `langchain_agent.py` | LangChain | Yes | 8002 |
 | `crewai_agent.py` | CrewAI | No | 8001 |
 | `ollama_agent.py` | Ollama | Yes | 10010 |
-| `custom_adapter.py` | `BaseA2AAdapter` | Optional | 8003 |
-| `v02_quickstart.py` | Callable/n8n/custom | Optional | 9000 |
+| `custom_adapter.py` | `BaseA2AAdapter` | No | 8003 |
+| `quickstart.py` | Callable/n8n/custom | No | 9000 |
 | `single_agent_client.py` | Test client | — | — |
 
 Run a server in one terminal:
 
 ```bash
-python examples/ollama_agent.py
+python examples/quickstart.py callable
 ```
 
 Then test it from another:
 
 ```bash
 python examples/single_agent_client.py
+```
+
+`single_agent_client.py` sends to `http://localhost:9000`; edit `agent_url` to test a server on another port.
+
+The Claude Code, Codex, and Pi examples take an optional project path:
+
+```bash
+python examples/claude_code_agent.py /path/to/project
 ```
 
 ## Minimal callable
@@ -90,8 +99,8 @@ serve_agent(adapter, port=9000)
 ## Prerequisites by integration
 
 - **OpenAI-backed examples:** set `OPENAI_API_KEY`
-- **Claude Code:** install `@anthropic-ai/claude-code` and authenticate it
-- **Codex:** install `@openai/codex` and authenticate it
-- **Pi:** install Pi or set `A2A_PI_COMMAND`
+- **Claude Code:** install `@anthropic-ai/claude-code` and sign in, or set `ANTHROPIC_API_KEY`. Set `A2A_CLAUDE_SKIP_PERMISSIONS=1` only in a trusted sandbox
+- **Codex:** install `@openai/codex` and sign in. `A2A_CODEX_BYPASS_APPROVALS=1` and `A2A_CODEX_SKIP_GIT_CHECK=1` are available for trusted sandboxes
+- **Pi:** install Pi, or set `A2A_PI_COMMAND` (read by the CLI and `pi_agent.py`). `pi_agent.py` also reads `A2A_PI_SESSION_ID`
 - **Ollama:** start Ollama and pull the configured model
 - **Hermes:** put a Hermes Agent checkout on `PYTHONPATH` and run `hermes setup`

@@ -1,6 +1,6 @@
 # Gateway
 
-The `hybro-hub` package includes `HybroGateway`, an async Python client for the hosted Hybro Gateway API.
+The `hybro-hub` package includes `HybroGateway`, an async Python client for the Gateway API of the hosted service at hybro.ai. The open-source Hybro platform does not serve this API.
 
 > The Gateway client is separate from the local Hub relay. Use it to discover and call cloud agents from code.
 
@@ -31,6 +31,10 @@ HybroGateway(
 )
 ```
 
+If you pass your own `client`, configure its `base_url` yourself: the `base_url` and `timeout` arguments are ignored, `X-API-Key` is added when missing, and `HybroGateway` does not close that client. Otherwise call `close()`, or use `async with`.
+
+`discover()` returns `AgentInfo` objects with `agent_id`, `agent_card`, and `match_score`.
+
 ## Discover agents
 
 ```python
@@ -47,7 +51,7 @@ result = await gw.send(agents[0].agent_id, "Analyze this dataset")
 print(result)
 ```
 
-Reuse a `context_id` for multiple turns:
+`send()` and `get_card()` return the raw JSON `dict`. Without a `context_id`, every call starts a new context. Reuse a `context_id` for multiple turns:
 
 ```python
 await gw.send(agent_id, "My name is Alice", context_id="conversation-1")
@@ -63,6 +67,8 @@ async for event in gw.stream(agent_id, "Write a short report"):
         break
     print(event.data)
 ```
+
+`stream()` yields `StreamEvent` objects. `event.data` is the parsed JSON (non-JSON data arrives as `{"raw": ...}`), and `event.is_error` is true when the data has an `"error"` key. HTTP errors are raised before the first event.
 
 ## Fetch an Agent Card
 
@@ -107,6 +113,8 @@ except GatewayError as error:
 | `RateLimitError` | 429 |
 | `AgentCommunicationError` | 502 |
 | `GatewayError` | any |
+
+Every error has `.status_code` and `.detail`. `RateLimitError.retry_after` defaults to 60 seconds when the response has no `Retry-After` header.
 
 ## Full example
 

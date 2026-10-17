@@ -31,6 +31,12 @@ Both modes share one runtime and differ in their resolved limits, such as model 
 
 **Debate is coming soon and is not currently selectable.** The menu contains a disabled **Debate (Coming Soon)** item, but no Debate request mode is sent to the backend.
 
+## Session passthrough
+
+Sessions opened by MCP or API clients use a third, model-free `passthrough` mode that calls exactly the addressed agent. It is not selectable in chat. See [Sessions](/docs/hybro/agent-users/sessions).
+
+Time spent waiting for your answer or for a remote agent does not count against a mode's deadline; see [Configuration](/docs/hybro/configuration#backend-fields).
+
 ## Request-scoped behavior
 
 The selected mode is attached to each send. Selecting a mode is local until you send a message; sending makes that mode the room default, so the selector is restored to your most recent choice after a reload.

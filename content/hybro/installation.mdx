@@ -1,25 +1,38 @@
 # Installation
 
-Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, the FastAPI backend, a MongoDB 7 replica set, Redis, persistent room-file storage, four example agents, and a one-shot registrar.
+Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, the FastAPI backend, a MongoDB 7 replica set, Redis, persistent room-file storage, the MCP adapter (`127.0.0.1:8001`), four example agents, and a one-shot registrar.
 
 ## Prerequisites
 
-- Git
-- Docker with Compose v2.24+ (`docker compose`)
-
-The legacy `docker-compose` v1 binary is not supported.
-
-- [uv](https://docs.astral.sh/uv/) — the `./scripts/hybro` CLI runs its configuration tool through uv.
+- Docker with Compose v2.24+ (`docker compose`). The legacy `docker-compose` v1 binary is not supported.
+- Node.js 18+ to install the CLI from npm. Not needed for release-archive installs.
+- Git and [uv](https://docs.astral.sh/uv/) only for a source checkout.
 
 For native development outside Docker, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+ (Docker Compose pins MongoDB 7.0).
 
-## Install with the script
+## Install the CLI (recommended)
+
+```bash
+npm install -g @hybroai/cli
+hybro setup
+hybro start
+```
+
+A released install runs `docker-compose.release.yml` and pulls the images pinned to the CLI's own version, so `hybro --version` is also the version of the stack it starts.
+
+Alternatively, unpack `hybro-<version>-<platform>.tar.gz` from the [GitHub Release](https://github.com/hybroai/hybro/releases) and run `hybro/hybro`.
+
+## Install from source
+
+Use a source checkout to change Hybro itself, or to use settings the published images cannot carry, such as a custom `api_prefix`.
+
+### With the script
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
 ```
 
-The installer requires `git`, `docker`, and `uv`. It clones or updates `${INSTALL_DIR:-$HOME/hybro}`, prints the setup and start commands, and opens the interactive CLI when a terminal is attached. It does not create environment files, generate secrets, build images, or start services.
+The installer requires `git`, `docker`, and `uv`. It clones or updates `${INSTALL_DIR:-$HOME/hybro}` and prints the setup and start commands. It opens the interactive CLI only when both stdin and stdout are terminals; with `curl ... | sh`, stdin is a pipe, so run `./scripts/hybro` afterwards. It does not create environment files, generate secrets, build images, or start services.
 
 Choose another directory with:
 
@@ -28,7 +41,7 @@ INSTALL_DIR=/path/to/hybro \
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh)"
 ```
 
-## Install manually
+### Manually
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
@@ -37,7 +50,9 @@ cd hybro
 ./scripts/hybro start --build
 ```
 
-A fresh checkout cannot start before it is configured. Running `./scripts/hybro start` without configuration stops with a message pointing at `./scripts/hybro setup` (or `config migrate` for an older YAML setup).
+A fresh install cannot start before it is configured. Running `start` without configuration stops with a message pointing at `setup` (or `config migrate` for an older YAML setup).
+
+In a checkout, use `./scripts/hybro` wherever these docs show `hybro`.
 
 ## Configure Hybro
 
@@ -50,8 +65,8 @@ Hybro keeps backend, frontend, and bundled-agent settings in one local JSON dire
 ```
 
 ```bash
-./scripts/hybro setup          # Choose a Provider, authenticate, select models
-./scripts/hybro start --build  # Build and start the stack
+hybro setup   # Choose a Provider, authenticate, select models
+hybro start   # Start the stack
 ```
 
 See [Configuration](/docs/hybro/configuration) for the full contract, the `config` commands, and the one-time migration from an older setup.
@@ -64,39 +79,58 @@ See [Configuration](/docs/hybro/configuration) for the full contract, the `confi
 | API server | [http://localhost:8000](http://localhost:8000) |
 | Health check | [http://localhost:8000/health](http://localhost:8000/health) |
 | Interactive API docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
+| MCP server | `http://127.0.0.1:8001/mcp` |
+| MCP health | `http://127.0.0.1:8001/health` |
 
-The app opens on the Hybro Core page. The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup.
+The app opens on **Overview** (`/`): Sessions, Chats, Agents, and MCP gateway tiles, recent sessions and chats, a mini network map, and the most-called agents. The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup.
 
 ## Manage the stack
 
-`./scripts/hybro` is the day-to-day lifecycle CLI:
+`hybro` is the day-to-day lifecycle CLI:
 
 ```bash
-./scripts/hybro start                     # Start services, no rebuild (fast daily loop)
-./scripts/hybro start --build             # Rebuild images (after code or dependency changes)
-./scripts/hybro start --recreate          # Recreate containers (runtime configuration changes)
-./scripts/hybro start --build --recreate  # Rebuild and recreate (public frontend or image changes)
-./scripts/hybro status                    # Show all containers, including stopped ones
-./scripts/hybro logs backend              # Follow one service; omit the name for all
-./scripts/hybro logs --container <name>   # Follow one exact container or replica
-./scripts/hybro restart backend           # Restart one service; omit the name for the stack
-./scripts/hybro stop                      # Stop containers but keep them
-./scripts/hybro down                      # Remove containers and the default network
+hybro start                     # Start services, no rebuild (fast daily loop)
+hybro start --recreate          # Recreate containers (after configuration changes)
+hybro start --build             # Rebuild images (source checkout only)
+hybro start --build --recreate  # Rebuild and recreate (source checkout only)
+hybro start --compose-file <f>  # Add an explicit Compose overlay
+hybro status                    # Show all containers, including stopped ones
+hybro logs backend              # Follow one service; omit the name for all
+hybro logs --container <name>   # Follow one exact container or replica
+hybro restart backend           # Restart one service; omit the name for the stack
+hybro mcp status|start|stop|logs  # Manage only the MCP server
+hybro stop                      # Stop containers but keep them
+hybro down                      # Remove containers and the default network
+hybro --version                 # Print the CLI and stack version
 ```
 
-`start` also generates missing internal service tokens and regenerates the default-agent Compose services from `default_agents/agents.yaml`.
+`--build` works only from a source checkout; a released install refuses it and moves versions with `hybro upgrade` instead.
 
-Named volumes remain intact after `stop` or `down`; avoid `./scripts/hybro down -v` unless you intend to delete local data.
+`start` also generates missing internal service tokens and, in a source checkout, regenerates the default-agent Compose services from `default_agents/agents.yaml`.
 
-Run `./scripts/hybro --help` for the complete command reference. Running `./scripts/hybro` with no command opens the interactive Models/Services UI when a terminal is available; otherwise it prints that same help text.
+Named volumes remain intact after `stop` or `down`; avoid `hybro down -v` unless you intend to delete local data.
+
+Run `hybro --help` for the complete command reference. Running `hybro` with no command opens the interactive Models/Services UI when a terminal is available; otherwise it prints that same help text. The Services page offers Start, Stop, Reload configuration, View logs, MCP connection, and Upgrade hybro.
 
 ## Bundled agents
 
 The default manifest starts Weather, Image Generator, Travel Planner, and Story, plus a one-shot registrar that registers them with the backend on startup.
 
-Registration itself does not need a Provider credential. Calls that use a model — the bundled agents and Hybro's own orchestration — need the Provider configured through `./scripts/hybro setup`.
+Registration itself does not need a Provider credential. Calls that use a model — the bundled agents and Hybro's own orchestration — need the Provider configured through `hybro setup`.
 
 ## Update
+
+For a released install:
+
+```bash
+hybro upgrade --check    # Report; exits non-zero when a newer release exists
+hybro upgrade            # Install it
+hybro start --recreate   # Move the containers onto its images
+```
+
+The container images are pinned to the CLI version, so upgrading the CLI is what moves the stack. `hybro upgrade` replaces an npm install in place; a release-archive install prints the download, checksum, and unpack commands instead.
+
+For a source checkout:
 
 ```bash
 cd ~/hybro   # or your INSTALL_DIR

@@ -57,10 +57,10 @@ Use the [A2A Python SDK](https://github.com/a2aproject/a2a-python) directly when
 
 ## Interactive agents
 
-Hybro understands A2A's `input-required` state. An agent that needs an answer mid-task can return a typed question, and Hybro renders it in the room composer and sends the answer back to the same call. Agents without that metadata surface a message instead of a structured prompt.
+Hybro understands A2A's `input-required` state. An agent that needs an answer mid-task can return a typed question, and Hybro renders it in the room composer, or in **Sessions** when a client opened the conversation, and sends the answer back to the same call. Agents without that metadata surface a message instead of a structured prompt.
 
 ## Verify and connect
 
 1. Confirm `/.well-known/agent-card.json` loads
 2. Test the server in Hybro's [integrated inspection flow](/docs/hybro/agent-developers/a2a-inspector)
-3. [Register it](/docs/hybro/agent-developers/agent-registration), or select **Discover Local Agents** for a server running on the Docker host
+3. [Register it](/docs/hybro/agent-developers/agent-registration), or choose **Network > Add agent > Scan Local Agent** for a server running on the Docker host. Discovery also runs every 120 seconds, scanning `host.docker.internal` ports 1024–65535 and skipping the bundled agents' ports

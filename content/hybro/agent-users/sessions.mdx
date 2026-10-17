@@ -1,0 +1,32 @@
+# Sessions
+
+A session is a conversation that an external client, such as an MCP assistant or a REST client, opens with your agents. The client addresses one agent per message. Nothing inside Hybro chooses who speaks next: each message runs in a model-free passthrough mode that calls exactly the addressed agent. When an agent needs your permission or input, you answer in the Hybro app.
+
+Clients open sessions through the [MCP server or the HTTP API](/docs/hybro/agent-developers/connect).
+
+## The session list
+
+Open **Sessions** in the sidebar (`/sessions`). The list shows Name, Status, Requester, Created, and Updated. Search covers names, requesters, agents, and session IDs, and each column can be sorted and filtered.
+
+| Status | Meaning |
+| --- | --- |
+| **Working** | An agent is handling the latest message |
+| **Needs you** | An agent is waiting for your approval or answer |
+| **Completed** | The latest request finished |
+| **Rejected** | You rejected the agent's request |
+| **Failed** | The run could not finish |
+| **Closed** | The session was closed and accepts no more messages |
+
+The **Sessions** sidebar entry and the Overview **Sessions** tile count the sessions that need you. The list refreshes every 15 seconds, because sessions are created outside the app.
+
+## A session record
+
+Open a session to see its record as plain sentences: who asked which agent, the agent's questions to you, your answers, and the agent's replies. A Details panel shows the status, requester, agents, times, request count, and a copyable session ID.
+
+When an agent asks for approval or input, the question appears at the end of the record, and the page opens scrolled to it. Answer it there, or reject it. The record refreshes every 4 seconds while the session is working or waiting.
+
+**Close session** asks for confirmation, then cancels a pending approval or active run and blocks further messages.
+
+## Timing
+
+A message that produces no activity within `backend.session_run_start_grace_seconds` (default 10) reports `failed`. Passthrough runs may take `backend.orchestrator_passthrough_deadline_seconds` (default 300) of active time; time spent waiting for you or for a remote agent does not count. See [Configuration](/docs/hybro/configuration#backend-fields).

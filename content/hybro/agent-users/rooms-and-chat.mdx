@@ -1,53 +1,48 @@
-# Rooms and Teams
+# Chats and Subnets
 
-Rooms are persistent agent conversations. Open previous rooms from **Chat History** in the sidebar.
+Chats are persistent agent conversations, also called rooms. Open previous chats from the **History** column shown beside the sidebar on the Chats and room pages (inside the navigation sheet on mobile).
 
-## Create a room
+## Start a chat
 
-1. Open **New Chat** (`/chat`)
+1. Open **Chats** (`/chat`) or select **New chat**
 2. Choose the agent scope and execution mode
 3. Add text or files
 4. Send the message
 
 Hybro creates the room and opens `/room/{id}`.
 
-On an empty `/chat`, **Featured Use Cases** cards resolve the Agents a scenario needs, save them as a Team, select it, and prefill the composer. Nothing is created until you send the message.
+On an empty `/chat`, **Featured Use Cases** cards resolve the agents a scenario needs, save them as a preset subnet (or reuse it if it already exists), select it, and prefill the composer. Nothing is sent until you send the message.
 
 ## Choose the agent scope
 
 | Choice | Behavior |
 | --- | --- |
-| **All Agents** | Makes every currently available agent a candidate for the request |
-| **Room Team** | Uses the membership already snapshotted for this room |
-| **Saved Team** | Uses the members of a reusable Team |
+| **All agents** | Makes every currently available agent a candidate for the request |
+| **Room agents** | Uses the membership already snapshotted for this room |
+| **Saved subnet** | Uses the members of a reusable subnet |
 | **Mention** | `@agent-name` targets the mentioned agent or agents |
 
-The backend authorizes and expands the membership. The frontend does not send a copied list of agent IDs as the canonical Team request.
+The backend authorizes and expands the membership. The frontend does not send a copied list of agent IDs as the canonical request.
 
 Naming an agent with `@` is an instruction, not just a filter: a mentioned agent is called for that turn.
 
-## Saved Teams
+## Subnets
 
-The product UI calls reusable agent groups **Teams**. Create one from the agent selector:
+The UI calls reusable agent groups **subnets**. Create one from the scope selector (**Create subnet**), from **Network > Create subnet**, or from an agent's **Add to subnet > Create subnet...**. The dialog has a Details step (name and optional description) and a Members step (search and select agents).
 
-1. Select **Create Team**
-2. Enter a Team name
-3. Choose agents
-4. Save
+Edit or delete subnets from the selector or from the Network details panel. When a subnet starts a chat, Hybro snapshots its membership for that room; later edits do not rewrite existing rooms.
 
-When a Team starts a room, Hybro snapshots its current membership for that room. Editing the saved Team later does not silently rewrite the room's existing membership.
+## Manage History
 
-## Manage Chat History
+The **History** column has **Pinned** and **Recent** sections. Active entries show whether work is Queued, Running, or Needs input, and the **Chats** sidebar entry shows a badge with the number of chats that need input.
 
-Expand **Chat History** in the sidebar to reopen persistent rooms. Active entries show whether work is queued, processing, or waiting for input.
-
-Use a room's actions menu to:
+Use a chat's actions menu to:
 
 - Pin or unpin it
 - Rename it
-- Permanently delete the conversation and its related files
+- Delete the conversation and its related files (asks for confirmation)
 
-Pinned rooms appear separately and can be reordered by dragging on desktop. Deletion cannot be undone.
+Pinned chats can be reordered by dragging on desktop. Deletion cannot be undone.
 
 ## Room features
 
@@ -63,4 +58,4 @@ Pinned rooms appear separately and can be reordered by dragging on desktop. Dele
 ## Next steps
 
 - [Orchestration Modes](/docs/hybro/agent-users/orchestration-modes)
-- [Agents](/docs/hybro/agent-users/agents)
+- [Network](/docs/hybro/agent-users/agents)

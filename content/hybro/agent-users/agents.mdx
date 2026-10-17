@@ -1,41 +1,50 @@
-# Agents
+# Network
 
-Hybro's **Agents** page is a unified inventory of A2A agents from two sources.
+Hybro's **Network** page (`/network`) shows every A2A agent and subnet in one workspace. Agents come from two sources:
 
 | Source | Description |
 | --- | --- |
 | **Remote** | An agent registered from an HTTP(S) A2A URL, including the bundled example agents |
 | **Local** | An A2A server discovered directly on the machine hosting Hybro |
 
+The older `/agents` address redirects here.
+
 ## Browse and discover
 
-Open [http://localhost:3000/agents](http://localhost:3000/agents).
+Open [http://localhost:3000/network](http://localhost:3000/network). You can:
 
-You can:
-
-- Search by name, description, skills, or tags
-- Select **Discover Local Agents** to scan the Docker host
-- Open an agent profile
-- Register another remote agent
+- Search by name, description, provider, skills, tags, or subnet name
+- Choose **Add agent > Scan Local Agent** to scan the Docker host now
+- Choose **Add agent > Add Remote Agent** to register another remote agent
+- Choose **Create subnet** to group agents
 
 The inventory refreshes periodically. Local agents appear only while their server is active and responding.
 
+## Views
+
+- **Topology** is a force graph of agents and subnets. Hovering, searching, or selecting highlights neighbours. Controls cover zoom, Fit all, resetting the node layout, and display options.
+- **Structure** lists scopes (All agents, Unassigned, and each subnet) and a table with Agent, Status, Subnets, Source, and Room calls, laid out as a List or By subnet.
+
+Selecting a node or row opens a details panel. For a subnet it offers Manage members, Connect, and Delete subnet; for an agent it offers Open details and Add to subnet. The view, search, scope, layout, and selection are kept in the URL, so a link reopens the same view.
+
 ## Agent profiles
 
-An agent profile can show:
+An agent profile (`/network/agents/{id}`) can show:
 
 - Name, description, provider, version, and source
 - Skills, tags, examples, and quick prompts
 - Input/output modes
 - Streaming and other A2A capabilities
-- Current availability
+- Status: Online, Offline, Removed, or Unverified
+- Room-call count, documentation link, and Share actions
+- The agent's **Subnets**, with **Add to subnet**
 - A **Chat with this agent** action
 
 Starting a chat from a profile opens the composer with that agent seeded as the room's membership and prefilled prompt text, if the action offered one. It is a room-membership handoff, not an `@mention`.
 
 ## Availability and removal
 
-Owned remote agents can be unregistered from their profile. Directly discovered Local agents are discovery-managed, so they do not expose the same unregister action.
+Owned remote agents can be unregistered from their profile. Local agents are managed by automatic discovery and cannot be unregistered.
 
 Deleted or unavailable agents are hidden from normal inventory results but may remain identifiable in historical room records.
 

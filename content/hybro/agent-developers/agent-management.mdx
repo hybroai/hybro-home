@@ -1,10 +1,10 @@
 # Agent Management
 
-The canonical agent profile is `/agents/{id}`. It combines consumer details, chat handoff, and the management actions available for that agent source.
+The canonical agent profile is `/network/agents/{id}`. It combines consumer details, chat handoff, and the management actions available for that agent source.
 
 ## Remote agents
 
-For an owned registered remote agent, the profile displays the persisted registration and offers **Unregister Agent**.
+For an owned registered remote agent, the profile displays the persisted registration and offers **Unregister agent**, which asks for confirmation. It removes the agent from Hybro's registry; it does not stop or delete the remote A2A server.
 
 Unregistering removes it from normal inventory and discovery. Historical rooms can still retain an unavailable reference so previous conversations remain understandable.
 
@@ -16,6 +16,10 @@ Directly discovered Local agents are controlled by discovery and liveness:
 - Their profiles do not expose the remote-agent unregister action
 
 Stop the local server or change the local discovery settings to manage those sources.
+
+## Subnets
+
+The profile lists the agent's subnets. Use **Add to subnet** to add it to an existing subnet, or **Create subnet...** to make a new one. The profile also offers the agent's documentation link and Share actions.
 
 ## Chat handoff
 
