@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Head } from 'nextra/components'
 import { Inter, Space_Grotesk } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 
 // Inter for body text, Space Grotesk for headings and the wordmark, on the site and in the docs.
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -36,6 +37,7 @@ export default function RootLayout({
       />
       <body className={inter.className}>
         {children}
+        <Analytics />
       </body>
     </html>
   )
