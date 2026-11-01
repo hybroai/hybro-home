@@ -30,9 +30,9 @@ type View = 'overview' | 'network' | 'sessions' | 'chats' | 'connect'
 const VIEWS: { key: View; label: string }[] = [
   { key: 'overview', label: 'Overview' },
   { key: 'network', label: 'Network' },
-  { key: 'sessions', label: 'Sessions' },
   { key: 'chats', label: 'Chats' },
-  { key: 'connect', label: 'Connect' },
+  { key: 'sessions', label: 'Inbox' },
+  { key: 'connect', label: 'Access' },
 ]
 
 // Sidebar icons and their colors, as in the app's navigation.
@@ -125,7 +125,7 @@ const MINI = {
 }
 const MOST_CALLED = NET_AGENTS.slice().sort((a, b) => b.calls - a.calls).slice(0, 3)
 
-/** A clickable mock of the Hybro app: Overview, Network, Sessions, Chats and Connect. */
+/** A clickable mock of the Hybro app: Overview, Network, Chats, Inbox and Access. */
 export function AppPreview() {
   const [view, setView] = useState<View>('overview')
   const [chatIndex, setChatIndex] = useState(0)
@@ -168,8 +168,8 @@ export function AppPreview() {
   let body: ReactNode
   if (view === 'overview') {
     const tiles = [
-      { label: 'Sessions', value: '5', color: 'hsl(142 70% 65%)', detail: decision ? 'Open' : '1 need you', warn: !decision, pick: () => go('sessions') },
       { label: 'Chats', value: String(chats.length), color: 'hsl(142 70% 65%)', detail: chatAnswer ? '1 running' : '1 need input', warn: !chatAnswer, pick: () => openChat(chatAnswer ? 3 : 4) },
+      { label: 'Inbox', value: '5', color: 'hsl(142 70% 65%)', detail: decision ? 'Open' : '1 need you', warn: !decision, pick: () => go('sessions') },
       { label: 'Agents', value: String(NET_AGENTS.length), color: 'hsl(180 100% 70%)', detail: '1 offline', warn: false, pick: () => go('network') },
       { label: 'MCP gateway', value: 'Ready', color: 'hsl(270 80% 70%)', detail: 'localhost:3000', warn: false, pick: () => go('connect') },
     ]
@@ -193,19 +193,6 @@ export function AppPreview() {
         </div>
         <div className="app-overview-cols">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
-            <SectionTitle title="Recent sessions" action={<LinkButton onClick={() => go('sessions')}>All sessions ›</LinkButton>} />
-            <div style={cardBox}>
-              {sessions.slice(0, 3).map((s, i) => (
-                <button key={s.name} type="button" onClick={() => openSession(i)} className="app-list-row">
-                  <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', lineHeight: 1.35 }}>
-                    <span style={{ fontWeight: 500, ...ellipsis }}>{s.name}</span>
-                    <span style={{ fontSize: 11.5, color: APP.mutedFg, ...ellipsis }}>{`${s.requester} · ${s.agents} · ${s.updated}`}</span>
-                  </span>
-                  <SessionStatus kind={s.kind} />
-                  <span style={{ color: '#7A808C' }}>›</span>
-                </button>
-              ))}
-            </div>
             <SectionTitle title="Recent chats" action={<LinkButton onClick={() => openChat(0)}>All chats ›</LinkButton>} />
             <div style={cardBox}>
               {[3, 4, 0].map((i, k) => {
@@ -226,6 +213,19 @@ export function AppPreview() {
                   </button>
                 )
               })}
+            </div>
+            <SectionTitle title="Inbox" action={<LinkButton onClick={() => go('sessions')}>Open inbox ›</LinkButton>} />
+            <div style={cardBox}>
+              {sessions.slice(0, 3).map((s, i) => (
+                <button key={s.name} type="button" onClick={() => openSession(i)} className="app-list-row">
+                  <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', lineHeight: 1.35 }}>
+                    <span style={{ fontWeight: 500, ...ellipsis }}>{s.name}</span>
+                    <span style={{ fontSize: 11.5, color: APP.mutedFg, ...ellipsis }}>{`${s.requester} · ${s.agents} · ${s.updated}`}</span>
+                  </span>
+                  <SessionStatus kind={s.kind} />
+                  <span style={{ color: '#7A808C' }}>›</span>
+                </button>
+              ))}
             </div>
           </div>
           <div className="hide-sm" style={{ flexDirection: 'column', gap: 8, minHeight: 0, display: 'flex' }}>
@@ -260,7 +260,7 @@ export function AppPreview() {
       <div className="app-pane" style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {!selected ? (
           <>
-            <div style={{ fontSize: 20, fontWeight: 600 }}>Sessions</div>
+            <div style={{ fontSize: 20, fontWeight: 600 }}>Inbox</div>
             <div style={{ border: '1px solid #2A2E35', borderRadius: 8, padding: '7px 12px', color: '#5A606B' }}>Find a session, requester, agent, or ID</div>
             <div style={{ border: '1px solid #24272E', borderRadius: 12, overflow: 'hidden' }}>
               <div className="app-session-cols" style={{ padding: '8px 14px', background: '#15171C', fontSize: 12, color: '#8C929C' }}>
@@ -286,7 +286,7 @@ export function AppPreview() {
         ) : (
           <>
             <button type="button" onClick={() => setSessionIndex(-1)} className="app-link" style={{ alignSelf: 'flex-start', padding: 0, fontSize: 12.5, color: '#A8AEB8' }}>
-              ← Sessions
+              ← Inbox
             </button>
             <div className="app-session-detail">
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -704,7 +704,7 @@ function ConnectView({ tab, setTab }: { tab: McpTab; setTab: (tab: McpTab) => vo
   return (
     <div className="app-pane" style={{ flex: 1, overflow: 'hidden', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div>
-        <div style={{ fontSize: 20, fontWeight: 600 }}>Connect</div>
+        <div style={{ fontSize: 20, fontWeight: 600 }}>Access</div>
         <div style={{ color: '#8C929C' }}>Let your AI assistant reach every agent on this Hybro through MCP.</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, border: '1px solid #2A2E35', background: '#15171C' }}>
