@@ -1,75 +1,65 @@
 # Configuration
 
-Backend, frontend, and bundled-agent user settings belong to one local JSON configuration, not repository environment files.
+Hybro reads one JSON configuration for the backend, the frontend, and the bundled agents. Start options such as the port and listener are `hybro` flags; see [Installation](/docs/hybro/installation#run-hybro).
 
 ## Configuration files
 
 ```text
 ~/.hybro/
-├── config.json   # User settings; edit through the CLI or directly
-└── auth.json     # Credentials; managed through the CLI
+├── config.json   # User settings; the Settings page or a text editor
+└── auth.json     # Credentials; the Settings page and the container manage it
 ```
 
-`HYBRO_HOME` relocates that directory and must be an absolute path. Hybro creates the directory with mode `0700`; `auth.json` requires mode `0600`.
+`HYBRO_HOME` relocates that directory and must be an absolute path. Hybro creates the directory with mode `0700`; `auth.json` requires mode `0600`. A released install and a source checkout read the same directory.
 
-`config.json` holds the shared user configuration:
+`config.json` holds the shared user configuration. It only needs the values you override:
 
 | Field | Purpose |
 | --- | --- |
 | `version` | Configuration format version; always `1` |
-| `provider` | Provider ID (`openai`, `deepseek`, `anthropic`) and authentication method (`api_key` or `oauth`) |
-| `models` | Selected text model, and an image model when the connection supports one |
+| `provider` | Provider ID (`openai`, `deepseek`, `anthropic`) and authentication method (`api_key` or `oauth`); set from **Settings** |
+| `models` | Selected text model, and an image model when the connection supports one; set from **Settings** |
 | `backend` | Deployment overrides such as `log_level`, `auth_mode`, or local discovery settings |
 | `frontend` | Public frontend overrides such as `max_message_length` |
 | `image_size` | Generated image size: `1024x1024`, `1536x1024`, `1024x1536`, or `auto` |
 
-Startup validates JSON syntax, known fields, types, ranges, and required combinations, and reports safe field-level errors. `backend` accepts deployment settings only — credential fields and model/route fields belong in `auth.json` and the top-level provider/model selection.
+Startup validates JSON syntax, known fields, types, ranges, and required combinations, and reports safe field-level errors. A missing model provider is allowed: Room Chat and the LLM-backed agents stay inactive and the app points to **Settings**. `backend` accepts deployment settings only; credentials belong in `auth.json`, and the provider and models are set from **Settings**.
 
-`.env`, `.env.example`, and `frontend/.env.local` are not required by this contract. Provider keys placed in the environment are one-time inputs to `setup` and are saved privately; running services do not read Provider keys from environment files.
+Repository `.env` files are not read. The container's entrypoint gives each service only its own scoped settings; secrets never enter the browser bundle and are never forwarded wholesale to agents.
 
-Settings are a startup snapshot: apply changes with `hybro start --recreate`. No rebuild is needed, because the frontend reads its public settings at runtime. The one exception is `backend.api_prefix`, which is compiled into the frontend image; only a source checkout can change it, followed by `./scripts/hybro start --build --recreate`. A released install refuses `config set backend.api_prefix`.
+## Model provider
 
-In a source checkout, use `./scripts/hybro` wherever this page shows `hybro`.
-
-## Run setup
-
-```bash
-hybro setup
-```
-
-Setup selects a Provider and authentication method, authenticates, chooses models, verifies text with one request, and saves `config.json` and `auth.json`. The verification request uses Provider billing or subscription quota; images are never probed. It requires `uv` and an interactive terminal for browser OAuth or hidden API-key input.
+Set up the model provider in the app: **Settings**, **Model provider** (also under your name at the bottom of the sidebar).
 
 | Provider | Authentication | Notes |
 | --- | --- | --- |
-| OpenAI | API key or ChatGPT/Codex OAuth | OAuth is available only for OpenAI. Image generation requires the API-key connection |
-| DeepSeek | API key | |
+| OpenAI | ChatGPT sign-in or API key | Image generation requires the API-key connection |
 | Anthropic | API key | |
+| DeepSeek | API key | |
 
-A custom OpenAI-compatible endpoint can be supplied with `OPENAI_BASE_URL` when setting up an OpenAI connection. Setup saves it as `backend.openai_base_url`, which you can change later with `hybro config set backend.openai_base_url '"https://..."'`.
-
-`setup` also accepts explicit automation flags:
-
-```bash
-hybro setup --non-interactive \
-  --provider openai --auth api_key --text-model gpt-5-mini
-```
-
-`--non-interactive` requires `--provider`, `--auth`, and `--text-model`, and cannot be combined with `--auth oauth`. `--image-model <id|none>` selects an image model explicitly.
+**Check and save** verifies an API key with one small request before saving it to `auth.json`. The provider and models apply at once, without a restart; a new image size applies after `hybro stop` and `hybro`. See [Getting Started](/docs/hybro/agent-users/getting-started#2-set-up-a-model-provider) for the steps.
 
 ## Edit configuration
 
-```bash
-hybro config show        # User configuration only, never auth.json
-hybro config check       # Validate structure and credentials, no Provider calls
-hybro config set backend.log_level '"DEBUG"'
-hybro config set frontend.max_message_length 12000
-hybro config secret webhook_signing_key
-hybro start --recreate
+Edit `~/.hybro/config.json`, then restart:
+
+```json
+{
+  "version": 1,
+  "backend": { "log_level": "DEBUG" },
+  "frontend": { "max_message_length": 12000 }
+}
 ```
 
-`config set` validates and saves a deployment setting; its path must start with `backend`, `frontend`, or be `image_size`. Provider and model changes go through `setup`. `config secret <name>` reads a service credential from hidden terminal input. Accepted names are `clerk_secret_key`, `clerk_webhook_secret`, `mongodb_password`, `mongodb_url`, `redis_url`, `default_agent_registrar_token`, `default_agent_llm_token`, and `webhook_signing_key`. Internal tokens and `webhook_signing_key` must be at least 32 bytes. Startup generates missing internal tokens without rotating existing ones.
+```bash
+hybro stop && hybro
+```
 
-Apply changes with `hybro start --recreate`.
+Settings other than the model provider are a startup snapshot. Edits from the Settings page use the same validation before saving; manual edits are validated at the next start. Startup generates missing internal tokens in `auth.json` without rotating existing ones.
+
+## Model access for agents
+
+Bundled agents never receive Provider credentials or the configuration directory. Each one gets a scoped projection with the backend's model proxy URL, a separate inference token, and the image size. The token cannot authenticate as a user.
 
 ## Backend fields
 
@@ -78,7 +68,18 @@ Waits for the owner or for a remote agent:
 | Field | Default | Meaning |
 | --- | --- | --- |
 | `backend.approval_deadline_hours` | `null` (no deadline) | Hours before an unanswered supervisor question expires and fails its run. Must be greater than 0 when set |
-| `backend.orchestrator_call_wait_ceiling_hours` | `168` (seven days) | Hours an acknowledged remote agent task is polled with `tasks/get` before the call expires |
+| `backend.orchestrator_call_wait_ceiling_hours` | `168` (seven days) | Hours an acknowledged remote agent task is polled with `tasks/get` before the call expires. Must be greater than 0 |
+| `backend.a2a_push_callback_base_url` | `""` (push disabled) | Base URL that remote agents can reach. Must be `https`; plain `http` is accepted only for loopback, `host.docker.internal`, or a private RFC 1918 address, because the per-call push token travels in a request header. When set, Hybro registers a push notification URL with agents whose card advertises push support, so late results arrive without waiting for the next poll. Polling stays the fallback |
+
+```json
+{
+  "backend": {
+    "approval_deadline_hours": 48,
+    "orchestrator_call_wait_ceiling_hours": 72.5,
+    "a2a_push_callback_base_url": "https://hybro.example.com"
+  }
+}
+```
 
 A run waiting for an answer or a remote agent does not count that time against its mode's deadline, so it can wait as long as these limits allow. While it waits, it keeps the room's single active-run slot.
 
@@ -95,40 +96,8 @@ Sessions:
 | --- | --- | --- |
 | `backend.session_run_start_grace_seconds` | `10` | Seconds after a send without any lifecycle event before the session reports `failed` with `run_not_started` |
 
-Other common fields include `backend.auth_mode` (`mock` or `clerk`), `backend.log_level`, `backend.log_format` (`auto`, `json`, or `logfmt`), and the `backend.local_agent_discovery_*` settings. In Docker, local discovery is on by default and scans `host.docker.internal` ports 1024–65535 every 120 seconds.
+Other common fields include `backend.auth_mode` (`mock` or `clerk`), `backend.log_level`, `backend.log_format` (`auto`, `json`, or `logfmt`), and the `backend.local_agent_discovery_*` settings. In the image, local discovery is on by default and scans `host.docker.internal` ports 1024–65535 every 120 seconds, skipping the bundled agents' ports.
 
 ## Frontend fields
 
-`frontend` accepts only known public keys, including `api_base_url`, `api_prefix` (must equal the backend's), `server_url`, the `clerk_*` sign-in settings, `enable_waitlist`, `max_message_length` (default `10000`), and `inspection_timeout_ms` (default `300000`). Unknown keys are rejected.
-
-## Migrate an existing installation
-
-If a previous release configured `~/.hybro/config.yaml`, and possibly a repository `.env`, convert it once:
-
-```bash
-hybro config migrate --from-env .env
-hybro config check
-hybro start --recreate
-```
-
-`migrate`:
-
-- refuses to overwrite an existing `config.json`
-- imports known deployment settings, service secrets, and public frontend values
-- warns about legacy model and route fields it cannot map, and points back to `setup`
-- never deletes the original files
-
-Omit `--from-env` when no deployment values need importing. Installations that only used the old root `.env` have no `config.yaml` to convert, so re-run `hybro setup` instead. After either path, normal setup and start use JSON only, even if the old files remain.
-
-## Interactive CLI
-
-Running `hybro` with no command opens a terminal UI when a terminal is available. Tab switches between its pages:
-
-- **Models** edits the same connection, models, and verification flow as `setup`.
-- **Services** starts, stops, and reloads the stack, tails container logs, manages the MCP connection (status, URL, Start, Stop, View logs, Refresh), and upgrades hybro. Each long-running service is shown as active or inactive; status refreshes on entry and after actions.
-
-Reload configuration confirms, then recreates containers without rebuilding them. Compact terminals omit the logo to keep the controls visible.
-
-## Lifecycle commands
-
-See [Installation](/docs/hybro/installation) for the day-to-day `start`, `status`, `logs`, `restart`, `stop`, and `down` commands, and run `hybro --help` for the complete reference.
+`frontend` accepts only known public keys, including `api_base_url`, `server_url`, the `clerk_*` sign-in settings, `enable_waitlist`, `max_message_length` (default `10000`), and `inspection_timeout_ms` (default `300000`). Unknown keys are rejected. The MCP address is always `/mcp` on the app's origin.

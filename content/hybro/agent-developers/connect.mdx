@@ -4,18 +4,18 @@ Hybro lets AI assistants and other programs find your agents and message them. E
 
 ## MCP server
 
-Hybro ships an MCP server for assistants on the same machine:
+Hybro's container includes an MCP server for assistants on the same machine. It shares the app's address:
 
 ```text
-http://127.0.0.1:8001/mcp
+http://localhost:3000/mcp
 ```
 
-It uses the Streamable HTTP transport. `hybro start` and the TUI's **Start services** start it with the rest of the stack.
+From a source checkout, use `http://localhost:3100/mcp`. It uses the Streamable HTTP transport and starts with the rest of Hybro.
 
 In the app, open **Connect** (`/connect/mcp`) to copy the URL or a ready snippet for Claude Code, Cursor, Codex, VS Code, or another client. Hybro does not register clients automatically. For Claude Code:
 
 ```bash
-claude mcp add --transport http hybro http://127.0.0.1:8001/mcp
+claude mcp add --transport http hybro http://localhost:3000/mcp
 ```
 
 For a client that reads JSON:
@@ -23,7 +23,7 @@ For a client that reads JSON:
 ```json
 {
   "mcpServers": {
-    "hybro": { "type": "http", "url": "http://127.0.0.1:8001/mcp" }
+    "hybro": { "type": "http", "url": "http://localhost:3000/mcp" }
   }
 }
 ```
@@ -44,22 +44,15 @@ The URL is for clients on the machine running Hybro. If you open the app from an
 
 `waiting_on_owner` means an agent is waiting for your decision in **Sessions**; check again later.
 
-### Manage the MCP server
+### MCP status
 
-```bash
-hybro mcp status   # Readiness, URL and transport; exits non-zero unless ready
-hybro mcp start    # Start only MCP; requires setup and a running backend
-hybro mcp logs
-hybro mcp stop     # The next hybro start includes MCP again
-```
+The Overview **MCP gateway** tile shows whether MCP is reachable. If it is not, check Hybro with `hybro status` and `hybro logs`.
 
-The TUI's **Services > MCP connection** offers the same actions. The Overview **MCP gateway** tile shows the status when Overview loads. `GET http://127.0.0.1:8001/health` reports `ready`, `unavailable`, or `unsupported_auth`.
-
-> MCP has no authentication or user isolation. It works only with `backend.auth_mode="mock"` (the default), not Clerk. Do not expose it publicly.
+> MCP has no authentication or user isolation. It works only with `backend.auth_mode="mock"` (the default), not Clerk, and Hybro serves it only on a loopback listener: `hybro start --listen` with a non-loopback address leaves `/mcp` out. Do not expose it publicly.
 
 ## HTTP API
 
-The **API** tab (`/connect/api`) shows the equivalent HTTP requests with copyable examples. The main routes, under `http://localhost:8000/api/v1`:
+The **API** tab (`/connect/api`) shows the equivalent HTTP requests with copyable examples. The main routes, under `http://localhost:3000/api/v1`:
 
 | Method | Path | Purpose |
 | --- | --- | --- |
@@ -71,4 +64,4 @@ The **API** tab (`/connect/api`) shows the equivalent HTTP requests with copyabl
 | GET | `/sessions/{id}` | Session state and history |
 | POST | `/sessions/{id}/close` | Close a session |
 
-`POST /sessions/messages` requires `client_request_id` and `text` (at most 10,000 characters), plus `client_label` when opening a session. It returns the receipt without waiting for the agent. In mock mode, REST clients need no token. See [API access](/docs/hybro/agent-developers/api-keys) and the interactive docs at [http://localhost:8000/docs](http://localhost:8000/docs).
+`POST /sessions/messages` requires `client_request_id` and `text` (at most 10,000 characters), plus `client_label` when opening a session. It returns the receipt without waiting for the agent. In mock mode, REST clients need no token. See [API access](/docs/hybro/agent-developers/api-keys).

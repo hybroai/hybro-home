@@ -1,141 +1,149 @@
 # Installation
 
-Hybro's open-source stack runs with Docker Compose. It includes the Next.js frontend, the FastAPI backend, a MongoDB 7 replica set, Redis, persistent room-file storage, the MCP adapter (`127.0.0.1:8001`), four example agents, and a one-shot registrar.
+Hybro runs as one container from one image. The image holds the Next.js frontend, the FastAPI backend, an embedded MongoDB 7 replica set, room-file storage, the MCP adapter, and the bundled agents, with Caddy serving them on one port. The `hybro` command is a small shell script that starts it with Docker.
 
 ## Prerequisites
 
-- Docker with Compose v2.24+ (`docker compose`). The legacy `docker-compose` v1 binary is not supported.
-- Node.js 18+ to install the CLI from npm. Not needed for release-archive installs.
-- Git and [uv](https://docs.astral.sh/uv/) only for a source checkout.
+| You need | When |
+| --- | --- |
+| Docker (Docker Desktop on macOS, Docker Engine on Linux), amd64 or arm64 | Always |
+| An API key for OpenAI, DeepSeek, or Anthropic, or a ChatGPT account | For Room Chat and the LLM-backed agents; Echo Agent and MCP work without one |
+| Node.js | Only to install the CLI with npm |
+| Node.js 24+, Python 3.12+, and MongoDB 4.2+ | Only to run the frontend or backend outside Docker |
 
-For native development outside Docker, use Node.js 20.19+, Python 3.12+, and MongoDB 4.2+ (Docker Compose pins MongoDB 7.0).
+## Install
 
-## Install the CLI (recommended)
+```bash
+curl -fsSL https://hybro.ai/install.sh | sh
+hybro
+```
+
+`install.sh` downloads the `hybro` script from the latest release, verifies it against the release's `SHA256SUMS`, installs it into `~/.local/bin` (or a writable `/usr/local/bin` when `~/.local/bin` is not on `PATH`), and pulls the image. It never uses `sudo` and never edits shell profiles; if the directory is not on `PATH`, it prints the line to add.
+
+With npm instead:
 
 ```bash
 npm install -g @hybroai/cli
-hybro setup
-hybro start
+hybro
 ```
 
-A released install runs `docker-compose.release.yml` and pulls the images pinned to the CLI's own version, so `hybro --version` is also the version of the stack it starts.
+Both install the same script.
 
-Alternatively, unpack `hybro-<version>-<platform>.tar.gz` from the [GitHub Release](https://github.com/hybroai/hybro/releases) and run `hybro/hybro`.
+`hybro` (or `hybro start`) pulls the image for its own version, starts the container, prints the address, and follows the logs; Ctrl-C stops Hybro. `hybro start -d` runs it in the background.
 
-## Install from source
+## Released install or source checkout
 
-Use a source checkout to change Hybro itself, or to use settings the published images cannot carry, such as a custom `api_prefix`.
+| | Released install | Source checkout |
+| --- | --- | --- |
+| Use it to | Try or use Hybro | Change Hybro |
+| Command | `hybro` | `./scripts/hybro` |
+| Image | `ghcr.io/hybroai/hybro:<version>`, pulled | `hybro:dev`, built from your working tree |
+| Container | `hybro` | `hybro-dev` |
+| Data volume | `hybro-data` | `hybro-dev-data` |
+| App, API, and MCP | [http://localhost:3000](http://localhost:3000) | [http://localhost:3100](http://localhost:3100) |
+| Updates | Daily notice; `hybro upgrade` | `git pull`, then `./scripts/hybro start --build --recreate` |
 
-### With the script
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh
-```
-
-The installer requires `git`, `docker`, and `uv`. It clones or updates `${INSTALL_DIR:-$HOME/hybro}` and prints the setup and start commands. It opens the interactive CLI only when both stdin and stdout are terminals; with `curl ... | sh`, stdin is a pipe, so run `./scripts/hybro` afterwards. It does not create environment files, generate secrets, build images, or start services.
-
-Choose another directory with:
-
-```bash
-INSTALL_DIR=/path/to/hybro \
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh)"
-```
-
-### Manually
+From a checkout:
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-./scripts/hybro setup
-./scripts/hybro start --build
+./scripts/hybro
 ```
 
-A fresh install cannot start before it is configured. Running `start` without configuration stops with a message pointing at `setup` (or `config migrate` for an older YAML setup).
-
-In a checkout, use `./scripts/hybro` wherever these docs show `hybro`.
-
-## Configure Hybro
-
-Hybro keeps backend, frontend, and bundled-agent settings in one local JSON directory instead of repository environment files:
-
-```text
-~/.hybro/
-├── config.json   # User settings and Provider/model selection
-└── auth.json     # Provider credentials and scoped service tokens
-```
-
-```bash
-hybro setup   # Choose a Provider, authenticate, select models
-hybro start   # Start the stack
-```
-
-See [Configuration](/docs/hybro/configuration) for the full contract, the `config` commands, and the one-time migration from an older setup.
+The first build takes several minutes; later starts reuse the image until you pass `--build`. In a checkout, use `./scripts/hybro` wherever these docs show `hybro`. Both read the same `~/.hybro/` configuration, so a provider saved in one is used by the other, and both can run at once.
 
 ## Open Hybro
 
-| Service | URL |
+Open the address that `hybro` prints. One port serves everything:
+
+| Path | What |
 | --- | --- |
-| Hybro app | [http://localhost:3000](http://localhost:3000) |
-| API server | [http://localhost:8000](http://localhost:8000) |
-| Health check | [http://localhost:8000/health](http://localhost:8000/health) |
-| Interactive API docs | [http://localhost:8000/docs](http://localhost:8000/docs) |
-| MCP server | `http://127.0.0.1:8001/mcp` |
-| MCP health | `http://127.0.0.1:8001/health` |
+| `/` | The Hybro app |
+| `/api/v1` | The backend API |
+| `/health` | Backend health check |
+| `/mcp` | The MCP server (Streamable HTTP, loopback listener only) |
 
-The app opens on **Overview** (`/`): Sessions, Chats, Agents, and MCP gateway tiles, recent sessions and chats, a mini network map, and the most-called agents. The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup.
+The app opens on **Overview** (`/`): Sessions, Chats, Agents, and MCP gateway tiles, recent sessions and chats, a mini network map, and the most-called agents. Until a model provider is set up, a banner links to **Settings**; see [Getting Started](/docs/hybro/agent-users/getting-started).
 
-## Manage the stack
+If the page does not load, check Hybro with `hybro status` and `hybro logs`.
 
-`hybro` is the day-to-day lifecycle CLI:
+## Run Hybro
 
 ```bash
-hybro start                     # Start services, no rebuild (fast daily loop)
-hybro start --recreate          # Recreate containers (after configuration changes)
-hybro start --build             # Rebuild images (source checkout only)
-hybro start --build --recreate  # Rebuild and recreate (source checkout only)
-hybro start --compose-file <f>  # Add an explicit Compose overlay
-hybro status                    # Show all containers, including stopped ones
-hybro logs backend              # Follow one service; omit the name for all
-hybro logs --container <name>   # Follow one exact container or replica
-hybro restart backend           # Restart one service; omit the name for the stack
-hybro mcp status|start|stop|logs  # Manage only the MCP server
-hybro stop                      # Stop containers but keep them
-hybro down                      # Remove containers and the default network
-hybro --version                 # Print the CLI and stack version
+hybro                        # Start and follow the logs; Ctrl-C stops Hybro
+hybro start -d               # Start in the background
+hybro start --port 4000      # Another host port (default 3000; 3100 from a checkout)
+hybro status                 # Running or not, with the address
+hybro logs -f                # Follow the logs; docker logs options pass through
+hybro stop                   # Stop; data stays in the volume
+hybro upgrade                # Newest release, its image, and any 0.3 migration
+hybro version
 ```
 
-`--build` works only from a source checkout; a released install refuses it and moves versions with `hybro upgrade` instead.
+Start options are flags only; environment variables do not become a second configuration source. Configuration changes apply after `hybro stop` and `hybro`, except the model provider, which applies at once. From a checkout, `./scripts/hybro start --build` rebuilds `hybro:dev` and `--recreate` replaces a running container. Run `hybro help` for the full command reference.
 
-`start` also generates missing internal service tokens and, in a source checkout, regenerates the default-agent Compose services from `default_agents/agents.yaml`.
+## Run on a server
 
-Named volumes remain intact after `stop` or `down`; avoid `hybro down -v` unless you intend to delete local data.
+`hybro` listens on `127.0.0.1` by default. `--listen <address>` serves the app on another address:
 
-Run `hybro --help` for the complete command reference. Running `hybro` with no command opens the interactive Models/Services UI when a terminal is available; otherwise it prints that same help text. The Services page offers Start, Stop, Reload configuration, View logs, MCP connection, and Upgrade hybro.
+```bash
+hybro start -d --listen 0.0.0.0 --port 443
+```
+
+A non-loopback listener requires sign-in (`backend.auth_mode` set to `clerk`, see [API access](/docs/hybro/agent-developers/api-keys)) and a `frontend.server_url`, or the explicit `--insecure-no-auth` for a trusted network. MCP is served only on a loopback listener, because it has no authentication.
 
 ## Bundled agents
 
-The default manifest starts Weather, Image Generator, Travel Planner, and Story, plus a one-shot registrar that registers them with the backend on startup.
+The image runs five agents, and the backend registers them at startup:
 
-Registration itself does not need a Provider credential. Calls that use a model — the bundled agents and Hybro's own orchestration — need the Provider configured through `hybro setup`.
+- **Echo Agent** repeats your message and needs no model provider, so it works right after install.
+- **Weather Agent**, **Story Agent**, **Travel Planner Agent**, and **Image Generator Agent** stay inactive, with the reason shown on their cards, until a model provider is set up. Image Generator Agent also needs an image model, which requires an OpenAI API key.
 
-## Update
-
-For a released install:
+## Upgrade
 
 ```bash
 hybro upgrade --check    # Report; exits non-zero when a newer release exists
-hybro upgrade            # Install it
-hybro start --recreate   # Move the containers onto its images
+hybro upgrade
 ```
 
-The container images are pinned to the CLI version, so upgrading the CLI is what moves the stack. `hybro upgrade` replaces an npm install in place; a release-archive install prints the download, checksum, and unpack commands instead.
+`hybro upgrade` downloads the newest script, checks it against `SHA256SUMS`, and replaces itself the way it was installed (through npm for an npm install), then pulls the new image. A running container is started again on the new image with the same port and listener. Once a day `hybro` also prints a one-line notice when a newer release exists; `HYBRO_NO_UPDATE_CHECK=1` turns it off.
 
-For a source checkout:
+A checkout is updated with `git pull` and `./scripts/hybro start --build --recreate`.
+
+## Upgrade from 0.3
+
+Hybro 0.3 ran a Docker Compose stack whose data lives in the `hybro_mongo_data` and `hybro_room_files` volumes (`hybro-dev_*` for a checkout). If you installed 0.3 with npm, run the 0.3 command `hybro upgrade` first; it installs the 0.4 script.
+
+The first `hybro` on 0.4 finds the 0.3 data, starts nothing, and offers two choices:
 
 ```bash
-cd ~/hybro   # or your INSTALL_DIR
-git pull
-./scripts/hybro start --build --recreate
+hybro upgrade      # Copy the 0.3 data into the new volume
+hybro --fresh      # Or start with an empty volume and keep the old data aside
 ```
 
-The `mongo_data`, `redis_data`, and `room_files` volumes persist across container recreation.
+The migration stops the 0.3 containers, checks that Docker has twice the 0.3 data size free, copies MongoDB and room files into `hybro-data` from read-only mounts, and starts Hybro. Redis data is not migrated; it held only transient state. `config.json` and `auth.json` stay where they are, so a provider set up in 0.3 carries over. If the 0.3 install used a custom app port, the output shows the `--port` value that keeps it.
+
+The 0.3 volumes are only read, never changed. An interrupted migration is detected on the next `hybro`, and `hybro upgrade` starts the copy over. After checking your data, remove the 0.3 containers, volumes, and images:
+
+```bash
+hybro cleanup-old
+```
+
+### Roll back to 0.3
+
+1. Run `hybro stop`.
+2. Remove `admin_user_ids` from `config.json` if you set it, because 0.3 rejects unknown keys. 0.3 also requires a configured model provider.
+3. Reinstall 0.3.0 with `npm install -g @hybroai/cli@0.3.0`, or unpack the `hybro-0.3.0-<platform>.tar.gz` archive from the [0.3.0 release](https://github.com/hybroai/hybro/releases/tag/v0.3.0), then run `hybro start`.
+
+0.3 finds its data as it was at the migration. Rooms, sessions, and agents created in 0.4 are not carried back.
+
+## Uninstall
+
+```bash
+hybro stop
+docker rm hybro && docker volume rm hybro-data   # Deletes all Hybro data
+rm "$(command -v hybro)"                          # Or: npm uninstall -g @hybroai/cli
+```
+
+`~/.hybro` holds the configuration and credentials; delete it to remove those too.

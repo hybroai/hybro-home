@@ -2,30 +2,42 @@
 
 ## Local backend
 
-The default Docker deployment exposes:
+The backend API shares the app's address, under the `/api/v1` prefix:
 
 ```text
-http://localhost:8000
+http://localhost:3000/api/v1
 ```
 
-Routes use the `/api/v1` prefix. Interactive docs and the raw schema are available at:
+From a source checkout, use `http://localhost:3100/api/v1`. `GET /health` reports backend health. The interactive API docs are not served on the app's port; the API schema for each release is [`backend/openapi.json`](https://github.com/hybroai/hybro/blob/main/backend/openapi.json) in the repository.
 
-```text
-http://localhost:8000/docs
-http://localhost:8000/openapi.json
-```
-
-Use the generated schema from your running version as the source of truth. Besides the routes behind the UI, Hybro exposes an agent-network API and a sessions API for external clients; see [Connect over MCP or HTTP](/docs/hybro/agent-developers/connect). Removed surfaces are not kept as compatibility aliases.
+Besides the routes behind the UI, Hybro exposes an agent-network API and a sessions API for external clients; see [Connect over MCP or HTTP](/docs/hybro/agent-developers/connect). Removed surfaces are not kept as compatibility aliases.
 
 ## Authentication
 
 The open-source frontend uses a built-in local developer identity and sends its mock token through the normal bearer-auth path. That mode is the default `backend.auth_mode` in `~/.hybro/config.json`. In mock mode, REST clients need no token.
 
-A hosted or custom deployment can run with Clerk instead. Set `backend.auth_mode` to `clerk`, store the secret with `hybro config secret clerk_secret_key` (and optionally `clerk_webhook_secret`), and set `frontend.clerk_publishable_key`. Startup fails when `auth_mode` is `clerk` without the secret. The MCP server does not work with Clerk. Do not expose a mock-auth backend to an untrusted network.
+A hosted or custom deployment can run with Clerk instead:
+
+1. In `config.json`, set `backend.auth_mode` to `clerk`, and set `frontend.clerk_publishable_key` and `frontend.server_url`.
+2. In `auth.json`, add the secret under `services`:
+
+   ```json
+   {
+     "services": {
+       "clerk_secret_key": "sk_...",
+       "clerk_webhook_secret": "whsec_..."
+     }
+   }
+   ```
+
+   `clerk_webhook_secret` is optional. Keep the other fields in `auth.json` and its mode `0600`.
+3. Restart with `hybro stop` and `hybro`.
+
+Startup fails when `auth_mode` is `clerk` without the secret. The MCP server does not work with Clerk. Do not expose a mock-auth backend to an untrusted network.
 
 ## Agent-scoped inference
 
-Bundled agents do not receive Provider credentials. The CLI gives them a scoped projection containing a backend proxy URL, a separate inference token, and the configured image size. That token reaches only the internal LLM routes (`/api/v1/internal/llm`) and cannot authenticate as a user or as the registrar.
+Bundled agents do not receive Provider credentials. The container gives them a scoped projection containing the backend's model proxy URL, a separate inference token, and the configured image size. That token reaches only the internal LLM routes (`/api/v1/internal/llm`) and cannot authenticate as a user.
 
 ## Python Gateway client
 
@@ -35,10 +47,10 @@ Bundled agents do not receive Provider credentials. The CLI gives them a scoped 
 
 Before exposing Hybro outside a trusted machine or network:
 
-- Replace mock authentication
+- Replace mock authentication; a non-loopback `--listen` requires Clerk and `frontend.server_url`, or the explicit `--insecure-no-auth`
 - Configure an HTTPS reverse proxy
-- Restrict database, Redis, and backend ports. Compose publishes MongoDB (27017) and Redis (6379) on all interfaces
-- Do not expose the MCP server; it has no authentication
-- Deny `/api/v1/internal/llm` to callers other than your agents at your ingress
-- Keep signing and registrar secrets private
+- Publish only the app port; MongoDB and the internal services listen on the container's loopback and are not published
+- Do not expose the MCP server; it has no authentication, and Hybro serves it only on a loopback listener
+- Deny `/api/v1/internal/llm` to callers other than your agents at your ingress; the app port forwards the whole API prefix
+- Keep `auth.json` private
 - Review CORS and provider-key configuration

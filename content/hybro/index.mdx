@@ -11,39 +11,40 @@
 | **Execution modes** | Fast direct execution or Ultimate supervisor orchestration |
 | **Network workspace** | Topology and structure views of registered remote agents, local agents discovered on the host, and saved subnets |
 | **Sessions** | External clients (MCP or REST) open sessions with your agents; you approve or reject agent questions in the app |
-| **MCP gateway** | Streamable HTTP MCP server at `http://127.0.0.1:8001/mcp` with agent-network and session tools |
+| **MCP gateway** | Streamable HTTP MCP server at `/mcp` on the app's own address, with agent-network and session tools |
 | **A2A registration** | Load, inspect, validate, and register an A2A Agent Card from one flow |
-| **Durable runtime** | MongoDB persistence, Redis coordination, SSE delivery, and recovery after reloads |
-| **Local-first stack** | Next.js frontend, FastAPI backend, MongoDB, Redis, the MCP adapter, and bundled example agents |
-| **CLI-managed configuration** | Configure models and credentials once, then start every service without maintaining environment files |
+| **Durable runtime** | MongoDB persistence, SSE delivery, and recovery after reloads |
+| **One container** | One image runs the UI, API, MCP gateway, an embedded MongoDB, and five bundled agents on one port |
+| **Browser setup** | Set up the model provider in **Settings**; no terminal wizard and no environment files |
 
-The open-source frontend uses a built-in local developer identity, so the default Docker deployment does not require account setup. Hybro speaks A2A protocol 1.0 and still accepts agents and cards built for A2A 0.3.
+The open-source frontend uses a built-in local developer identity, so a local install does not require account setup. Hybro speaks A2A protocol 1.0 and still accepts agents and cards built for A2A 0.3.
 
 ## Quick start
 
+You need Docker (amd64 or arm64).
+
 ```bash
-npm install -g @hybroai/cli
-hybro setup
-hybro start
+curl -fsSL https://hybro.ai/install.sh | sh
+hybro
 ```
 
-Or build from a source checkout:
+With npm instead: `npm install -g @hybroai/cli`. Both install the same `hybro` script.
+
+`hybro` pulls the image for its version, starts the container, prints the address, and follows the logs; Ctrl-C stops Hybro. Open [http://localhost:3000](http://localhost:3000). Everything is served from that one address:
+
+- **Hybro app:** [http://localhost:3000](http://localhost:3000)
+- **API:** `http://localhost:3000/api/v1`
+- **MCP server:** `http://localhost:3000/mcp` (same-host clients only)
+
+Hybro starts without a model provider. Echo Agent and MCP work at once; a banner leads to **Settings**, **Model provider** to connect OpenAI, Anthropic, or DeepSeek for Room Chat and the LLM-backed agents.
+
+Or run it from a source checkout, which builds the image from your working tree and serves it on port 3100:
 
 ```bash
 git clone https://github.com/hybroai/hybro.git
 cd hybro
-./scripts/hybro setup
-./scripts/hybro start --build
+./scripts/hybro
 ```
-
-`setup` chooses a Provider, authentication, and models, and saves them to `~/.hybro/config.json` and `auth.json`. `hybro start` pulls the images published for the CLI's version; `./scripts/hybro start --build` builds them from the checkout. Nothing starts until setup has run.
-
-Open:
-
-- **Hybro app:** [http://localhost:3000](http://localhost:3000)
-- **API server:** [http://localhost:8000](http://localhost:8000)
-- **API docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **MCP server:** `http://127.0.0.1:8001/mcp` (same-host clients only)
 
 See [Installation](/docs/hybro/installation) and [Configuration](/docs/hybro/configuration).
 
