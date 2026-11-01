@@ -1,13 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { type ReactNode, useRef } from 'react'
 import { type LogoName, FrameworkLogo } from '../agent-mark'
 import { AVATAR } from '../avatars'
 import { Avatar } from '../chrome'
-import { GithubIcon } from '../icons'
 import { Mention } from '../mention'
 import { useTick } from '../use-tick'
-import { Tui } from './tui'
+import { Topology } from './topology'
 
 // With reduced motion every demo shows this tick: answers written, a session
 // waiting, and the approval card asking.
@@ -189,18 +189,21 @@ export function Features() {
         <FeatureCard title="Agents propose. You decide." text="When something matters, the agent stops and asks. The work waits until you approve or reject.">
           <ApprovalDemo />
         </FeatureCard>
-        <FeatureCard title="Set up from the terminal" text="Run hybro to pick a model provider, then start, stop and inspect the stack from one screen.">
-          <Tui />
+        <FeatureCard title="See how your agents connect" text="The topology maps every agent and the subnets they share, so you can see who works with whom at a glance.">
+          <Topology />
         </FeatureCard>
       </div>
       <div className="home-card" style={{ marginTop: 20, padding: 30, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '28px 40px', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span className="mono adapter-tag">
+            <span aria-hidden="true" />
+            Open-source Python SDK · Apache 2.0
+          </span>
           <h3 style={{ fontSize: 20, fontWeight: 500 }}>Any agent, one command from A2A</h3>
-          <p className="home-card-text">The A2A Adapter wraps Claude Code, Codex, LangGraph, CrewAI and more, so they join your network as A2A agents.</p>
-          <a href="https://github.com/hybroai/a2a-adapter" className="btn btn-accent btn-accent-lg">
-            <GithubIcon className="github-btn-icon" />
-            A2A Adapter on GitHub →
-          </a>
+          <p className="home-card-text">The A2A Adapter is an open-source SDK and CLI. It wraps Claude Code, Codex, LangGraph, CrewAI and more, so they join your network as A2A agents.</p>
+          <Link href="/a2a-adapter" className="btn btn-accent btn-accent-lg">
+            Explore the A2A Adapter →
+          </Link>
         </div>
         <AdapterFlow />
       </div>

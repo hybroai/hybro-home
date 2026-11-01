@@ -171,7 +171,7 @@ export function AppPreview() {
       { label: 'Sessions', value: '5', color: 'hsl(142 70% 65%)', detail: decision ? 'Open' : '1 need you', warn: !decision, pick: () => go('sessions') },
       { label: 'Chats', value: String(chats.length), color: 'hsl(142 70% 65%)', detail: chatAnswer ? '1 running' : '1 need input', warn: !chatAnswer, pick: () => openChat(chatAnswer ? 3 : 4) },
       { label: 'Agents', value: String(NET_AGENTS.length), color: 'hsl(180 100% 70%)', detail: '1 offline', warn: false, pick: () => go('network') },
-      { label: 'MCP gateway', value: 'Ready', color: 'hsl(270 80% 70%)', detail: '127.0.0.1:8001', warn: false, pick: () => go('connect') },
+      { label: 'MCP gateway', value: 'Ready', color: 'hsl(270 80% 70%)', detail: 'localhost:3000', warn: false, pick: () => go('connect') },
     ]
     body = (
       <div className="app-overview" style={{ flex: 1, minHeight: 0, padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>

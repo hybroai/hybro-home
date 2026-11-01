@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { DISCORD_URL, GITHUB_URL, SiteFooter, SiteHeader } from '../../components/site/chrome'
 import { AgentGlobe } from '../../components/site/home/agent-globe'
 import { AppPreview } from '../../components/site/home/app-preview'
-import { CommandCard, HeroCopy } from '../../components/site/home/copy-command'
+import { CommandCard, InstallPanel } from '../../components/site/home/copy-command'
 import { Features } from '../../components/site/home/features'
 import { UseCaseMarquee } from '../../components/site/home/use-cases'
 
@@ -38,7 +38,9 @@ export default function HomePage() {
             <br />
             Stay in charge of what matters.
           </p>
-          <HeroCopy command="npm i -g @hybroai/cli" />
+          <div style={{ width: '100%', maxWidth: 640 }}>
+            <InstallPanel id="hero-install" />
+          </div>
         </section>
 
         <AppPreview />
@@ -68,13 +70,18 @@ export default function HomePage() {
         <section id="start" style={{ padding: '100px 0 40px', scrollMarginTop: 40 }}>
           <h2 className="home-h2" style={{ marginBottom: 12 }}>User experience</h2>
           <p className="home-sub" style={{ marginBottom: 16 }}>Install Hybro on your machine and start chatting with agents in minutes.</p>
-          <Requirements items={[['Docker Compose v2.24+', '#2496ED'], ['Node.js 18+', '#5FA04E'], ['macOS · Linux · WSL', '#A8AEB8']]} />
+          <Requirements items={[['Docker', '#2496ED'], ['Node.js (npm only)', '#5FA04E'], ['amd64 · arm64', '#A8AEB8']]} />
           <div className="home-grid">
-            <CommandCard
-              title="Install with npm"
-              lines={['npm install -g @hybroai/cli', 'hybro setup', 'hybro start']}
-              copyText="npm install -g @hybroai/cli && hybro setup && hybro start"
-            />
+            <div className="home-card" style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 500 }}>Install and start</h3>
+              <p className="home-card-text" style={{ marginBottom: 12 }}>
+                One container runs the app, API, MCP gateway and sample agents. Open the address it prints and set up a model provider in Settings.
+              </p>
+              <InstallPanel id="start-install" start />
+              <p className="home-card-text" style={{ marginTop: 4, fontSize: 14 }}>
+                Both install the same <code className="mono" style={{ color: '#C9CDD4' }}>hybro</code> command. Run it again any time to start Hybro.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -82,13 +89,13 @@ export default function HomePage() {
         <section style={{ padding: '80px 0 40px' }}>
           <h2 className="home-h2" style={{ marginBottom: 12 }}>Developer experience</h2>
           <p className="home-sub" style={{ marginBottom: 16 }}>Build Hybro from source and run the whole stack yourself.</p>
-          <Requirements items={[['git', '#F05133'], ['Docker', '#2496ED'], ['uv', '#DE5FE9']]} />
+          <Requirements items={[['git', '#F05133'], ['Docker', '#2496ED']]} />
           <div className="home-grid">
             <CommandCard
               title="Install from source"
-              text="Clone the repository and build the stack yourself."
-              lines={['curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh', './scripts/hybro setup', './scripts/hybro start --build']}
-              copyText="curl -fsSL https://raw.githubusercontent.com/hybroai/hybro/main/install.sh | sh"
+              text="Clone the repository and build the image from your working tree. It serves on port 3100, so it runs beside a released install."
+              lines={['git clone https://github.com/hybroai/hybro.git', 'cd hybro', './scripts/hybro']}
+              copyText="git clone https://github.com/hybroai/hybro.git && cd hybro && ./scripts/hybro"
             />
           </div>
         </section>

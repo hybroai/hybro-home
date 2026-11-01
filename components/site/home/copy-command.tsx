@@ -1,21 +1,18 @@
 'use client'
 
+import { InstallCard } from '../install-card'
 import { useCopy } from '../use-tick'
 
-/** The hero's one-line install command, with the same copy button as the command cards. */
-export function HeroCopy({ command }: { command: string }) {
-  const { copied, copy } = useCopy()
-  return (
-    <div className="hero-copy">
-      <code className="mono" style={{ fontSize: 14 }}>
-        <span style={{ color: 'var(--cyan)' }}>$ </span>
-        {command}
-      </code>
-      <button type="button" onClick={() => copy(command)} className="copy-btn copy-btn-accent" aria-label="Copy the install command">
-        <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
-      </button>
-    </div>
-  )
+// Both install the same hybro command.
+const INSTALL = [
+  { key: 'curl', label: 'Shell script', command: 'curl -fsSL https://hybro.ai/install.sh | sh' },
+  { key: 'npm', label: 'npm', command: 'npm install -g @hybroai/cli' },
+]
+
+/** The Hybro install command. With `start`, it adds the `hybro` line that starts it. */
+export function InstallPanel({ id, start = false }: { id: string; start?: boolean }) {
+  const options = INSTALL.map(({ key, label, command }) => ({ key, label, lines: start ? [command, 'hybro'] : [command] }))
+  return <InstallCard id={id} options={options} large={!start} />
 }
 
 /** A card with shell commands, one per line, and a button that copies `copyText`. */

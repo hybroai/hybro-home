@@ -256,53 +256,6 @@ body:has(.site) {
   background: #7ad6e1;
 }
 
-.site .install-card {
-  width: 100%;
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  background: #0a0b0e;
-  overflow: hidden;
-  text-align: left;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-}
-.site .install-card-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  padding: 8px 10px 8px 8px;
-  border-bottom: 1px solid #1c1f25;
-  background: var(--panel);
-}
-.site .install-tab {
-  min-height: 32px;
-  padding: 0 14px;
-  border-radius: 7px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-}
-.site .install-tab:hover {
-  color: var(--text);
-}
-.site .install-tab[aria-selected='true'] {
-  border-color: var(--cyan);
-  background: var(--cyan);
-  color: var(--bg);
-  font-weight: 600;
-}
-.site .install-card-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px 16px 18px 20px;
-}
-
 /* A2A Adapter flow graphic */
 @keyframes site-flow {
   from {
@@ -418,9 +371,6 @@ body:has(.site) {
 
 
 
-.site .tui {
-  font-size: 10.5px;
-}
 
 
 .site .site-logo-svg {
@@ -497,9 +447,6 @@ body:has(.site) {
   }
   .site .hide-sm {
     display: none !important;
-  }
-  .site .tui {
-    font-size: 8.5px;
   }
   .site .flowgrid {
     grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
@@ -605,16 +552,89 @@ body:has(.site) {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
   gap: 20px;
 }
-.site .hero-copy {
+.site .install-card {
+  width: 100%;
+  border: 1px solid #24272e;
+  border-radius: 12px;
+  background: #0f1114;
+  overflow: hidden;
+  text-align: left;
+}
+.site .install-card-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 10px 10px;
+  border-bottom: 1px solid #1f2228;
+  background: #121418;
+}
+.site .install-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid #24272e;
+  background: #0a0b0d;
+}
+.site .install-tab {
+  min-height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8c929c;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  min-height: 46px;
-  padding: 0 6px 0 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(10, 11, 13, 0.5);
-  color: var(--text);
+  gap: 7px;
+  transition: color 0.15s, background 0.15s;
+}
+.site .install-tab:hover {
+  color: #e3e6eb;
+}
+.site .install-tab::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3a3f48;
+  transition: background 0.15s;
+}
+.site .install-tab[aria-selected='true'] {
+  background: #1c1f25;
+  color: #f2f4f7;
+  font-weight: 500;
+}
+.site .install-tab[aria-selected='true']::before {
+  background: var(--cyan);
+  box-shadow: 0 0 8px rgba(61, 191, 207, 0.6);
+}
+.site .install-tab:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
+}
+.site .install-card-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 18px 16px 20px;
+}
+.site .install-card-body code {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.9;
+  color: #e3e6eb;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.site .install-card-lg .install-card-body {
+  align-items: center;
+  padding: 20px 20px 20px 22px;
+}
+.site .install-card-lg .install-card-body code {
+  font-size: 14.5px;
 }
 .site .req-chip {
   display: inline-flex;
@@ -658,6 +678,26 @@ body:has(.site) {
   margin-top: 8px;
   padding: 0 20px;
   font-size: 15px;
+}
+.site .adapter-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(61, 191, 207, 0.35);
+  background: rgba(61, 191, 207, 0.08);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7ad6e1;
+}
+.site .adapter-tag > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
 }
 .site .particles {
   position: absolute;

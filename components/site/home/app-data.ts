@@ -299,9 +299,9 @@ export const GRAPH = layoutGraph()
 
 // ---------- Connect ----------
 
-export const MCP_URL = 'http://127.0.0.1:8001/mcp'
+export const MCP_URL = 'http://localhost:3000/mcp'
 export const MCP_SNIPPETS = {
   claude: `claude mcp add --transport http hybro ${MCP_URL}`,
-  json: `{\n  "mcpServers": {\n    "hybro": { "url": "${MCP_URL}" }\n  }\n}`,
+  json: `{\n  "mcpServers": {\n    "hybro": { "type": "http", "url": "${MCP_URL}" }\n  }\n}`,
 }
 export type McpTab = keyof typeof MCP_SNIPPETS

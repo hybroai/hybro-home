@@ -1,60 +1,44 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useCopy } from './use-tick'
 
 export type InstallOption = {
   key: string
   label: string
-  /** Where the method runs, shown on the right of the tab bar. */
-  shell: string
-  /** Text shown in the card; the shell prompt is added for commands. */
-  body: string
-  prompt: boolean
-  /** Text copied to the clipboard. */
-  copy: string
-  copyLabel?: string
+  /** Commands shown in the card, one per line, each with a shell prompt. */
+  lines: string[]
 }
 
-/** Install methods as tabs inside one card, with the command and a Copy button. */
-export function InstallCard({
-  id,
-  options,
-  value,
-  onChange,
-  maxWidth = 760,
-  fontSize = 14,
-}: {
-  id: string
-  options: InstallOption[]
-  value: string
-  onChange: (key: string) => void
-  maxWidth?: number
-  fontSize?: number
-}) {
+/**
+ * Install methods as a segmented switch inside one card, with the commands and
+ * a Copy button that copies them joined with `&&`. `large` is the hero size.
+ */
+export function InstallCard({ id, options, large = false }: { id: string; options: InstallOption[]; large?: boolean }) {
+  const [index, setIndex] = useState(0)
   const { copied, copy, reset } = useCopy()
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const current = options.find((o) => o.key === value) ?? options[0]
+  const current = options[index]
 
-  const pick = (key: string) => {
-    onChange(key)
+  const pick = (next: number) => {
+    setIndex(next)
     reset()
   }
-  const onTabKey = (e: React.KeyboardEvent, index: number) => {
+  const onTabKey = (e: React.KeyboardEvent, i: number) => {
     const delta = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
     if (!delta) return
     e.preventDefault()
-    const next = (index + delta + options.length) % options.length
-    pick(options[next].key)
+    const next = (i + delta + options.length) % options.length
+    pick(next)
     tabRefs.current[next]?.focus()
   }
 
   return (
-    <div className="install-card" style={{ maxWidth }}>
+    <div className={`install-card${large ? ' install-card-lg' : ''}`}>
       <div className="install-card-bar">
-        <div role="tablist" aria-label="Install method" style={{ display: 'flex', gap: 4 }}>
+        <div className="install-seg" role="tablist" aria-label="Install method">
           {options.map((option, i) => {
-            const on = option.key === current.key
+            const on = i === index
             return (
               <button
                 key={option.key}
@@ -65,7 +49,7 @@ export function InstallCard({
                 aria-selected={on}
                 aria-controls={`${id}-panel`}
                 tabIndex={on ? 0 : -1}
-                onClick={() => pick(option.key)}
+                onClick={() => pick(i)}
                 onKeyDown={(e) => onTabKey(e, i)}
                 className="install-tab"
               >
@@ -74,16 +58,18 @@ export function InstallCard({
             )
           })}
         </div>
-        <span className="mono" style={{ fontSize: 11.5, color: 'var(--dim)' }}>{current.shell}</span>
       </div>
       <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${current.key}`} className="install-card-body">
-        <code className="mono" style={{ flex: 1, minWidth: 0, fontSize, lineHeight: 1.75, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
-          {current.prompt && <span style={{ color: 'var(--cyan)' }}>$ </span>}
-          {current.body}
+        <code className="mono">
+          {current.lines.map((line) => (
+            <span key={line} style={{ display: 'block' }}>
+              <span style={{ color: 'var(--cyan)' }}>$ </span>
+              {line}
+            </span>
+          ))}
         </code>
-        <button type="button" className="copy-btn copy-btn-accent" onClick={() => copy(current.copy)}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
-          <span aria-live="polite">{copied ? 'Copied' : current.copyLabel ?? 'Copy'}</span>
+        <button type="button" className="copy-btn copy-btn-accent" onClick={() => copy(current.lines.join(' && '))} aria-label="Copy the install command">
+          <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
     </div>
