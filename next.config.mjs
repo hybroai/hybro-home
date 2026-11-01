@@ -34,6 +34,13 @@ const nextConfig = {
         destination: '/docs/a2a-adapter/:path+',
         permanent: true,
       },
+      // Each Hybro release publishes the install script. Not permanent, so
+      // nothing caches the target.
+      {
+        source: '/install.sh',
+        destination: 'https://github.com/hybroai/hybro/releases/latest/download/install.sh',
+        permanent: false,
+      },
       // Pages from the old marketing site.
       ...['/core', '/about', '/pricing'].map((source) => ({
         source,
