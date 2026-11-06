@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { GithubIcon, HybroMark, HybroWordmark } from './icons'
+import { RequestDemo } from './request-demo'
 
 export const GITHUB_URL = 'https://github.com/hybroai/hybro'
 export const DISCORD_URL = 'https://discord.gg/2S5pCKzUmJ'
@@ -23,7 +24,7 @@ function NavLink({ href, children, className, current }: { href: string; childre
 
 type Page = 'home' | 'a2a-adapter'
 
-/** The floating site header shared by every page: logo, centered nav, GitHub button. */
+/** The floating site header shared by every page: logo, centered nav, Request a demo and GitHub buttons. */
 export function SiteHeader({ current }: { current: Page }) {
   // Section links scroll in place on the home page and navigate there from other pages.
   const section = (id: string) => (current === 'home' ? `#${id}` : `/#${id}`)
@@ -40,7 +41,7 @@ export function SiteHeader({ current }: { current: Page }) {
         <Link href="/" aria-label="Hybro home" style={{ justifySelf: 'start', display: 'flex', alignItems: 'center', gap: 9, color: 'var(--text)' }}>
           <HybroMark size={26} />
           <HybroWordmark size={20} />
-          <span className="mono hide-sm site-header-badge">Open source</span>
+          <span className="mono site-header-badge">Open source</span>
         </Link>
         <nav aria-label="Primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, fontSize: 14 }}>
           {items.map((item) => (
@@ -49,10 +50,13 @@ export function SiteHeader({ current }: { current: Page }) {
             </NavLink>
           ))}
         </nav>
-        <a href={GITHUB_URL} className="github-btn" aria-label="Hybro on GitHub">
-          <GithubIcon className="github-btn-icon" />
-          <span className="hide-sm">GitHub</span>
-        </a>
+        <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <RequestDemo />
+          <a href={GITHUB_URL} className="github-btn" aria-label="Hybro on GitHub">
+            <GithubIcon className="github-btn-icon" />
+            <span className="github-btn-label">GitHub</span>
+          </a>
+        </div>
       </header>
     </div>
   )
