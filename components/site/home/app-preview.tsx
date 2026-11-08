@@ -25,7 +25,7 @@ import {
   getSessions,
 } from './app-data'
 
-type View = 'overview' | 'network' | 'sessions' | 'chats' | 'connect'
+type View = 'overview' | 'network' | 'sessions' | 'chats' | 'connect' | 'settings'
 
 const VIEWS: { key: View; label: string }[] = [
   { key: 'overview', label: 'Overview' },
@@ -33,6 +33,7 @@ const VIEWS: { key: View; label: string }[] = [
   { key: 'chats', label: 'Chats' },
   { key: 'sessions', label: 'Inbox' },
   { key: 'connect', label: 'Access' },
+  { key: 'settings', label: 'Settings' },
 ]
 
 // Sidebar icons and their colors, as in the app's navigation.
@@ -62,6 +63,19 @@ const NAV_ICON: Record<View, ReactNode> = {
       <path d="M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8z" />
     </svg>
   ),
+  settings: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6AA8FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+}
+
+function ChipIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+      <rect x="5" y="5" width="14" height="14" rx="2" /><rect x="9" y="9" width="6" height="6" rx="1" /><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+    </svg>
+  )
 }
 
 const cardBox: CSSProperties = { borderRadius: 12, border: `1px solid ${APP.border}`, background: APP.card, overflow: 'hidden' }
@@ -125,7 +139,7 @@ const MINI = {
 }
 const MOST_CALLED = NET_AGENTS.slice().sort((a, b) => b.calls - a.calls).slice(0, 3)
 
-/** A clickable mock of the Hybro app: Overview, Network, Chats, Inbox and Access. */
+/** A clickable mock of the Hybro app: Overview, Network, Chats, Inbox, Access and Settings. */
 export function AppPreview() {
   const [view, setView] = useState<View>('overview')
   const [chatIndex, setChatIndex] = useState(0)
@@ -332,8 +346,10 @@ export function AppPreview() {
         toggleResponses={() => setResponsesOpen((open) => !open)}
       />
     )
-  } else {
+  } else if (view === 'connect') {
     body = <ConnectView tab={mcpTab} setTab={setMcpTab} />
+  } else {
+    body = <SettingsView />
   }
 
   return (
@@ -384,7 +400,7 @@ export function AppPreview() {
               <div className="app-history-label">Pinned</div>
               {historyRow(0)}
               <div className="app-history-label" style={{ paddingTop: 8 }}>Recent</div>
-              {[3, 4, 1, 2].map(historyRow)}
+              {[3, 4, 1].map(historyRow)}
             </div>
           )}
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderTop: '1px solid #1F2228', fontSize: 13 }}>
@@ -723,6 +739,36 @@ function ConnectView({ tab, setTab }: { tab: McpTab; setTab: (tab: McpTab) => vo
         {MCP_SNIPPETS[tab]}
       </pre>
       <div style={{ color: '#8C929C', fontSize: 12.5 }}>Then ask your assistant to find an agent: it can discover, message and check sessions on its own.</div>
+    </div>
+  )
+}
+
+const MODEL_PROVIDERS = ['OpenAI', 'Anthropic', 'DeepSeek']
+
+function SettingsView() {
+  return (
+    <div className="app-pane" style={{ flex: 1, minHeight: 0, padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em' }}>Settings</div>
+      <div style={{ display: 'flex', borderBottom: '1px solid #24272E' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, height: 38, padding: '0 11px', marginBottom: -1, borderBottom: '2px solid #3DBFCF', color: '#E3E6EB', fontWeight: 500 }}>
+          <ChipIcon size={15} />
+          Model provider
+        </div>
+      </div>
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, textAlign: 'center' }}>
+        <span style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(61,191,207,0.12)', color: '#3DBFCF' }}>
+          <ChipIcon size={22} />
+        </span>
+        <div style={{ marginTop: 4, fontSize: 17, fontWeight: 600, color: '#F2F4F7' }}>Bring your own model</div>
+        <div style={{ color: '#A8AEB8' }}>Your keys stay on your machine.</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+          {MODEL_PROVIDERS.map((name) => (
+            <span key={name} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 30, padding: '0 12px', borderRadius: 8, border: '1px solid #2E323A', background: '#0A0B0D', color: '#E3E6EB', fontSize: 13, fontWeight: 500 }}>
+              {name}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
