@@ -18,6 +18,7 @@ type Adapter = { name: string; cls: string; streaming: Streaming } & ({ logo: Lo
 const ADAPTERS: Adapter[] = [
   { name: 'Claude Code', cls: 'ClaudeCodeAdapter', logo: 'claude', streaming: 'yes' },
   { name: 'Codex', cls: 'CodexAdapter', logo: 'codex', streaming: 'no' },
+  { name: 'Antigravity CLI', cls: 'AntigravityAdapter', logo: 'antigravity', streaming: 'yes' },
   { name: 'Pi', cls: 'PiAdapter', logo: 'pi', streaming: 'yes' },
   { name: 'OpenClaw', cls: 'OpenClawAdapter', logo: 'openclaw', streaming: 'no' },
   { name: 'DeepSeek Harness', cls: 'DeepSeekHarnessAdapter', logo: 'deepseek', streaming: 'yes' },
@@ -179,7 +180,8 @@ export default function A2AAdapterPage() {
               {PROMPT}a2a-adapter codex --port 9011{'\n'}
               {PROMPT}a2a-adapter pi --port 9012{'\n'}
               {PROMPT}a2a-adapter openclaw --port 9008{'\n'}
-              {PROMPT}a2a-adapter dsh --port 9013{'\n\n'}
+              {PROMPT}a2a-adapter dsh --port 9013{'\n'}
+              {PROMPT}a2a-adapter antigravity --port 9014{'\n\n'}
               <span style={{ color: 'var(--dim)' }}># native agent options go after --</span>{'\n'}
               {PROMPT}a2a-adapter codex --port 9011 -- --sandbox workspace-write
             </CodeCard>

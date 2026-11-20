@@ -22,6 +22,7 @@ export type LogoName =
   | 'omp'
   | 'muse'
   | 'deepseek'
+  | 'antigravity'
 
 const VECTOR = {
   pi: PiIcon,
@@ -35,10 +36,10 @@ const VECTOR = {
 
 /** A framework logo at `size` px, drawn in the light text color. */
 export function FrameworkLogo({ name, size }: { name: LogoName; size: number }) {
-  // Full-color marks served as files: Claude from simple-icons (CC0), Codex from
-  // LobeHub icons (MIT), omp, Muse (Meta) and DeepSeek from their official sites,
+  // Full-color marks served as files: Claude from simple-icons (CC0), Codex and
+  // Antigravity from LobeHub icons (MIT), omp, Muse (Meta) and DeepSeek from their official sites,
   // Hermes as in the Hybro app.
-  if (name === 'claude' || name === 'codex' || name === 'omp' || name === 'muse' || name === 'deepseek') {
+  if (name === 'claude' || name === 'codex' || name === 'omp' || name === 'muse' || name === 'deepseek' || name === 'antigravity') {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- small static logo
       <img src={`/logos/${name}.svg`} alt="" width={size} height={size} style={{ width: size, height: size, objectFit: 'contain' }} />
